@@ -11,6 +11,7 @@ module EffectiveMemberships
     initializer 'effective_memberships.active_record' do |app|
       ActiveSupport.on_load :active_record do
         ActiveRecord::Base.extend(EffectiveMembershipsUser::Base)
+        ActiveRecord::Base.extend(EffectiveMembershipsCategory::Base)
       end
     end
 

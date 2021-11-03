@@ -12,7 +12,7 @@ module EffectiveMembershipsUser
   end
 
   included do
-    belongs_to :membership_category, polymorphic: true, optional: true
+    belongs_to :membership_category, optional: true
   end
 
   module ClassMethods
