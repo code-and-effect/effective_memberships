@@ -50,7 +50,6 @@ Use the following datatables to display to your user their applicants dues:
 
 ```haml
 %h2 Applications to Join
-
 - datatable = EffectiveMembershipsApplicantssDatatable.new(self)
 ```
 
@@ -62,15 +61,13 @@ Add a link to the admin menu:
 ```haml
 - if can? :admin, :effective_memberships
   - if can? :index, Effective::MembershipCategory
-    = nav_link_to 'CPD Categories', effective_memberships.admin_membership_categories_path
+    = nav_link_to 'Membership Categories', effective_memberships.admin_membership_categories_path
 
   - if can? :index, Effective::Applicants
-    = nav_link_to 'CPD Cycles', effective_memberships.admin_applicants_path
+    = nav_link_to 'Applicants', effective_memberships.admin_applicants_path
 ```
 
 ## Configuration
-
-# TODO
 
 ## Authorization
 
