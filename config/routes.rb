@@ -4,6 +4,7 @@ end
 
 EffectiveMemberships::Engine.routes.draw do
   scope module: 'effective' do
+    # Public routes
   end
 
   namespace :admin do

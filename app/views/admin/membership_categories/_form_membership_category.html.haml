@@ -1,0 +1,9 @@
+%p Membership is a #{membership_category.class}
+
+= effective_form_with(model: [:admin, membership_category], engine: true) do |f|
+  = f.text_field :title
+  = f.check_box :can_apply
+  = f.price_field :applicant_fee
+  = f.price_field :annual_fee
+
+  = effective_submit(f)

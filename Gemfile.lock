@@ -109,6 +109,9 @@ GEM
       effective_resources
       rails (>= 3.2.0)
       sass
+    effective_developer (0.6.8)
+      effective_resources
+      rails (>= 3.2.0)
     effective_email_templates (1.0.13)
       effective_bootstrap
       effective_datatables (>= 4.0.0)
@@ -249,6 +252,7 @@ PLATFORMS
 
 DEPENDENCIES
   devise
+  effective_developer
   effective_email_templates
   effective_memberships!
   haml-rails

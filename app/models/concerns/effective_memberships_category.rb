@@ -18,10 +18,10 @@ module EffectiveMembershipsCategory
   included do
     log_changes if respond_to?(:log_changes)
 
-    has_many :users
+    has_rich_text :body
 
     effective_resource do
-      title                 :string       # 2021 Continuing Professional Development
+      title                 :string
       position              :integer
 
       can_apply             :boolean
@@ -33,7 +33,6 @@ module EffectiveMembershipsCategory
     end
 
     scope :deep, -> { with_rich_text_body }
-
     scope :sorted, -> { order(:title) }
     scope :can_apply, -> { where(can_apply: true) }
 

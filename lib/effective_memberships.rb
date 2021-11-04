@@ -16,6 +16,11 @@ module EffectiveMemberships
 
   include EffectiveGem
 
+  def self.membership_category_class
+    return membership_category.constantize if membership_category.present?
+    Effective::MembershipCategory
+  end
+
   def self.mailer_class
     return mailer.constantize if mailer.present?
     Effective::MembershipsMailer
