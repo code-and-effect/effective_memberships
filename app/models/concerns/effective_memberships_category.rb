@@ -25,9 +25,11 @@ module EffectiveMembershipsCategory
       position              :integer
 
       can_apply             :boolean
+      can_renew             :boolean
 
       applicant_fee         :integer
       annual_fee            :integer
+      renewal_fee           :integer
 
       timestamps
     end

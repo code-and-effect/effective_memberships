@@ -7,7 +7,7 @@ module Admin
       col :created_at, visible: false
       col :id, visible: false
 
-      col :title, label: 'Title from GEm'
+      col :title
       col :applicant_fee, as: :price
       col :annual_fee, as: :price
 

@@ -2,8 +2,17 @@
 
 = effective_form_with(model: [:admin, membership_category], engine: true) do |f|
   = f.text_field :title
-  = f.check_box :can_apply
-  = f.price_field :applicant_fee
-  = f.price_field :annual_fee
+
+  %h2 Applications to Join
+  = f.check_box :can_apply, label: 'Yes, useres may apply to join this category'
+
+  = f.show_if(:can_apply, true) do
+    = f.price_field :applicant_fee
+
+  %h2 Annual Renewals
+  = f.check_box :can_renew, label: 'Yes, members in this category must renew annually'
+
+  = f.show_if(:can_renew, true) do
+    = f.price_field :renewal_fee
 
   = effective_submit(f)

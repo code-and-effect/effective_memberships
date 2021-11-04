@@ -11,12 +11,12 @@ module EffectiveMembershipsUser
     end
   end
 
-  included do
-    belongs_to :membership_category, optional: true
-  end
-
   module ClassMethods
     def effective_memberships_user?; true; end
+  end
+
+  included do
+    belongs_to :membership_category, optional: true
   end
 
 end
