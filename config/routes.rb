@@ -8,6 +8,7 @@ EffectiveMemberships::Engine.routes.draw do
   end
 
   namespace :admin do
+    resources :applicants, except: [:new, :create, :show]
     resources :membership_categories, except: [:show]
   end
 

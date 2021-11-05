@@ -7,8 +7,8 @@ module EffectiveMemberships
 
   def self.config_keys
     [
-      :membership_categories_table_name,
-      :membership_category,
+      :membership_categories_table_name, :applicants_table_name,
+      :membership_category, :applicant,
       :layout,
       :mailer, :parent_mailer, :deliver_method, :mailer_layout, :mailer_sender, :mailer_admin, :use_effective_email_templates
     ]
@@ -19,6 +19,11 @@ module EffectiveMemberships
   def self.membership_category_class
     return membership_category.constantize if membership_category.present?
     Effective::MembershipCategory
+  end
+
+  def self.applicant_class
+    return applicant.constantize if applicant.present?
+    Effective::Applicant
   end
 
   def self.mailer_class

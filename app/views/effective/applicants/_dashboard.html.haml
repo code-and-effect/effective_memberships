@@ -1,0 +1,21 @@
+%h2 Applications
+
+- authorized = EffectiveResources.authorized?(self, :new, EffectiveMemberships.applicant_class)
+
+- datatable = EffectiveResources.best('EffectiveApplicantsDatatable').new(self)
+- in_progress = current_user.applicants.in_progress
+
+- if authorized && in_progress.blank?
+  %p= link_to 'Apply to join, reclassify or provide a change of status notification', '#', class: 'btn btn-primary'
+
+- if datatable.present?
+  = render_simple_datatable(datatable)
+- else
+  %p You have not yet submitted any online applications. When you do, we'll show them here.
+
+- if in_progress.present?
+  %h3 Active Applications
+
+- in_progress.each do |applicant|
+  %p= applicant
+  /= render 'applicants/summary', applicant: applicant

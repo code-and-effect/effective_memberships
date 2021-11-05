@@ -15,7 +15,7 @@ module Admin
     end
 
     collection do
-      EffectiveMemberships.membership_category_class.deep
+      EffectiveMemberships.membership_category_class.deep.all
     end
   end
 end

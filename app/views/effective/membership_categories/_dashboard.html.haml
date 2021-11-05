@@ -1,0 +1,12 @@
+%h2 Membership
+
+- if current_user.membership_category.present?
+  %p
+    = succeed('.') do
+      You are a #{current_user.membership_category} member
+
+      - if (joined_on = current_user.membership_joined_on).present?
+        who joined on #{joined_on.strftime('%F')}
+
+- if current_user.membership_category.blank?
+  %p You are not a member.

@@ -17,6 +17,15 @@ module EffectiveMembershipsUser
 
   included do
     belongs_to :membership_category, optional: true
+
+    has_many :applicants
+
+    effective_resource do
+      membership_joined_on    :date
+
+      timestamps
+    end
+
   end
 
 end
