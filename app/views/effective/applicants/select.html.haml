@@ -1,0 +1,9 @@
+%h1= @page_title
+
+%p Resource is #{resource.class.name}
+
+%p Resource #{resource.class.const_get(:WIZARD_STEPS)}
+
+= effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+  = f.hidden_field :id
+  = f.save 'Save and Continue'

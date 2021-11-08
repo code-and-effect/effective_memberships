@@ -1,7 +1,0 @@
-%h1.effective-admin-heading= @page_title
-
-%p.text-right.effective-admin-actions
-  = link_to 'New Membership Category', effective_memberships.new_admin_membership_category_path, class: 'btn btn-primary'
-
-- datatable = EffectiveResources.best('Admin::EffectiveMembershipCategoriesDatatable').new(self)
-= render_datatable(datatable)

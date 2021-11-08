@@ -3,8 +3,11 @@ Rails.application.routes.draw do
 end
 
 EffectiveMemberships::Engine.routes.draw do
+  # Public routes
   scope module: 'effective' do
-    # Public routes
+    resources :applicants, only: [:new, :show, :destroy] do
+      resources :build, controller: :applicants, only: [:show, :update]
+    end
   end
 
   namespace :admin do

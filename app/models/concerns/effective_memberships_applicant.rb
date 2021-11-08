@@ -16,6 +16,8 @@ module EffectiveMembershipsApplicant
   end
 
   included do
+    acts_as_tokened
+
     acts_as_statused(
       :draft,       # Just Started
       :submitted,   # Completed wizard. Paid applicant fee.
@@ -52,6 +54,15 @@ module EffectiveMembershipsApplicant
       status                 :string, permitted: false
       status_steps           :text, permitted: false
 
+      # Dates
+      submitted_at           :datetime
+      completed_at           :datetime
+      reviewed_at            :datetime
+      approved_at            :datetime
+
+      declined_at            :datetime
+      declined_reason        :text
+
       # Acts as Wizard
       wizard_steps           :text, permitted: false
 
@@ -63,17 +74,27 @@ module EffectiveMembershipsApplicant
 
     validates :user, presence: true
 
+    scope :unsubmitted, -> { where(submitted_at: nil) }
+
     scope :in_progress, -> { where.not(status: [:approved, :declined]) }
     scope :done, -> { where(status: [:approved, :declined]) }
   end
 
-  # # Instance Methods
-  # def in_progress?
-  #   !approved? && !declined?
-  # end
+  # Instance Methods
+  def in_progress?
+    !approved? && !declined?
+  end
 
-  # def done?
-  #   approved? || declined?
-  # end
+  def done?
+    approved? || declined?
+  end
+
+  def can_visit_step?(step)
+    can_revisit_completed_steps(step)
+  end
+
+  def select!
+    update!(status: :approved)
+  end
 
 end

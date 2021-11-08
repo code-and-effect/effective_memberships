@@ -6,6 +6,7 @@ module Admin
     include Effective::CrudController
 
     resource_scope -> { EffectiveMemberships.applicant_class.deep }
+    datatable -> { Admin::EffectiveApplicantsDatatable.new }
 
     private
 

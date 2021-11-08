@@ -6,6 +6,7 @@ module Admin
     include Effective::CrudController
 
     resource_scope -> { EffectiveMemberships.membership_category_class.deep }
+    datatable -> { Admin::EffectiveMembershipCategoriesDatatable.new }
 
     private
 

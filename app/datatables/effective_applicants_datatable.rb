@@ -15,17 +15,13 @@ class EffectiveApplicantsDatatable < Effective::Datatable
 
     col :orders
     col :membership_category
-
     col :status
 
     actions_col(show: false) do |applicant|
       if applicant.in_progress?
-        permitted_step = applicant.first_uncompleted_step || applicant.last_completed_step
-        #link_to 'Continue', applicant_path(permitted_step || Applicant::STEPS.keys.first), class: 'btn btn-outline-primary', 'data-turbolinks' => false
-        link_to 'Continue', '#', class: 'btn btn-outline-primary', 'data-turbolinks' => false
+        link_to 'Continue', effective_memberships.applicant_build_path(applicant, applicant.next_step), class: 'btn btn-outline-primary', 'data-turbolinks' => false
       else
-        #link_to 'Show', applicant_path(applicant), class: 'btn btn-outline-primary'
-        link_to 'Show', '#', class: 'btn btn-outline-primary'
+        link_to 'Show', effective_memberships.applicant_path(applicant), class: 'btn btn-outline-primary'
       end
     end
   end
