@@ -25,7 +25,11 @@ module EffectiveMembershipsUser
 
       timestamps
     end
+  end
 
+  # Called by the applicants select screen
+  def applicant_membership_categories_collection
+    (membership_category || build_membership_category).class.for_applicant
   end
 
 end

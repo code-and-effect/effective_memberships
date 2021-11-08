@@ -18,7 +18,8 @@ module EffectiveMembershipsCategory
   included do
     log_changes if respond_to?(:log_changes)
 
-    has_rich_text :body
+    # rich_text_body - Used by the select step
+    has_many_rich_texts
 
     effective_resource do
       title                 :string
@@ -34,9 +35,11 @@ module EffectiveMembershipsCategory
       timestamps
     end
 
-    scope :deep, -> { with_rich_text_body }
-    scope :sorted, -> { order(:title) }
+    scope :deep, -> { includes(:rich_texts) }
+    scope :sorted, -> { order(:position) }
     scope :can_apply, -> { where(can_apply: true) }
+
+    scope :for_applicants, -> { deep.sorted.can_apply }
 
     validates :title, presence: true, uniqueness: true
     validates :position, presence: true

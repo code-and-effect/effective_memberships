@@ -1,0 +1,38 @@
+%p All done
+%p InProgress: #{resource.in_progress?}
+
+-# = render partial: 'sidebar'
+
+-# %h1= @page_title
+
+-# - raise('expected a registered applicant') unless current_applicant.registered?
+
+-# .text-center
+-#   .row
+-#     .col-2
+-#     .col-8
+-#       .alert.alert-success Application Registered!
+
+-#   %p
+-#     The following application was successfully registered at
+-#     = succeed('.') do
+-#       = current_applicant.registered_at.strftime('%F')
+
+-#   - if current_applicant.notification?
+-#     %p Your #{current_applicant} has been registered.
+-#   - else
+-#     %p
+-#       You have been registered as a
+-#       %strong= current_applicant.registrant_category
+-#       with number
+-#       %strong= current_applicant.registrant_number
+
+-# .mb-4= render '/applicants/summary', applicant: current_applicant
+
+-# .mb-4
+-#   = collapse('Show application...', card_class: 'my-2') do
+-#     = render current_applicant
+
+-# .mb-4
+-#   = collapse('Show order receipts...', card_class: 'my-2') do
+-#     = render '/applicants/orders', applicant: current_applicant

@@ -17,5 +17,4 @@
   %h3 Active Applications
 
 - in_progress.each do |applicant|
-  %p= applicant
-  /= render 'applicants/summary', applicant: applicant
+  = render 'applicants/summary', applicant: applicant

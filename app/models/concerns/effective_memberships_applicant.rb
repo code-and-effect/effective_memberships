@@ -43,6 +43,8 @@ module EffectiveMembershipsApplicant
     log_changes(except: :wizard_steps) if respond_to?(:log_changes)
 
     belongs_to :user, polymorphic: true
+    accepts_nested_attributes_for :user
+
     belongs_to :membership_category, polymorphic: true, optional: true
     belongs_to :from_membership_category, polymorphic: true, optional: true
 
@@ -72,12 +74,10 @@ module EffectiveMembershipsApplicant
     scope :deep, -> { includes(:user, :membership_category, :from_membership_category, :orders) }
     scope :sorted, -> { order(:id) }
 
-    validates :user, presence: true
-
-    scope :unsubmitted, -> { where(submitted_at: nil) }
-
     scope :in_progress, -> { where.not(status: [:approved, :declined]) }
     scope :done, -> { where(status: [:approved, :declined]) }
+
+    validates :user, presence: true
   end
 
   # Instance Methods
@@ -91,10 +91,6 @@ module EffectiveMembershipsApplicant
 
   def can_visit_step?(step)
     can_revisit_completed_steps(step)
-  end
-
-  def select!
-    update!(status: :approved)
   end
 
 end
