@@ -1,0 +1,12 @@
+= render 'layout' do
+  %h1= @page_title
+
+  %p Please review and declare the following:
+
+  = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+    = f.hidden_field :id
+
+    = f.check_box :declare_code_of_ethics, label: 'Yes, I hereby certify that I have read and will adhere to the Code of Ethics'
+    = f.check_box :declare_truth, label: 'Yes, I hereby certify that the statements and information contained herein are correct'
+
+    = f.save 'Save and Continue'

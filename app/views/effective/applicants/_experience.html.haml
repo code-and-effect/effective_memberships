@@ -1,0 +1,27 @@
+.card
+  .card-body
+    .row
+      .col-sm
+        %h5.card-title= applicant.wizard_step_title(:experience)
+      .col-sm-auto.text-right
+        = link_to('Edit', wizard_path(:experience)) if edit_effective_applicants_wizard?
+
+    %table.table
+      %tbody
+        -# %tr
+        -#   %th CV / Resume Upload
+        -#   %td
+        -#     - if applicant.cv.attached?
+        -#       = link_to(applicant.cv.filename, url_for(applicant.cv), target: '_blank')
+        -#     - else
+        -#       None
+
+        %tr
+          %th Total Months
+          %td= applicant.applicant_experiences_months
+
+    - datatable = EffectiveApplicantExperiencesDatatable.new(applicant_id: applicant.id)
+    .mb-4= render_simple_datatable(datatable)
+
+    %h6 Additional Experiences Details
+    = simple_format(applicant.applicant_experiences_details.presence || 'none')

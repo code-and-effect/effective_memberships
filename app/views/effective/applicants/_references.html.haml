@@ -1,0 +1,15 @@
+.card
+  .card-body
+    .row
+      .col-sm
+        %h5.card-title= applicant.wizard_step_title(:references)
+      .col-sm-auto.text-right
+        = link_to('Edit', wizard_path(:references)) if edit_effective_applicants_wizard?
+
+    - applicant.applicant_references.each_with_index do |applicant_reference, index|
+      - if index > 0
+        .mb-4
+
+      %h6 Reference ##{index + 1}
+
+      = render('effective/applicant_references/applicant_reference', applicant_reference: applicant_reference)

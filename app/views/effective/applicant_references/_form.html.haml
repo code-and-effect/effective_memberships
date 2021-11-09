@@ -1,0 +1,13 @@
+= effective_form_with(model: applicant_reference) do |f|
+  - if inline_datatable?
+    = f.hidden_field :applicant_id
+  - else
+    - raise('expected inline datatable')
+
+  = f.text_field :name
+  = f.email_field :email
+  = f.tel_field :phone
+
+  %p An email will be sent asking them to complete a reference declaration form.
+
+  = effective_submit(f)

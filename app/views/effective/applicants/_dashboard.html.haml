@@ -5,7 +5,7 @@
 - datatable = EffectiveResources.best('EffectiveApplicantsDatatable').new(self)
 - in_progress = current_user.applicants.in_progress
 
-- if authorized && in_progress.blank? || true
+- if authorized && in_progress.blank?
   %p= link_to 'Apply to join, reclassify or provide a change of status notification', effective_memberships.new_applicant_path, class: 'btn btn-primary'
 
 - if datatable.present?
@@ -17,4 +17,4 @@
   %h3 Active Applications
 
 - in_progress.each do |applicant|
-  = render 'applicants/summary', applicant: applicant
+  = render 'effective/applicants/summary', applicant: applicant

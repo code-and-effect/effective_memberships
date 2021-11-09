@@ -1,0 +1,28 @@
+= render 'layout' do
+  %h1= @page_title
+
+  %p Please add your post secondary and other education.
+
+  = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+    = f.hidden_field :id
+
+    = f.error :applicant_educations
+
+    = f.has_many(:applicant_educations, cards: true) do |aef|
+      %h4 Education
+      %p You've earned the following degree or diploma.
+
+      .row
+        .col= aef.date_field :start_on, label: 'Start Date'
+        .col= aef.text_field :institution
+
+      .row
+        .col= aef.date_field :end_on, label: 'End Date'
+        .col= aef.text_field :location
+
+      = aef.text_field :program, label: 'Program'
+      = aef.text_field :degree_obtained, label: 'Degree or diploma obtained'
+
+    = f.text_area :applicant_educations_details, label: 'Additional Education Details'
+
+    = f.save 'Save and Continue'

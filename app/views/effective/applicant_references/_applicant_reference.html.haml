@@ -1,0 +1,51 @@
+- reference = applicant_reference
+
+%table.table
+  %tbody
+    %tr
+      %th Name
+      %td= link_to("#{reference.name} <#{reference.email}>", "mailto:#{reference.email}")
+
+    %tr
+      %th Known
+      %td= reference.known
+
+    %tr
+      %th Relationship
+      %td= reference.relationship
+
+    %tr
+      %th Status
+      %td
+        - if reference.submitted?
+          Waiting on response
+        - elsif reference.completed?
+          Response completed
+
+    - if reference.applicant.was_submitted? && !reference.completed?
+      %tr
+        %th Last Notified at
+        %td= reference.last_notified_at&.strftime('%F') || 'Never'
+
+      - if can?(:notify, reference) && !local_assigns[:skip_actions]
+        %tr
+          %th Notification
+          %td= link_to('Resend email notification', notify_applicant_reference_path(reference), 'data-method': :post, 'data-confirm': "Really resend email notification to #{reference.reference_email}?")
+
+    - if reference.completed? && can?(:review, reference)
+      %tr
+        %th Address
+        %td= reference.reference_address.to_html
+
+
+      %tr
+        %th Reservations
+        %td
+          - if reference.reservations?
+            = reference.reservations_reason
+          - else
+            None
+
+      %tr
+        %th Work History
+        %td= reference.work_history

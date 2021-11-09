@@ -7,158 +7,36 @@
       .col-sm-auto.text-right
         /= link_to('Edit', effective_memberships.applicant_build_path(:select)) if edit_applicants_wizard?
 
-    -# %table.table
-    -#   %tbody
-    -#     %tr
-    -#       %th= (applicant.from_registrant_category.present? ? 'Registrant' : 'Applicant')
-    -#       %td= render 'users/col', resource: applicant
+    %table.table
+      %tbody
+        %tr
+          %th Applicant
+          %td= render 'effective/applicants/user', applicant: applicant, user: applicant.user
 
-    -#     - if request.path.start_with?('/admin')
-    -#       %tr
-    -#         %th User
-    -#         %td= link_to(applicant.user, edit_admin_user_path(applicant.user))
+        - if request.path.start_with?('/admin')
+          %tr
+            %th User
+            %td= link_to(applicant.user, edit_admin_user_path(applicant.user))
 
-    -#     - if applicant.reclassification?
-    -#       %tr
-    -#         %th From Registrant Category
-    -#         %td= applicant.from_registrant_category
+        - if applicant.from_membership_category.present?
+          %tr
+            %th From Membership Category
+            %td= applicant.from_membership_category
 
-    -#     - if applicant.reinstatement?
-    -#       %tr
-    -#         %th Reinstatement From
-    -#         %td= applicant.from_reinstatement_category
+        %tr
+          %th Membership Category
+          %td= applicant.membership_category
 
-    -#     %tr
-    -#       %th Registrant Category
-    -#       %td= applicant.registrant_category
+        - if applicant.orders.present?
+          %tr
+            %th Orders
+            %td
+              - applicant.orders.each do |order|
+                = link_to(order, effective_orders.order_path(order))
 
-    -#     - if applicant.stream.present?
-    -#       %tr
-    -#         %th Stream
-    -#         %td= applicant.stream
-
-    -#     %tr
-    -#       %th Status
-    -#       %td
-    -#         %p.mb-3
-    -#           Please read
-    -#           = link_to "Understanding Your Application Status", "https://www.cab-bc.org/understanding-your-application-status"
-    -#           for more information about your status.
-
-    -#         %p
-    -#           %span.badge.badge-secondary= applicant.status
-
-    -#         = applicant_summary_text(applicant)
-
-    -#     - if applicant.offline?
-    -#       %tr
-    -#         %th Offline
-    -#         %td This application was entered by an admin
-
-    -#       %tr
-    -#         %th Offline Order
-    -#         %td
-    -#           - if applicant.offline_order.present?
-    -#             = link_to(applicant.offline_order, effective_orders.admin_order_path(applicant.offline_order))
-
-    -#     - if applicant.nwpta?
-    -#       %tr
-    -#         %th Verification Form
-    -#         %td
-    -#           - if applicant.nwpta_form_received?
-    -#             Received
-    -#           - else
-    -#             The
-    -#             = link_to 'NWPTA Verification Form', asset_path('NWPTA_Verification.pdf'), target: '_blank'
-    -#             must be filled in and sent to
-    -#             = mail_to('info@aspb.ab.ca')
-
-    -#     - if applicant.rsb?
-    -#       %tr
-    -#         %th Authorization Form
-    -#         %td
-    -#           - if applicant.rsb_form_received?
-    -#             Received
-    -#           - else
-    -#             The
-    -#             = link_to 'RSB Authorization Form', asset_path('RSB_Authorization.pdf'), target: '_blank'
-    -#             must be filled in and sent to
-    -#             = mail_to('cbiol@rsb.org.uk')
-
-
-    -#     - if applicant.transcripts_required?
-    -#       %tr
-    -#         %th Transcripts
-    -#         %td
-    -#           - unless applicant.transcripts_received_was
-    -#             Not yet received.
-
-    -#           - if applicant.transcripts_received_was
-    -#             Received on #{applicant.transcripts_received_on&.strftime('%F')}.
-
-    -#             - if applicant.transcripts_approved?
-    -#               Approved.
-    -#             - elsif applicant.transcripts_problematic?
-    -#               Problematic.
-    -#             - else
-    -#               Not yet reviewed.
-
-    -#           - if applicant.transcripts_note.present?
-    -#             = applicant.transcripts_note
-
-    -#     - if applicant.applicant_references_required?
-    -#       %tr
-    -#         %th References
-    -#         %td
-    -#           = applicant.applicant_references.count(&:completed?)
-    -#           = '/'
-    -#           = applicant.required_applicant_reference_count
-    -#           responded
-
-    -#     - if applicant.applicant_reports_required?
-    -#       %tr
-    -#         %th Lead Author Declarations
-    -#         %td
-    -#           - reports = applicant.applicant_reports.select { |report| report.lead_author_declaration_required? }
-
-    -#           = reports.count(&:completed?)
-    -#           = '/'
-    -#           = reports.length
-    -#           responded.
-
-    -#     - if applicant.applicant_reviews_required? && current_user.is?(:admin)
-    -#       %tr
-    -#         %th Registrar Reviews
-    -#         %td
-    -#           = applicant.applicant_reviews.count(&:completed?)
-    -#           = '/'
-    -#           = applicant.required_applicant_review_count
-    -#           reviewers have voted.
-    -#           (admin only information)
-
-    -#     - if applicant.training_required?
-    -#       %tr
-    -#         %th Training
-    -#         %td
-    -#           - if applicant.was_trained?
-    -#             Passed on #{applicant.trained_at&.strftime('%F')}
-    -#           - elsif applicant.train_order&.purchased?
-    -#             Not Yet Completed
-    -#           - else
-    -#             Not Yet Purchased
-
-    -#     - if applicant.was_registered?
-    -#       %tr
-    -#         %th Registered
-    -#         %td
-    -#           #{applicant.registrant_category} ##{applicant.registrant_number}
-
-    -#     - if applicant.was_registered? || applicant.package_mailed_on.present?
-    -#       %tr
-    -#         %th Package Mailed
-    -#         %td= applicant.package_mailed_on&.strftime('%F') || 'Not yet mailed'
-
-    -#     - if (applicant.seal_required? && applicant.was_registered?) || applicant.seal_ordered_on.present?
-    -#       %tr
-    -#         %th Seal Ordered
-    -#         %td= applicant.seal_ordered_on&.strftime('%F') || 'Not yet ordered'
+        %tr
+          %th Status
+          %td
+            %p
+              %span.badge.badge-secondary= applicant.status
+            %p= applicant.summary

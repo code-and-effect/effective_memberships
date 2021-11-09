@@ -1,0 +1,10 @@
+= render 'layout' do
+  %h1= @page_title
+
+  %p Please review your application and get ready to checkout.
+
+  .mb-4= render('effective/applicants/applicant', applicant: resource)
+
+  = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+    = f.hidden_field :id
+    = f.submit 'Submit Application', class: 'btn btn-primary'

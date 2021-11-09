@@ -1,0 +1,16 @@
+.card
+  .card-body
+    .row
+      .col-sm
+        %h5.card-title= applicant.wizard_step_title(:declarations)
+      .col-sm-auto.text-right
+        = link_to('Edit', wizard_path(:declarations)) if edit_effective_applicants_wizard?
+
+    %table.table
+      %tbody
+        %tr
+          %td= icon('check')
+          %td Yes, I hereby certify that I have read and will adhere to the Code of Ethics
+        %tr
+          %td= icon('check')
+          %td Yes, I hereby certify that the statements and information contained herein are correct

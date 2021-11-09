@@ -1,6 +1,6 @@
 .effective-applicant
   - blacklist = [:start, :select, :review, :checkout, :submitted]
-  - steps = resource.required_steps.keys - blacklist
+  - steps = resource.required_steps - blacklist
 
   - steps.select { |step| applicant.has_completed_step?(step) }.each do |partial|
-    .mb-4= render "applicants/#{partial}", applicant: applicant, step: partial
+    .mb-4= render "effective/applicants/#{partial}", applicant: applicant, step: partial

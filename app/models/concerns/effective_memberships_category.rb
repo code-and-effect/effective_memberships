@@ -39,7 +39,7 @@ module EffectiveMembershipsCategory
     scope :sorted, -> { order(:position) }
     scope :can_apply, -> { where(can_apply: true) }
 
-    scope :for_applicants, -> { deep.sorted.can_apply }
+    scope :for_applicant, -> { deep.sorted.can_apply }
 
     validates :title, presence: true, uniqueness: true
     validates :position, presence: true

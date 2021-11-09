@@ -1,0 +1,33 @@
+= effective_form_with(model: applicant_reference) do |f|
+  = f.hidden_field :reference_id, value: current_user&.id
+
+  %p Please confirm your name, email, and address:
+
+  .row
+    .col= f.text_field :reference_name
+    .col= f.email_field :reference_email
+
+  = effective_address_fields(f, :reference_address)
+
+  %hr
+
+  = f.select :known, Effective::ApplicantReference::KNOWNS, label: 'I have known the applicant for', required: true
+
+  = f.radios :relationship, Effective::ApplicantReference::RELATIONSHIPS, required: true,
+    label: 'I have known or been associated with the applicant as their'
+
+  = f.radios :reservations, applicant_reference_reservations_collection(),
+    label: "Do you have any reservations about the applicant?", inline: true, required: true
+
+  = f.show_if :reservations, true do
+    = f.text_area :reservations_reason,
+      label: 'Please provide a brief but candid explanation of your reservations'
+
+  = f.text_area :work_history,
+    label: "Work History - Please provide information on the applicant's work history and/or work ethic and the ability to communicate",
+    hint: "If you are an employer or supervisor please provide information on the term of employment, the responsibilities of the position, and any significant projects undertaken by the individual of which you are aware or with which you have been involved."
+
+  %hr
+  = f.check_box :accept_declaration, label: 'Yes, I declare that the above information is true and accurate'
+
+  = f.submit 'Complete Reference'

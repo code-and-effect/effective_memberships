@@ -1,0 +1,20 @@
+%table.table
+  %tbody
+    %tr
+      %th Name
+      %td= user.to_s
+
+    - if user.respond_to?(:email) && user.email.present?
+      %tr
+        %th Email
+        %td= mail_to user.email
+
+    - if user.respond_to?(:date_of_birth) && user.date_of_birth.present?
+      %tr
+        %th Date of Birth
+        %td= user.date_of_birth.strftime('%F')
+
+    - if user.respond_to?(:phone) && user.phone.present?
+      %tr
+        %th Phone:
+        %td= user.phone

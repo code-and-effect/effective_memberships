@@ -1,0 +1,50 @@
+= render 'layout' do
+  %h1= @page_title
+
+  %p Please add your work experience.
+
+  = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+    = f.hidden_field :id
+
+    = f.error :applicant_experiences
+    = f.error :applicant_experiences_months
+
+    = f.has_many(:applicant_experiences, cards: true) do |aef|
+      %h4 Experience
+      %p You've had the following work experience.
+
+      .row
+        .col= aef.text_field :position
+        .col= aef.text_field :employer
+
+      .row
+        .col= aef.date_field :start_on, label: 'Employment start', 'data-applicant-experiences-month': true
+        .col
+          = aef.date_field :end_on, label: 'Employment end', 'data-applicant-experiences-month': true
+          = aef.check_box :still_work_here, label: 'I still work here'
+
+      .row
+        .col
+          = aef.radios :category, aef.object.class.const_get(:CATEGORIES), inline: true,
+            label: 'Employment', 'data-applicant-experiences-month': true
+
+          = aef.show_if :category, 'Part Time' do
+            = aef.percent_field :percent_worked, label: 'Percent time worked',
+              hint: 'required when part time', 'data-applicant-experiences-month': true
+
+        .col= aef.static_field :months, label: 'Calculated Months', value: aef.object.months.to_i
+
+      = aef.text_area :tasks_performed, class: 'mb-0'
+
+    %h3 Total Months
+    .row
+      .col= f.static_field :applicant_experiences_months, label: 'Entered Months', value: f.object.applicant_experiences_months.to_i
+      .col
+        = f.static_field :min_applicant_experiences_months, label: 'Required Months' do
+          #{f.object.min_applicant_experiences_months} months, or #{f.object.min_applicant_experiences_months / 12} years
+
+    = f.error :applicant_experiences_months
+
+    = f.text_area :applicant_experiences_details, label: 'Additional Experiences Details'
+
+    = f.save 'Save and Continue'

@@ -42,13 +42,25 @@ module EffectiveMembershipsApplicant
 
     log_changes(except: :wizard_steps) if respond_to?(:log_changes)
 
+    attr_accessor :declare_code_of_ethics
+    attr_accessor :declare_truth
+
     belongs_to :user, polymorphic: true
     accepts_nested_attributes_for :user
 
     belongs_to :membership_category, polymorphic: true, optional: true
     belongs_to :from_membership_category, polymorphic: true, optional: true
 
-    has_many :orders, as: :parent, class_name: 'Effective::Order', dependent: :nullify
+    has_many :applicant_educations, -> { order(:id) }, class_name: 'Effective::ApplicantEducation', inverse_of: :applicant, dependent: :destroy
+    accepts_nested_attributes_for :applicant_educations, reject_if: :all_blank, allow_destroy: true
+
+    has_many :applicant_experiences, -> { order(:id) }, class_name: 'Effective::ApplicantExperience', inverse_of: :applicant, dependent: :destroy
+    accepts_nested_attributes_for :applicant_experiences, reject_if: :all_blank, allow_destroy: true
+
+    has_many :applicant_references, -> { order(:id) }, class_name: 'Effective::ApplicantReference', inverse_of: :applicant, dependent: :destroy
+    accepts_nested_attributes_for :applicant_references, reject_if: :all_blank, allow_destroy: true
+
+    has_many :orders, -> { order(:id) }, as: :parent, class_name: 'Effective::Order', dependent: :nullify
     accepts_nested_attributes_for :orders
 
     effective_resource do
@@ -62,8 +74,16 @@ module EffectiveMembershipsApplicant
       reviewed_at            :datetime
       approved_at            :datetime
 
+      # Declined
       declined_at            :datetime
       declined_reason        :text
+
+      # Applicant Educations
+      applicant_educations_details  :text
+
+      # Applicant Experiences
+      applicant_experiences_months   :integer
+      applicant_experiences_details  :text
 
       # Acts as Wizard
       wizard_steps           :text, permitted: false
@@ -77,7 +97,72 @@ module EffectiveMembershipsApplicant
     scope :in_progress, -> { where.not(status: [:approved, :declined]) }
     scope :done, -> { where(status: [:approved, :declined]) }
 
+    before_validation(if: -> { current_step == :start && user.present? }) do
+      self.from_membership_category ||= user.membership_category
+    end
+
+    before_validation(if: -> { current_step == :select && membership_category_id.present? }) do
+      self.membership_category_type ||= EffectiveMemberships.membership_category_class.name
+    end
+
+    before_validation(if: -> { current_step == :experience }) do
+      assign_applicant_experiences_months!
+    end
+
     validates :user, presence: true
+
+    # Select Step
+    with_options(if: -> { current_step == :select || has_completed_step?(:select) }) do
+      validates :membership_category, presence: true
+    end
+
+    # Applicant Educations Step
+    with_options(if: -> { current_step == :education }) do
+      validates :applicant_educations, length: { minimum: 1, message: "can't be blank. Please include at least one" }
+    end
+
+    # Applicant Experiences Step
+    with_options(if: -> { current_step == :experience }) do
+      validates :applicant_experiences, length: { minimum: 1, message: "can't be blank. Please include at least one" }
+      validates :applicant_experiences_months, presence: true
+
+      validate do
+        if (min = min_applicant_experiences_months) > applicant_experiences_months.to_i
+          self.errors.add(:applicant_experiences_months, "must be at least #{min} months, or #{min / 12} years")
+        end
+      end
+
+      # Make sure none of the full time applicant_experience dates overlap
+      validate do
+        experiences = present_applicant_experiences.select(&:full_time?)
+
+        experiences.find do |x|
+          (experiences - [x]).find do |y|
+            next unless (x.start_on..x.end_on).overlaps?(y.start_on..y.end_on)
+            x.errors.add(:start_on, "can't overlap when full time")
+            x.errors.add(:end_on, "can't overlap when full time")
+            y.errors.add(:start_on, "can't overlap when full time")
+            y.errors.add(:end_on, "can't overlap when full time")
+            self.errors.add(:applicant_experiences, "can't have overlaping dates for full time experiences")
+          end
+        end
+      end
+    end
+
+    # Applicant References Step
+    with_options(if: -> { current_step == :references }) do
+      validates :applicant_references, length: { minimum: 1, message: "can't be blank. Please include at least one" }
+    end
+
+    # Declarations Step
+    with_options(if: -> { current_step == :declarations }) do
+      validates :declare_code_of_ethics, acceptance: true
+      validates :declare_truth, acceptance: true
+    end
+
+    # These two try completed and try reviewed
+    before_save(if: -> { submitted? }) { complete! }
+    before_save(if: -> { completed? }) { review! }
   end
 
   # Instance Methods
@@ -91,6 +176,98 @@ module EffectiveMembershipsApplicant
 
   def can_visit_step?(step)
     can_revisit_completed_steps(step)
+  end
+
+  def category
+    'Apply to Join'
+  end
+
+  # Applicant Experiences
+  def min_applicant_experiences_months
+    #membership_category.min_applicant_experience_months
+    0
+  end
+
+  def summary
+    case status
+    when 'draft'
+      "Applicant has not yet completed the #{category} wizard steps or paid to submit this application. This application will transition to 'submitted' after payment has been collected."
+    when 'submitted'
+      summary = "Application has been purchased and submitted. The following tasks must be done before this application will transition to 'completed':"
+      items = completed_requirements.map { |item, done| content_tag(:li, "#{item}: #{done ? 'Complete' : 'Incomplete'}") }.join.html_safe
+      content_tag(:p, summary) + content_tag(:ul, items)
+    when 'completed'
+      if applicant_reviews_required?
+        "All required materials have been provided. This application will transition to 'reviewed' after all reviewers have voted."
+      else
+        "This application has been completed and is now ready for an admin to approve or decline it. If approved, prorated fees will be generated."
+      end
+    when 'reviewed'
+      "This application has been reviewed and is now ready for an admin to approve or decline it. If approved, prorated fees will be generated."
+    when 'approved'
+      "The application has been approved! All done!"
+    when 'declined'
+      "This application has been declined."
+    else
+      raise("unexpected status #{status}")
+    end.html_safe
+  end
+
+  # Draft -> Submitted requirements
+  def submit!
+    raise('already submitted') if was_submitted?
+    raise('expected a purchased order') unless (submit_order&.purchased? || offline?)
+
+    submitted!
+    applicant_references.each { |reference| reference.notify! if reference.submitted? }
+
+    true
+  end
+
+  # Submitted -> Completed requirements
+
+  # When an application is submitted, these must be done to go to completed
+  def completed_requirements
+    #{'Admin has approved transcripts' => true}
+  end
+
+  def complete!
+    return false unless submitted? && completed_materials.values.all?
+    # Could send registrar an email here saying this applicant is ready to review
+    completed!
+  end
+
+  # Completed -> Reviewed requirements
+  def applicant_reviews_required?
+    false
+  end
+
+  # When an application is completed, these must be done to go to reviewed
+  def reviewed_materials
+    {}
+  end
+
+  def review!
+    return false unless completed? && reviewed_materials.values.all?
+    # Could send registrar an email here saying this applicant is ready to approve
+    reviewed!
+  end
+
+  private
+
+  def present_applicant_experiences
+    applicant_experiences.select { |ae| ae.start_on.present? && ae.end_on.present? && !ae.marked_for_destruction? }
+  end
+
+  def present_applicant_references
+    applicant_references.reject(&:marked_for_destruction?)
+  end
+
+  def assign_applicant_experiences_months!
+    present_applicant_experiences.each { |ae| ae.assign_months! }
+    months = present_applicant_experiences.sum { |ae| ae.months }
+
+    self.applicant_experiences_months = months
   end
 
 end

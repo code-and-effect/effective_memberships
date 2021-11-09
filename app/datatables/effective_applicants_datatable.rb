@@ -9,7 +9,7 @@ class EffectiveApplicantsDatatable < Effective::Datatable
     col :updated_at, label: 'Updated', as: :date, visible: false
 
     col :submitted_at, label: 'Submitted', visible: false, as: :date
-    col :completed_at, label: 'Completed GEM', as: :date
+    col :completed_at, label: 'Completed', as: :date
     col :reviewed_at, label: 'Reviewed', as: :date
     col :approved_at, label: 'Approved', visible: false, as: :date
 
