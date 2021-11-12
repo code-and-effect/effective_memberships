@@ -79,10 +79,11 @@ module Effective
     def notify!
       raise('expected reference email') unless email.present?
 
-      #EmailTemplatesMailer.applicant_reference_notification(self).deliver_later
-      update!(last_notified_at: Time.zone.now)
+      after_commit do
+        EffectiveMemberships.send_email(:applicant_reference_notification, self)
+      end
 
-      raise('todo')
+      update!(last_notified_at: Time.zone.now)
     end
 
     def complete!

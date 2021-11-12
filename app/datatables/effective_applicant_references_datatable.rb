@@ -20,11 +20,11 @@ class EffectiveApplicantReferencesDatatable < Effective::Datatable
       reference.last_notified_at&.strftime('%F') unless reference.completed?
     end
 
-    actions_col(show: false)
+    actions_col partial: 'effective/applicant_references/datatable_actions', partial_as: :applicant_reference
   end
 
   collection do
-    ApplicantReference.where(applicant: applicant)
+    Effective::ApplicantReference.where(applicant: applicant)
   end
 
   def applicant

@@ -55,4 +55,12 @@ module EffectiveMembershipsCategory
     title.presence || 'New Membership Category'
   end
 
+  def applicant_qb_item_name
+    'QuickBooks'
+  end
+
+  def applicant_tax_exempt
+    false
+  end
+
 end

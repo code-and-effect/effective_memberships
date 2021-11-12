@@ -16,6 +16,7 @@ module EffectiveMembershipsApplicant
   end
 
   included do
+    acts_as_purchasable_parent
     acts_as_tokened
 
     acts_as_statused(
@@ -35,7 +36,7 @@ module EffectiveMembershipsApplicant
       experience: 'Work Experience',
       references: 'References',
       declarations: 'Declarations',
-      review: 'Review',
+      ready: 'Review',
       checkout: 'Checkout',
       submitted: 'Submitted'
     )
@@ -60,8 +61,12 @@ module EffectiveMembershipsApplicant
     has_many :applicant_references, -> { order(:id) }, class_name: 'Effective::ApplicantReference', inverse_of: :applicant, dependent: :destroy
     accepts_nested_attributes_for :applicant_references, reject_if: :all_blank, allow_destroy: true
 
-    has_many :orders, -> { order(:id) }, as: :parent, class_name: 'Effective::Order', dependent: :nullify
-    accepts_nested_attributes_for :orders
+    # Fees has to be below orders here
+    has_many :fees, -> { order(:id) }, as: :parent, dependent: :nullify
+    accepts_nested_attributes_for :fees, reject_if: :all_blank, allow_destroy: true
+
+    # has_many :orders, -> { order(:id) }, as: :parent, class_name: 'Effective::Order', dependent: :nullify
+    # accepts_nested_attributes_for :orders
 
     effective_resource do
       # Acts as Statused
@@ -109,6 +114,7 @@ module EffectiveMembershipsApplicant
       assign_applicant_experiences_months!
     end
 
+    # All Steps validations
     validates :user, presence: true
 
     # Select Step
@@ -163,6 +169,12 @@ module EffectiveMembershipsApplicant
     # These two try completed and try reviewed
     before_save(if: -> { submitted? }) { complete! }
     before_save(if: -> { completed? }) { review! }
+
+    after_purchase do |_order|
+      raise('expected submit_order to be purchased') unless submit_order&.purchased?
+      submit_purchased!
+    end
+
   end
 
   # Instance Methods
@@ -185,6 +197,10 @@ module EffectiveMembershipsApplicant
   # Applicant Experiences
   def min_applicant_experiences_months
     #membership_category.min_applicant_experience_months
+    0
+  end
+
+  def min_applicant_references
     0
   end
 
@@ -213,26 +229,98 @@ module EffectiveMembershipsApplicant
     end.html_safe
   end
 
+  def select!
+    return false if was_submitted?
+
+    submit_fees.each { |fee| fee.mark_for_destruction }
+    submit_order.mark_for_destruction if submit_order
+    save!
+  end
+
+  # All Fees and Orders
+  def submit_fees
+    fees.select { |fee| fee.applicant_submit_fee? }
+  end
+
+  def submit_order
+    orders.find { |order| order.purchasables.any?(&:applicant_submit_fee?) }
+  end
+
+  def find_or_build_submit_fees
+    return submit_fees if submit_fees.present?
+
+    fees.build(
+      user: user,
+      category: 'Applicant',
+      membership_category: membership_category,
+      price: membership_category.applicant_fee,
+      qb_item_name: membership_category.applicant_qb_item_name,
+      tax_exempt: membership_category.applicant_tax_exempt
+    )
+
+    submit_fees
+  end
+
+  def find_or_build_submit_order
+    order = submit_order || orders.build(user: user)
+
+    submit_fees.each do |fee|
+      order.add(fee) unless order.purchasables.include?(fee)
+    end
+
+    order
+  end
+
+  # Should be indempotent.
+  def build_submit_fees_and_order
+    return false if was_submitted?
+
+    fees = find_or_build_submit_fees()
+    raise('already has purchased submit fees') if fees.any? { |fee| fee.purchased? }
+
+    order = find_or_build_submit_order()
+    raise('already has purchased submit order') if order.purchased?
+
+    true
+  end
+
+  # User clicks on the Ready / Review step. Next step is Checkout
+  def ready!
+    build_submit_fees_and_order
+    save!
+  end
+
+  # Called automatically via after_purchase hook above
+  def submit_purchased!
+    return false if was_submitted?
+
+    wizard_steps[:checkout] = Time.zone.now
+    submit!
+  end
+
   # Draft -> Submitted requirements
   def submit!
     raise('already submitted') if was_submitted?
-    raise('expected a purchased order') unless (submit_order&.purchased? || offline?)
+    raise('expected a purchased order') unless submit_order&.purchased?
 
+    after_commit do
+      applicant_references.each { |reference| reference.notify! if reference.submitted? }
+    end
+
+    wizard_steps[:submitted] = Time.zone.now
     submitted!
-    applicant_references.each { |reference| reference.notify! if reference.submitted? }
-
-    true
   end
 
   # Submitted -> Completed requirements
 
   # When an application is submitted, these must be done to go to completed
   def completed_requirements
+    {}
     #{'Admin has approved transcripts' => true}
   end
 
   def complete!
-    return false unless submitted? && completed_materials.values.all?
+    return false unless submitted? && completed_requirements.values.all?
     # Could send registrar an email here saying this applicant is ready to review
     completed!
   end

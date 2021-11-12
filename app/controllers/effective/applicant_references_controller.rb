@@ -24,9 +24,9 @@ module Effective
 
     def permitted_params
       if resource.submitted?
-        params.require(:applicant_reference).permit(ApplicantReference.reference_params)
+        params.require(:effective_applicant_reference).permit(ApplicantReference.reference_params)
       else
-        params.require(:applicant_reference).permit(ApplicantReference.permitted_params)
+        params.require(:effective_applicant_reference).permit(ApplicantReference.permitted_params)
       end
     end
 

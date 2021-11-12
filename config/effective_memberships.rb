@@ -1,6 +1,7 @@
 EffectiveMemberships.setup do |config|
   config.membership_categories_table_name = :membership_categories
   config.applicants_table_name = :applicants
+  config.fees_table_name = :fees
 
   # Layout Settings
   # Configure the Layout per controller, or all at once
@@ -12,6 +13,7 @@ EffectiveMemberships.setup do |config|
   # And handle all the business logic for your membership categories.
   # config.membership_category = 'Effective::MembershipCategory'
   # config.applicant = 'Effective::Applicant'
+  # config.fee = 'Effective::Fee'
 
   # Mailer Configuration
   # Configure the class responsible to send e-mails.

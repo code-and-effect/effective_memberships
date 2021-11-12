@@ -7,8 +7,8 @@ module EffectiveMemberships
 
   def self.config_keys
     [
-      :membership_categories_table_name, :applicants_table_name,
-      :membership_category, :applicant,
+      :membership_categories_table_name, :applicants_table_name, :fees_table_name,
+      :membership_category, :applicant, :fee,
       :layout,
       :mailer, :parent_mailer, :deliver_method, :mailer_layout, :mailer_sender, :mailer_admin, :use_effective_email_templates
     ]
@@ -45,10 +45,10 @@ module EffectiveMemberships
   def self.send_email(email, *args)
     raise('expected args to be an Array') unless args.kind_of?(Array)
 
-    if defined?(Tenant)
-      tenant = Tenant.current || raise('expected a current tenant')
-      args << { tenant: tenant }
-    end
+    # if defined?(Tenant)
+    #   tenant = Tenant.current || raise('expected a current tenant')
+    #   args << { tenant: tenant }
+    # end
 
     deliver_method = EffectiveMemberships.deliver_method || EffectiveResources.deliver_method
 
