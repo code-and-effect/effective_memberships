@@ -90,6 +90,7 @@ module Effective
       completed!
       applicant.save!
     end
+
   end
 
 end

@@ -45,10 +45,10 @@ module EffectiveMemberships
   def self.send_email(email, *args)
     raise('expected args to be an Array') unless args.kind_of?(Array)
 
-    # if defined?(Tenant)
-    #   tenant = Tenant.current || raise('expected a current tenant')
-    #   args << { tenant: tenant }
-    # end
+    if defined?(Tenant)
+      tenant = Tenant.current || raise('expected a current tenant')
+      args << { tenant: tenant }
+    end
 
     deliver_method = EffectiveMemberships.deliver_method || EffectiveResources.deliver_method
 
