@@ -134,7 +134,7 @@ GEM
     effective_developer (0.6.8)
       effective_resources
       rails (>= 3.2.0)
-    effective_email_templates (1.1.0)
+    effective_email_templates (1.1.1)
       effective_bootstrap
       effective_datatables (>= 4.0.0)
       effective_resources
