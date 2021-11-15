@@ -22,7 +22,7 @@ module EffectiveMembershipsFee
 
   included do
     acts_as_purchasable
-    log_changes(to: :user) if defined?(:log_changes)
+    log_changes(to: :user) if respond_to?(:log_changes)
 
     # Every fee is charged to a user
     belongs_to :user, polymorphic: true

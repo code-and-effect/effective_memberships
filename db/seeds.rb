@@ -9,11 +9,18 @@ if Rails.env.test?
   Effective::ApplicantCourseName.delete_all
 end
 
-category = Effective::MembershipCategory.create!(
-  title: "Level A",
+member = Effective::MembershipCategory.create!(
+  title: "Full Member",
   can_apply: true,
   applicant_fee: 100_00,
   annual_fee: 250_00
+)
+
+student = Effective::MembershipCategory.create!(
+  title: "Student",
+  can_apply: true,
+  applicant_fee: 50_00,
+  annual_fee: 125_00
 )
 
 area = Effective::ApplicantCourseArea.create!(title: 'Science')

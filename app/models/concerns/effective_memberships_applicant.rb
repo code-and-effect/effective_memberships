@@ -335,6 +335,7 @@ module EffectiveMembershipsApplicant
       applicant_references.each { |reference| reference.notify! if reference.submitted? }
     end
 
+    wizard_steps[:checkout] ||= Time.zone.now
     wizard_steps[:submitted] = Time.zone.now
     submitted!
   end

@@ -19,6 +19,7 @@ module EffectiveMembershipsUser
     belongs_to :membership_category, optional: true
 
     has_many :applicants
+    has_many :fees
 
     effective_resource do
       membership_joined_on    :date

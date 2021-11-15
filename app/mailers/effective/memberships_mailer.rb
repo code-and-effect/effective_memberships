@@ -12,7 +12,7 @@ module Effective
         url: effective_memberships.applicant_reference_url(resource.token)
       )
 
-      mail(to: EffectiveMemberships.mailer_admin, **headers_for(resource, opts))
+      mail(to: resource.email, **headers_for(resource, opts))
     end
 
     protected

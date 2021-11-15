@@ -6,6 +6,12 @@ require "rails/all"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+require 'devise'
+require 'haml-rails'
+require 'wicked'
+
+require 'effective_addresses'
+require 'effective_orders'
 require 'effective_email_templates'
 require "effective_memberships"
 
@@ -20,5 +26,7 @@ module Dummy
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+
+    config.active_job.queue_adapter = :inline
   end
 end
