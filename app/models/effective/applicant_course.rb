@@ -21,11 +21,11 @@ module Effective
     scope :sorted, -> { order(:title) }
 
     before_validation(if: -> { applicant_course_name.present? }) do
-      self.title ||= applicant_course_name.title
+      self.title = applicant_course_name.title
+      self.applicant_course_area = applicant_course_name.applicant_course_area
     end
 
     validates :title, presence: true
-    validates :amount, presence: true
 
     with_options(if: -> { applicant_course_name.blank? }) do
       validates :code, presence: true

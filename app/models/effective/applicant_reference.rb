@@ -38,19 +38,7 @@ module Effective
       timestamps
     end
 
-    # This is for the applicant wizard reports step
-    def self.permitted_params
-      [:id, :_destroy, :applicant_id, :name, :email, :phone]
-    end
-
-    # For the complete step
-    def self.reference_params
-      [
-        :reference_id, :name, :email, :phone,
-        :known, :relationship, :reservations, :reservations_reason, :work_history, :accept_declaration,
-        reference_address: EffectiveAddresses.permitted_params
-      ]
-    end
+    scope :deep, -> { includes(:applicant) }
 
     # All step validations
     validates :applicant, presence: true

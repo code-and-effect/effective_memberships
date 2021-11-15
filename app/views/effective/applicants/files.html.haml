@@ -1,0 +1,11 @@
+= render 'layout' do
+  %h1= @page_title
+
+  %p Please attach one or more documents.
+
+  = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+    = f.hidden_field :id
+
+    = f.file_field :files, attachment_style: :table
+
+    = f.save 'Save and Continue'

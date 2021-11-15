@@ -1,0 +1,40 @@
+= render 'layout' do
+  %h1= @page_title
+
+  %p Please enter the number of courses you have completed.
+
+  = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+    = f.hidden_field :id
+
+    .applicant-courses-sum
+      All Courses Total:
+      %span{'data-applicant-courses-sum': true}= f.object.applicant_courses_sum
+
+    - f.object.applicant_course_areas_collection.each do |area|
+      .applicant-course-area.my-2
+        %h2= area
+        .mb-4= area.body
+
+        %table.table
+          %tbody
+            - area.applicant_course_names.each do |applicant_course_name|
+              - applicant_course = f.object.applicant_course(applicant_course_name: applicant_course_name)
+
+              = f.fields_for(:applicant_courses, applicant_course) do |acf|
+                %tr
+                  %th= applicant_course_name
+                  %td
+                    = acf.number_field :amount, label: false, required: false, 'data-applicant-courses-amount': true
+                    = acf.hidden_field :applicant_course_name_id, value: applicant_course_name.id
+
+          %tfoot
+            %tr
+              %th Total #{area}
+              %td
+                %span{'data-applicant-course-area-sum': true}= f.object.applicant_course_area_sum(applicant_course_area: area)
+
+    .applicant-courses-sum.my-2
+      All Courses Total:
+      %span{'data-applicant-courses-sum': true}= f.object.applicant_courses_sum
+
+    = f.save 'Save and Continue'

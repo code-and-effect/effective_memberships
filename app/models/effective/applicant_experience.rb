@@ -25,6 +25,8 @@ module Effective
       timestamps
     end
 
+    scope :deep, -> { includes(:applicant) }
+
     before_validation(if: -> { start_on.present? && end_on.present? }) do
       self.months ||= ((end_on - start_on) / 1.month).to_i
     end

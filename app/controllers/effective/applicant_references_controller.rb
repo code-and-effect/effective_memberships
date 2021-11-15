@@ -23,11 +23,14 @@ module Effective
     protected
 
     def permitted_params
-      if resource.submitted?
-        params.require(:effective_applicant_reference).permit(ApplicantReference.reference_params)
+      permitted = params.require(:effective_applicant_reference).permit!.except(:token, :last_notified_at, :status, :status_steps)
+
+      if resource.submitted? && resource.applicant.was_submitted? && (resource.applicant.user != current_user)
+        permitted
       else
-        params.require(:effective_applicant_reference).permit(ApplicantReference.permitted_params)
+        permitted.except(:reservations, :reservations_reason, :work_history, :accept_declaration)
       end
+
     end
 
   end

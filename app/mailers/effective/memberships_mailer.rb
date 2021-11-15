@@ -6,7 +6,12 @@ module Effective
     layout -> { EffectiveMemberships.mailer_layout || 'effective_memberships_mailer_layout' }
 
     def applicant_reference_notification(resource, opts = {})
-      @assigns = effective_memberships_email_assigns(resource)
+      @assigns = effective_memberships_email_assigns(resource).merge(
+        reference_name: resource.name,
+        applicant_name: resource.applicant.user.to_s,
+        url: effective_memberships.applicant_reference_url(resource.token)
+      )
+
       mail(to: EffectiveMemberships.mailer_admin, **headers_for(resource, opts))
     end
 

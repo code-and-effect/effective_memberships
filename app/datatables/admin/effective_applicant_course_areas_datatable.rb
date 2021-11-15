@@ -10,7 +10,7 @@ module Admin
     end
 
     collection do
-      Effective::ApplicantCourseArea.deep
+      Effective::ApplicantCourseArea.deep.all
     end
 
   end

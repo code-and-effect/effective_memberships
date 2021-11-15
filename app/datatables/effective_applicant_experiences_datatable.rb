@@ -33,7 +33,7 @@ class EffectiveApplicantExperiencesDatatable < Effective::Datatable
   end
 
   collection do
-    Effective::ApplicantExperience.where(applicant: applicant)
+    Effective::ApplicantExperience.deep.where(applicant: applicant)
   end
 
   def applicant

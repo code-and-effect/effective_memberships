@@ -24,7 +24,7 @@ class EffectiveApplicantReferencesDatatable < Effective::Datatable
   end
 
   collection do
-    Effective::ApplicantReference.where(applicant: applicant)
+    Effective::ApplicantReference.deep.where(applicant: applicant)
   end
 
   def applicant

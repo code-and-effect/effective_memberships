@@ -33,13 +33,17 @@ module EffectiveMembershipsApplicant
       select: 'Select Application Type',
       demographics: 'Demographics',
       education: 'Education',
+      course_amounts: 'Courses',
       experience: 'Work Experience',
       references: 'References',
+      files: 'Attach Files',
       declarations: 'Declarations',
       ready: 'Review',
       checkout: 'Checkout',
       submitted: 'Submitted'
     )
+
+    has_many_attached :files
 
     log_changes(except: :wizard_steps) if respond_to?(:log_changes)
 
@@ -52,6 +56,9 @@ module EffectiveMembershipsApplicant
     belongs_to :membership_category, polymorphic: true, optional: true
     belongs_to :from_membership_category, polymorphic: true, optional: true
 
+    has_many :applicant_courses, -> { order(:id) }, class_name: 'Effective::ApplicantCourse', inverse_of: :applicant, dependent: :destroy
+    accepts_nested_attributes_for :applicant_courses, reject_if: :all_blank, allow_destroy: true
+
     has_many :applicant_educations, -> { order(:id) }, class_name: 'Effective::ApplicantEducation', inverse_of: :applicant, dependent: :destroy
     accepts_nested_attributes_for :applicant_educations, reject_if: :all_blank, allow_destroy: true
 
@@ -61,12 +68,11 @@ module EffectiveMembershipsApplicant
     has_many :applicant_references, -> { order(:id) }, class_name: 'Effective::ApplicantReference', inverse_of: :applicant, dependent: :destroy
     accepts_nested_attributes_for :applicant_references, reject_if: :all_blank, allow_destroy: true
 
-    # Fees has to be below orders here
+    has_many :orders, -> { order(:id) }, as: :parent, class_name: 'Effective::Order', dependent: :nullify
+    accepts_nested_attributes_for :orders
+
     has_many :fees, -> { order(:id) }, as: :parent, dependent: :nullify
     accepts_nested_attributes_for :fees, reject_if: :all_blank, allow_destroy: true
-
-    # has_many :orders, -> { order(:id) }, as: :parent, class_name: 'Effective::Order', dependent: :nullify
-    # accepts_nested_attributes_for :orders
 
     effective_resource do
       # Acts as Statused
@@ -202,6 +208,28 @@ module EffectiveMembershipsApplicant
 
   def min_applicant_references
     0
+  end
+
+  # Applicant Courses
+  def applicant_course_areas_collection
+    Effective::ApplicantCourseArea.deep.sorted
+  end
+
+  def applicant_course_names_collection(applicant_course_area:)
+    applicant_course_area.applicant_course_names
+  end
+
+  def applicant_course(applicant_course_name: nil)
+    applicant_courses.find { |ac| ac.applicant_course_name_id == applicant_course_name.id } ||
+    applicant_courses.build(applicant_course_name: applicant_course_name, applicant_course_area: applicant_course_name.applicant_course_area)
+  end
+
+  def applicant_course_area_sum(applicant_course_area:)
+    applicant_courses.select { |ac| ac.applicant_course_area_id == applicant_course_area.id }.sum { |ac| ac.amount.to_i }
+  end
+
+  def applicant_courses_sum
+    applicant_courses.sum { |ac| ac.amount.to_i }
   end
 
   def summary

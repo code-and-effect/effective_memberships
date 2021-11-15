@@ -1,0 +1,19 @@
+.card
+  .card-body
+    .row
+      .col-sm
+        %h5.card-title= applicant.wizard_step_title(:course_amounts)
+      .col-sm-auto.text-right
+        = link_to('Edit', wizard_path(:course_amounts)) if edit_effective_applicants_wizard?
+
+
+    - applicant.applicant_course_areas_collection.each do |area|
+      - datatable = EffectiveApplicantCoursesDatatable.new(applicant_id: applicant.id, applicant_course_area_id: area.id)
+
+      .mb-4
+        %h6= area
+        = render_simple_datatable(datatable)
+        %p #{area} courses: #{applicant.applicant_course_area_sum(applicant_course_area: area)}
+
+    %p
+      %strong All courses: #{pluralize(applicant.applicant_courses_sum, 'total course')}

@@ -14,7 +14,7 @@ class EffectiveApplicantEducationsDatatable < Effective::Datatable
   end
 
   collection do
-    Effective::ApplicantEducation.where(applicant: applicant)
+    Effective::ApplicantEducation.deep.where(applicant: applicant)
   end
 
   def applicant
