@@ -27,7 +27,7 @@ class EffectiveApplicantsDatatable < Effective::Datatable
   end
 
   collection do
-    EffectiveMemberships.applicant_class.deep
+    EffectiveMemberships.applicant_class.deep.where(user: current_user)
   end
 
 end

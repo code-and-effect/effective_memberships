@@ -1,0 +1,8 @@
+= tabs do
+  = tab 'Course Area' do
+    = render 'admin/applicant_course_areas/form_applicant_course_area', applicant_course_area: applicant_course_area
+
+  - if applicant_course_area.persisted?
+    - if applicant_course_area.respond_to?(:log_changes_datatable)
+      = tab 'Logs' do
+        = render_inline_datatable(applicant_course_area.log_changes_datatable)

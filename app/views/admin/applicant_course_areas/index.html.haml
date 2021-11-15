@@ -1,0 +1,8 @@
+.row
+  .col-8
+    %h1.effective-admin-heading= @page_title
+  .col-4.text-right
+    = render_resource_buttons(Effective::ApplicantCourseArea, :index => false)
+
+%p Click Reorder to drag & drop reorder the position of these items.
+= render_datatable(@datatable)

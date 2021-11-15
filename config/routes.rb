@@ -12,12 +12,14 @@ EffectiveMemberships::Engine.routes.draw do
     resources :applicant_references, only: [:new, :create, :show, :update] do
       post :notify, on: :member
     end
-
   end
 
   namespace :admin do
     resources :applicants, except: [:new, :create, :show]
     resources :membership_categories, except: [:show]
+
+    resources :applicant_course_areas, except: [:show]
+    resources :applicant_course_names, except: [:show]
   end
 
 end

@@ -1,0 +1,9 @@
+= effective_form_with(model: [:admin, applicant_course_name], engine: true) do |f|
+  - if inline_datatable?
+    = f.hidden_field :applicant_course_area_id
+  - else
+    = f.select :applicant_course_area_id, Effective::ApplicantCourseArea.all
+
+  = f.text_field :title
+
+  = f.submit

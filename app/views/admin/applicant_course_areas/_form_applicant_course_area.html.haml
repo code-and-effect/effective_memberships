@@ -1,0 +1,8 @@
+= effective_form_with(model: [:admin, applicant_course_area], engine: true) do |f|
+  = f.text_field :title
+  = effective_submit(f)
+
+- if applicant_course_area.persisted?
+  %h2 Course Names
+  - datatable = Admin::EffectiveApplicantCourseNamesDatatable.new(applicant_course_area_id: applicant_course_area.id)
+  = render_datatable(datatable, inline: true)
