@@ -25,27 +25,78 @@ module EffectiveMembershipsCategory
       title                 :string
       position              :integer
 
-      can_apply             :boolean
+      # Applicants
+      can_apply_new             :boolean
+      can_apply_existing        :boolean
+      can_apply_restricted      :boolean
+      can_apply_restricted_ids  :text
+
+      applicant_fee              :integer
+      applicant_wizard_steps     :text
+
+      prorated_jan        :integer
+      prorated_feb        :integer
+      prorated_mar        :integer
+      prorated_apr        :integer
+      prorated_may        :integer
+      prorated_jun        :integer
+      prorated_jul        :integer
+      prorated_aug        :integer
+      prorated_sep        :integer
+      prorated_oct        :integer
+      prorated_nov        :integer
+      prorated_dec        :integer
+
+      # Renewals
       can_renew             :boolean
 
-      applicant_fee         :integer
       annual_fee            :integer
       renewal_fee           :integer
 
       timestamps
     end
 
+    serialize :can_apply_restricted_ids, Array
+    serialize :applicant_wizard_steps, Array
+
     scope :deep, -> { includes(:rich_texts) }
     scope :sorted, -> { order(:position) }
-    scope :can_apply, -> { where(can_apply: true) }
+
+    scope :can_apply, -> {
+      where(can_apply_new: true)
+      .or(where(can_apply_existing: true))
+      .or(where(can_apply_restricted: true))
+    }
 
     scope :for_applicant, -> { deep.sorted.can_apply }
 
     validates :title, presence: true, uniqueness: true
     validates :position, presence: true
 
+    after_initialize(if: -> { new_record? }) do
+      self.applicant_wizard_steps = EffectiveMemberships.applicant_class.all_wizard_steps
+    end
+
     before_validation do
       self.position ||= (self.class.pluck(:position).compact.max || -1) + 1
+    end
+
+    with_options(if: -> { can_apply? }) do
+      validates :can_apply_restricted_ids, presence: true, if: -> { can_apply_restricted? }
+
+      validates :applicant_fee, presence: true, numericality: { greater_than_or_equal_to: 0 }
+      validates :prorated_jan, presence: true, numericality: { greater_than_or_equal_to: 0 }
+      validates :prorated_feb, presence: true, numericality: { greater_than_or_equal_to: 0 }
+      validates :prorated_mar, presence: true, numericality: { greater_than_or_equal_to: 0 }
+      validates :prorated_apr, presence: true, numericality: { greater_than_or_equal_to: 0 }
+      validates :prorated_may, presence: true, numericality: { greater_than_or_equal_to: 0 }
+      validates :prorated_jun, presence: true, numericality: { greater_than_or_equal_to: 0 }
+      validates :prorated_jul, presence: true, numericality: { greater_than_or_equal_to: 0 }
+      validates :prorated_aug, presence: true, numericality: { greater_than_or_equal_to: 0 }
+      validates :prorated_sep, presence: true, numericality: { greater_than_or_equal_to: 0 }
+      validates :prorated_oct, presence: true, numericality: { greater_than_or_equal_to: 0 }
+      validates :prorated_nov, presence: true, numericality: { greater_than_or_equal_to: 0 }
+      validates :prorated_dec, presence: true, numericality: { greater_than_or_equal_to: 0 }
     end
   end
 
@@ -61,6 +112,27 @@ module EffectiveMembershipsCategory
 
   def applicant_tax_exempt
     false
+  end
+
+  def can_apply?
+    can_apply_new? || can_apply_existing? || can_apply_restricted?
+  end
+
+  def can_apply_restricted_ids
+    Array(self[:can_apply_restricted_ids]) - [nil, '']
+  end
+
+  def applicant_wizard_steps
+    Array(self[:applicant_wizard_steps]).map(&:to_sym) - [nil, '']
+  end
+
+  def applicant_wizard_steps_collection
+    wizard_steps = EffectiveMemberships.applicant_class.const_get(:WIZARD_STEPS)
+    required_steps = EffectiveMemberships.applicant_class.required_wizard_steps
+
+    wizard_steps.map do |step, title|
+      [title, step, 'disabled' => required_steps.include?(step)]
+    end
   end
 
 end

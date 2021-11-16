@@ -1,8 +1,0 @@
-%h2 Applications to Join
-= f.check_box :can_apply, label: 'Yes, users may apply to join this category'
-
-= f.rich_text_area :rich_text_body, label: 'Body',
-  hint: 'A quick description of this category. It is displayed on the Application Select Category step.'
-
-= f.show_if(:can_apply, true) do
-  = f.price_field :applicant_fee

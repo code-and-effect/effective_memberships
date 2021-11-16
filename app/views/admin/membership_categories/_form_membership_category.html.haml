@@ -1,9 +1,7 @@
-%p Membership is a #{membership_category.class}
-
 = effective_form_with(model: [:admin, membership_category], engine: true) do |f|
   = f.text_field :title
 
-  = render 'fields_applicants', f: f
-  = render 'fields_renewals', f: f
+  = f.rich_text_area :rich_text_body, label: 'Body',
+    hint: 'A quick description of this category. It is displayed on the Application Select Category step.'
 
   = effective_submit(f)

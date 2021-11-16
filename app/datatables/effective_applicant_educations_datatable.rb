@@ -9,7 +9,6 @@ class EffectiveApplicantEducationsDatatable < Effective::Datatable
     col :institution
     col :location
 
-    col :program
     col :degree_obtained
   end
 

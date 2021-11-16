@@ -11,14 +11,14 @@ end
 
 member = Effective::MembershipCategory.create!(
   title: "Full Member",
-  can_apply: true,
+  can_apply_new: true,
   applicant_fee: 100_00,
   annual_fee: 250_00
 )
 
 student = Effective::MembershipCategory.create!(
   title: "Student",
-  can_apply: true,
+  can_apply_new: true,
   applicant_fee: 50_00,
   annual_fee: 125_00
 )

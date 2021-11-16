@@ -1,0 +1,49 @@
+= effective_form_with(model: [:admin, membership_category], engine: true) do |f|
+  %h2 Applications to Join
+
+  %p Please configure who may apply for this membership category.
+
+  %h3 Eligibility
+  = f.check_box :can_apply_new, label: 'Yes, new users may apply to join'
+  = f.check_box :can_apply_existing, label: 'Yes, existing members of any category may apply to join'
+  = f.check_box :can_apply_restricted, label: 'Only existing members of the following categories may apply to join'
+
+  = f.show_if(:can_apply_restricted, true) do
+    - categories = f.object.class.where.not(id: f.object)
+    = f.select :can_apply_restricted_ids, categories, label: 'Existing member categories'
+
+  %h3 Applicant Wizard Steps
+
+  %p The following steps will be required when applying for this membership category.
+
+  - f.object.applicant_wizard_steps += EffectiveMemberships.applicant_class.required_wizard_steps
+  = f.checks :applicant_wizard_steps, f.object.applicant_wizard_steps_collection()
+
+  %h3 Fees
+
+  %p Charged to submit an application to join this membership category:
+
+  .row
+    .col-lg-3= f.price_field :applicant_fee
+
+  %p Charged to join, based on the month of approval:
+
+  .row
+    .col-lg-3
+      = f.price_field :prorated_jan, label: "January"
+      = f.price_field :prorated_feb, label: "February"
+      = f.price_field :prorated_mar, label: "March"
+    .col-lg-3
+      = f.price_field :prorated_apr, label: "April"
+      = f.price_field :prorated_may, label: "May"
+      = f.price_field :prorated_jun, label: "June"
+    .col-lg-3
+      = f.price_field :prorated_jul, label: "July"
+      = f.price_field :prorated_aug, label: "August"
+      = f.price_field :prorated_sep, label: "September"
+    .col-lg-3
+      = f.price_field :prorated_oct, label: "October"
+      = f.price_field :prorated_nov, label: "November"
+      = f.price_field :prorated_dec, label: "December"
+
+  = effective_submit(f)

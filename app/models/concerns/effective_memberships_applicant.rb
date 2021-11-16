@@ -13,6 +13,16 @@ module EffectiveMembershipsApplicant
 
   module ClassMethods
     def effective_memberships_applicant?; true; end
+
+    def all_wizard_steps
+      const_get(:WIZARD_STEPS).keys
+    end
+
+    # For effective_membership_category_applicant_wizard_steps_collection
+    def required_wizard_steps
+      [:start, :select, :ready, :checkout, :submitted]
+    end
+
   end
 
   included do
@@ -181,6 +191,21 @@ module EffectiveMembershipsApplicant
       submit_purchased!
     end
 
+    # This required_steps is defined inside the included do .. end block so it overrides the acts_as_wizard one.
+    def required_steps
+      return self.class.test_required_steps if Rails.env.test? && self.class.test_required_steps.present?
+
+      @required_steps ||= begin
+        wizard_steps = self.class.all_wizard_steps
+        required_steps = self.class.required_wizard_steps
+
+        applicant_steps = Array(membership_category&.applicant_wizard_steps)
+
+        wizard_steps.select do |step|
+          required_steps.include?(step) || membership_category.blank? || applicant_steps.include?(step)
+        end
+      end
+    end
   end
 
   # Instance Methods
@@ -257,11 +282,31 @@ module EffectiveMembershipsApplicant
     end.html_safe
   end
 
-  def select!
-    return false if was_submitted?
+  # Used by the select step
+  def can_apply_membership_categories_collection
+    categories = EffectiveMemberships.membership_category_class.sorted.can_apply
 
+    if user.blank? || user.membership_category.blank?
+      return categories.where(can_apply_new: true)
+    end
+
+    categories.select do |cat|
+      cat.can_apply_existing? ||
+      (cat.can_apply_restricted? && cat.can_apply_restricted_ids.include?(user.membership_category.id))
+    end
+  end
+
+  def select!
+    raise('cannot select a submitted applicant') if was_submitted?
+    raise('cannot select a purchased applicant') if orders.any? { |order| order.purchased? }
+
+    # Reset the progress so far. They have to click through screens again.
+    assign_attributes(wizard_steps: wizard_steps.slice(:start, :select))
+
+    # Delete any fees and orders. Keep all other data.
     submit_fees.each { |fee| fee.mark_for_destruction }
     submit_order.mark_for_destruction if submit_order
+
     save!
   end
 

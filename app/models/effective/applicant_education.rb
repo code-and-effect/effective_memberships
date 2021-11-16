@@ -11,7 +11,6 @@ module Effective
       institution       :string
       location          :string
 
-      program           :string
       degree_obtained   :string
 
       timestamps
@@ -23,7 +22,6 @@ module Effective
     validates :end_on, presence: true
     validates :institution, presence: true
     validates :location, presence: true
-    validates :program, presence: true
     validates :degree_obtained, presence: true
 
     validate(if: -> { start_on.present? && end_on.present? }) do

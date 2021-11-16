@@ -1,5 +1,0 @@
-%h2 Annual Renewals
-= f.check_box :can_renew, label: 'Yes, members in this category must renew annually'
-
-= f.show_if(:can_renew, true) do
-  = f.price_field :renewal_fee

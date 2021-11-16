@@ -1,7 +1,7 @@
 = render 'layout' do
   %h1= @page_title
 
-  - membership_categories = resource.user.applicant_membership_categories_collection()
+  - membership_categories = resource.can_apply_membership_categories_collection()
 
   - if membership_categories.blank?
     %p There are no membership categories available right now. Try again later!
