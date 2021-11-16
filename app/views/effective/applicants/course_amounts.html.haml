@@ -7,7 +7,7 @@
     = f.hidden_field :id
 
     .applicant-courses-sum
-      All Courses Total:
+      Total Courses:
       %span{'data-applicant-courses-sum': true}= f.object.applicant_courses_sum
 
     - f.object.applicant_course_areas_collection.each do |area|
@@ -34,7 +34,12 @@
                 %span{'data-applicant-course-area-sum': true}= f.object.applicant_course_area_sum(applicant_course_area: area)
 
     .applicant-courses-sum.my-2
-      All Courses Total:
-      %span{'data-applicant-courses-sum': true}= f.object.applicant_courses_sum
+      %h3 Total Courses
+      .row
+        .col
+          %p Total Courses:
+          %span{'data-applicant-courses-sum': true}= f.object.applicant_courses_sum
+        .col
+          = f.static_field :min_applicant_courses, label: 'Required Courses'
 
     = f.save 'Save and Continue'

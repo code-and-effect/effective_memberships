@@ -6,4 +6,9 @@ class MembershipCategoriesTest < ActiveSupport::TestCase
     assert build_membership_category().valid?
   end
 
+  test 'new membership category defaults to all wizard steps' do
+    category = build_membership_category()
+    assert_equal Effective::Applicant::WIZARD_STEPS.keys, category.applicant_wizard_steps
+  end
+
 end

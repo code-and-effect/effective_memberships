@@ -6,7 +6,6 @@ class ApplicantsTest < ActiveSupport::TestCase
     applicant = build_applicant()
     assert applicant.valid?
     assert_equal 'Full Member', applicant.membership_category.to_s
-    #assert_equal 'Apply to Join', applicant.category
   end
 
   test 'build_submitted_applicant is valid' do
@@ -24,6 +23,23 @@ class ApplicantsTest < ActiveSupport::TestCase
     assert applicant.has_completed_step?(:checkout)
     assert applicant.has_completed_step?(:submitted)
     assert applicant.was_submitted?
+  end
+
+  test 'required_steps are based on membership category' do
+    applicant = build_applicant()
+    all_steps = applicant.class::WIZARD_STEPS.keys
+
+    # Default has all steps
+    assert_equal all_steps, applicant.required_steps
+
+    # When membership category only wants demographics
+    applicant.membership_category.update!(applicant_wizard_steps: [:demographics])
+    applicant.save!
+    assert_equal [:start, :select, :demographics, :ready, :checkout, :submitted], applicant.required_steps
+
+    # When no membership category
+    applicant.update!(membership_category: nil)
+    assert_equal all_steps, applicant.required_steps
   end
 
   # test 'build_reviewed_applicant is valid' do

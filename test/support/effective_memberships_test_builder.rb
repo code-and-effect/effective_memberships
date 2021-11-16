@@ -42,9 +42,12 @@ module EffectiveMembershipsTestBuilder
   def build_membership_category
     Effective::MembershipCategory.new(
       title: 'Category A',
-      can_apply: true,
+      can_apply_new: true,
+      can_apply_existing: true,
       applicant_fee: 100_00,
-      annual_fee: 250_00
+      annual_fee: 250_00,
+      prorated_jan: 120, prorated_feb: 110, prorated_mar: 100, prorated_apr: 90, prorated_may: 80, prorated_jun: 70,
+      prorated_jul: 60, prorated_aug: 50, prorated_sep: 40, prorated_oct: 30, prorated_nov: 20, prorated_dec: 10
     )
   end
 

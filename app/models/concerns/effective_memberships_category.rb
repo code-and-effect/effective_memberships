@@ -34,6 +34,12 @@ module EffectiveMembershipsCategory
       applicant_fee              :integer
       applicant_wizard_steps     :text
 
+      min_applicant_educations          :integer
+      min_applicant_experiences_months  :integer
+      min_applicant_references          :integer
+      min_applicant_courses             :integer
+      min_applicant_files               :integer
+
       prorated_jan        :integer
       prorated_feb        :integer
       prorated_mar        :integer

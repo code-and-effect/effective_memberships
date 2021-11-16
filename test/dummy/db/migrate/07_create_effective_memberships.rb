@@ -9,10 +9,31 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.string :title
       t.integer :position
 
-      t.boolean :can_apply, default: true
+      # Applicants
+      t.boolean :can_apply_new, default: false
+      t.boolean :can_apply_existing, default: false
+      t.boolean :can_apply_restricted, default: false
+      t.text :can_apply_restricted_ids
+
+      t.text :applicant_wizard_steps
+      t.integer :applicant_fee
+
+      t.integer :prorated_jan
+      t.integer :prorated_feb
+      t.integer :prorated_mar
+      t.integer :prorated_apr
+      t.integer :prorated_may
+      t.integer :prorated_jun
+      t.integer :prorated_jul
+      t.integer :prorated_aug
+      t.integer :prorated_sep
+      t.integer :prorated_oct
+      t.integer :prorated_nov
+      t.integer :prorated_dec
+
+      # Renewals
       t.boolean :can_renew, default: true
 
-      t.integer :applicant_fee
       t.integer :annual_fee
       t.integer :renewal_fee
 
@@ -71,7 +92,6 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.string :institution
       t.string :location
 
-      t.string :program
       t.string :degree_obtained
 
       t.datetime :updated_at

@@ -53,7 +53,7 @@ module EffectiveMembershipsApplicant
       submitted: 'Submitted'
     )
 
-    has_many_attached :files
+    has_many_attached :applicant_files
 
     log_changes(except: :wizard_steps) if respond_to?(:log_changes)
 
@@ -140,12 +140,16 @@ module EffectiveMembershipsApplicant
 
     # Applicant Educations Step
     with_options(if: -> { current_step == :education }) do
-      validates :applicant_educations, length: { minimum: 1, message: "can't be blank. Please include at least one" }
+      validate do
+        required = min_applicant_educations()
+        existing = applicant_educations().reject(&:marked_for_destruction?).length
+
+        self.errors.add(:applicant_educations, "please include #{required} or more educations") if existing < required
+      end
     end
 
     # Applicant Experiences Step
     with_options(if: -> { current_step == :experience }) do
-      validates :applicant_experiences, length: { minimum: 1, message: "can't be blank. Please include at least one" }
       validates :applicant_experiences_months, presence: true
 
       validate do
@@ -156,7 +160,7 @@ module EffectiveMembershipsApplicant
 
       # Make sure none of the full time applicant_experience dates overlap
       validate do
-        experiences = present_applicant_experiences.select(&:full_time?)
+        experiences = applicant_experiences.reject(&:marked_for_destruction?).select(&:full_time?)
 
         experiences.find do |x|
           (experiences - [x]).find do |y|
@@ -171,9 +175,33 @@ module EffectiveMembershipsApplicant
       end
     end
 
+    with_options(if: -> { current_step == :course_amounts }) do
+      validate do
+        required = min_applicant_courses()
+        existing = applicant_courses().reject(&:marked_for_destruction?).length
+
+        self.errors.add(:applicant_courses, "please include #{required} or more courses") if existing < required
+      end
+    end
+
     # Applicant References Step
     with_options(if: -> { current_step == :references }) do
-      validates :applicant_references, length: { minimum: 1, message: "can't be blank. Please include at least one" }
+      validate do
+        required = min_applicant_references()
+        existing = applicant_references().reject(&:marked_for_destruction?).length
+
+        self.errors.add(:applicant_references, "please include #{required} or more references") if existing < required
+      end
+    end
+
+    # Applicant Files Step
+    with_options(if: -> { current_step == :files }) do
+      validate do
+        required = min_applicant_files()
+        existing = applicant_files().length
+
+        self.errors.add(:applicant_files, "please include #{required} or more files") if existing < required
+      end
     end
 
     # Declarations Step
@@ -186,6 +214,9 @@ module EffectiveMembershipsApplicant
     before_save(if: -> { submitted? }) { complete! }
     before_save(if: -> { completed? }) { review! }
 
+    # Clear required steps memoization
+    after_save { @_required_steps = nil }
+
     after_purchase do |_order|
       raise('expected submit_order to be purchased') unless submit_order&.purchased?
       submit_purchased!
@@ -195,7 +226,7 @@ module EffectiveMembershipsApplicant
     def required_steps
       return self.class.test_required_steps if Rails.env.test? && self.class.test_required_steps.present?
 
-      @required_steps ||= begin
+      @_required_steps ||= begin
         wizard_steps = self.class.all_wizard_steps
         required_steps = self.class.required_wizard_steps
 
@@ -223,38 +254,6 @@ module EffectiveMembershipsApplicant
 
   def category
     'Apply to Join'
-  end
-
-  # Applicant Experiences
-  def min_applicant_experiences_months
-    #membership_category.min_applicant_experience_months
-    0
-  end
-
-  def min_applicant_references
-    0
-  end
-
-  # Applicant Courses
-  def applicant_course_areas_collection
-    Effective::ApplicantCourseArea.deep.sorted
-  end
-
-  def applicant_course_names_collection(applicant_course_area:)
-    applicant_course_area.applicant_course_names
-  end
-
-  def applicant_course(applicant_course_name: nil)
-    applicant_courses.find { |ac| ac.applicant_course_name_id == applicant_course_name.id } ||
-    applicant_courses.build(applicant_course_name: applicant_course_name, applicant_course_area: applicant_course_name.applicant_course_area)
-  end
-
-  def applicant_course_area_sum(applicant_course_area:)
-    applicant_courses.select { |ac| ac.applicant_course_area_id == applicant_course_area.id }.sum { |ac| ac.amount.to_i }
-  end
-
-  def applicant_courses_sum
-    applicant_courses.sum { |ac| ac.amount.to_i }
   end
 
   def summary
@@ -308,6 +307,52 @@ module EffectiveMembershipsApplicant
     submit_order.mark_for_destruction if submit_order
 
     save!
+  end
+
+  # Educations Step
+  def min_applicant_educations
+    membership_category&.min_applicant_educations.to_i
+  end
+
+  # Courses Amounts step
+  def min_applicant_courses
+    membership_category&.min_applicant_courses.to_i
+  end
+
+  def applicant_course_areas_collection
+    Effective::ApplicantCourseArea.deep.sorted
+  end
+
+  def applicant_course_names_collection(applicant_course_area:)
+    applicant_course_area.applicant_course_names
+  end
+
+  def applicant_course(applicant_course_name: nil)
+    applicant_courses.find { |ac| ac.applicant_course_name_id == applicant_course_name.id } ||
+    applicant_courses.build(applicant_course_name: applicant_course_name, applicant_course_area: applicant_course_name.applicant_course_area)
+  end
+
+  def applicant_course_area_sum(applicant_course_area:)
+    applicant_courses.select { |ac| ac.applicant_course_area_id == applicant_course_area.id }.sum { |ac| ac.amount.to_i }
+  end
+
+  def applicant_courses_sum
+    applicant_courses.sum { |ac| ac.amount.to_i }
+  end
+
+  # Work Experiences Step
+  def min_applicant_experiences_months
+    membership_category&.min_applicant_experiences_months.to_i
+  end
+
+  # References Step
+  def min_applicant_references
+    membership_category&.min_applicant_references.to_i
+  end
+
+  # Files Step
+  def min_applicant_files
+    membership_category&.min_applicant_files.to_i
   end
 
   # All Fees and Orders
@@ -417,19 +462,11 @@ module EffectiveMembershipsApplicant
 
   private
 
-  def present_applicant_experiences
-    applicant_experiences.select { |ae| ae.start_on.present? && ae.end_on.present? && !ae.marked_for_destruction? }
-  end
-
-  def present_applicant_references
-    applicant_references.reject(&:marked_for_destruction?)
-  end
-
   def assign_applicant_experiences_months!
-    present_applicant_experiences.each { |ae| ae.assign_months! }
-    months = present_applicant_experiences.sum { |ae| ae.months }
+    existing = applicant_experiences.reject(&:marked_for_destruction?)
+    existing.each { |ae| ae.assign_months! }
 
-    self.applicant_experiences_months = months
+    self.applicant_experiences_months = existing.sum { |ae| ae.months.to_i }
   end
 
 end

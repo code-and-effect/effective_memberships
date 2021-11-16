@@ -100,7 +100,6 @@ ActiveRecord::Schema.define(version: 7) do
     t.date "end_on"
     t.string "institution"
     t.string "location"
-    t.string "program"
     t.string "degree_obtained"
     t.datetime "updated_at"
     t.datetime "created_at"
@@ -230,9 +229,25 @@ ActiveRecord::Schema.define(version: 7) do
   create_table "membership_categories", force: :cascade do |t|
     t.string "title"
     t.integer "position"
-    t.boolean "can_apply", default: true
-    t.boolean "can_renew", default: true
+    t.boolean "can_apply_new", default: false
+    t.boolean "can_apply_existing", default: false
+    t.boolean "can_apply_restricted", default: false
+    t.text "can_apply_restricted_ids"
+    t.text "applicant_wizard_steps"
     t.integer "applicant_fee"
+    t.integer "prorated_jan"
+    t.integer "prorated_feb"
+    t.integer "prorated_mar"
+    t.integer "prorated_apr"
+    t.integer "prorated_may"
+    t.integer "prorated_jun"
+    t.integer "prorated_jul"
+    t.integer "prorated_aug"
+    t.integer "prorated_sep"
+    t.integer "prorated_oct"
+    t.integer "prorated_nov"
+    t.integer "prorated_dec"
+    t.boolean "can_renew", default: true
     t.integer "annual_fee"
     t.integer "renewal_fee"
     t.datetime "updated_at"

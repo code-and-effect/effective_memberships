@@ -8,7 +8,7 @@
 
     %table.table
       %tbody
-        - applicant.files.each do |file|
+        - applicant.applicant_files.each do |file|
 
           - url = url_for(file)
           - title = file.filename.to_s
