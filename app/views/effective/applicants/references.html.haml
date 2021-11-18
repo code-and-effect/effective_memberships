@@ -1,7 +1,10 @@
 = render 'layout' do
   %h1= @page_title
 
-  %p Please add your references.
+  %p Please provide your references.
+
+  - if resource.min_applicant_references > 0
+    %p You must include #{resource.min_applicant_references} or more references.
 
   = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
     = f.hidden_field :id

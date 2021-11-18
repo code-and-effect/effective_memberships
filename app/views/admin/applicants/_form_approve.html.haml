@@ -1,0 +1,16 @@
+= effective_form_with(model: [:admin, applicant], engine: true) do |f|
+  %p
+    The #{applicant} will be <strong>approved</strong> to the following membership category.
+
+  %h3 Category
+  = f.static_field :membership_category, label: 'Applied for'
+
+  - categories = EffectiveMemberships.membership_category_class.all
+  = f.select :membership_category_id, categories, label: 'Approve to'
+
+  %h3 Email to send
+
+  %p The following email will be sent:
+  = email_form_fields(f, :applicant_approved)
+
+  = f.submit 'Approve Applicant', border: false, center: true, 'data-confirm': "Approve #{f.object.user}?"

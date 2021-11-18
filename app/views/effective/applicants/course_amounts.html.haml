@@ -1,7 +1,10 @@
 = render 'layout' do
   %h1= @page_title
 
-  %p Please enter the number of courses you have completed.
+  %p Please provide the number of courses you have completed.
+
+  - if resource.min_applicant_courses > 0
+    %p You must include #{resource.min_applicant_courses} or more courses.
 
   = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
     = f.hidden_field :id

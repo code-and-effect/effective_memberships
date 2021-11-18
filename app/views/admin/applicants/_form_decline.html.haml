@@ -1,0 +1,11 @@
+= effective_form_with(model: [:admin, applicant], engine: true) do |f|
+  %p This applicant will be <strong>declined</strong> with the following reason:
+
+  = f.text_field :declined_reason, required: true, label: 'Reason for decline'
+
+  %h3 Email to send
+
+  %p The following email will be sent:
+  = email_form_fields(f, :applicant_declined)
+
+  = f.submit 'Decline Applicant', border: false, center: true, 'data-confirm': "Decline #{f.object.user}?"

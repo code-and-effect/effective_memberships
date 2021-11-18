@@ -26,6 +26,7 @@ module EffectiveMembershipsApplicant
   end
 
   included do
+    acts_as_email_form
     acts_as_purchasable_parent
     acts_as_tokened
 
@@ -432,10 +433,15 @@ module EffectiveMembershipsApplicant
 
   # Submitted -> Completed requirements
 
+  def applicant_references_required?
+    (min_applicant_references > 0 || applicant_references.present?)
+  end
+
   # When an application is submitted, these must be done to go to completed
   def completed_requirements
-    {}
-    #{'Admin has approved transcripts' => true}
+    {
+      'Applicant References' => (!applicant_references_required? || applicant_references.count(&:completed?) >= min_applicant_references)
+    }
   end
 
   def complete!
@@ -444,20 +450,61 @@ module EffectiveMembershipsApplicant
     completed!
   end
 
+  def min_applicant_reviews
+    0 # membership_category&.min_applicant_reviews.to_i
+  end
+
+  def applicant_reviews
+    []
+  end
+
   # Completed -> Reviewed requirements
   def applicant_reviews_required?
-    false
+    (min_applicant_reviews > 0 || applicant_reviews.present?)
   end
 
   # When an application is completed, these must be done to go to reviewed
-  def reviewed_materials
-    {}
+  def reviewed_requirements
+    {
+      'Applicant Reviews' => (!applicant_reviews_required? || applicant_reviews.count(&:completed?) >= min_applicant_reviews)
+    }
   end
 
   def review!
-    return false unless completed? && reviewed_materials.values.all?
+    return false unless completed? && reviewed_requirements.values.all?
     # Could send registrar an email here saying this applicant is ready to approve
     reviewed!
+  end
+
+  # Admin approves an applicant. Registers the user. Sends an email.
+  def approve!
+    raise('already approved') if was_approved?
+    raise('applicant must have been submitted to approve!') unless was_submitted?
+
+    # Complete the wizard step. Just incase this is run out of order.
+    wizard_steps[:checkout] ||= Time.zone.now
+    wizard_steps[:submitted] ||= Time.zone.now
+    approved!
+
+    after_commit { send_email(:applicant_approved) }
+
+    save!
+  end
+
+  # Admin approves an applicant. Registers the user. Sends an email.
+  def decline!
+    raise('already declined') if was_declined?
+    raise('previously approved') if was_approved?
+    raise('applicant must have been submitted to decline!') unless was_submitted?
+
+    # Complete the wizard step. Just incase this is run out of order.
+    wizard_steps[:checkout] ||= Time.zone.now
+    wizard_steps[:submitted] ||= Time.zone.now
+    declined!
+
+    after_commit { send_email(:applicant_declined) }
+
+    save!
   end
 
   private
@@ -467,6 +514,10 @@ module EffectiveMembershipsApplicant
     existing.each { |ae| ae.assign_months! }
 
     self.applicant_experiences_months = existing.sum { |ae| ae.months.to_i }
+  end
+
+  def send_email(email)
+    EffectiveMemberships.send_email(email, self, email_form_params) unless email_form_skip?
   end
 
 end

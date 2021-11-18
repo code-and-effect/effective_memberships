@@ -1,7 +1,10 @@
 = render 'layout' do
   %h1= @page_title
 
-  %p Please add your work experience.
+  %p Please provide your work experience.
+
+  - if resource.min_applicant_educations > 0
+    %p You must include #{resource.min_applicant_experiences_months} or more months of experience.
 
   = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
     = f.hidden_field :id

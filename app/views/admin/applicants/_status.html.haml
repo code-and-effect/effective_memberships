@@ -1,0 +1,122 @@
+%p
+  %span.badge.badge-secondary= applicant.status
+  = applicant.summary
+
+%table.table.table-striped
+  %thead
+    %tr
+      %th Status
+      %th Date Reached
+      %th Details
+      %th
+        - # Next action button
+  %tbody
+    %tr
+      %td In Progress
+      %td= applicant.created_at.strftime('%F')
+      %td
+        - if applicant.was_submitted?
+          = icon('check', class: 'small-1')
+          Done
+        - else
+          = '-'
+      %td
+    %tr
+      %td Application Submitted
+      %td= applicant.submitted_at&.strftime('%F') || '-'
+      %td
+        - if applicant.submit_order.present?
+          = link_to(applicant.submit_order, effective_orders.admin_order_path(applicant.submit_order))
+        - else
+          = '-'
+      %td
+    %tr
+      %td Waiting to Complete
+      %td= applicant.submitted_at&.strftime('%F') || '-'
+      %td
+        - applicant.completed_requirements.each do |requirement, completed|
+          - next if requirement.to_s == 'Applicant References'
+
+          %p
+            = icon((completed ? 'check' : 'x'), class: 'small-1')
+            = requirement
+
+        - if applicant.applicant_references_required?
+          %p
+            - if applicant.completed_requirements['Applicant References']
+              = icon('check', class: 'small-1')
+
+            = applicant.applicant_references.count(&:completed?)
+            = '/'
+            = applicant.min_applicant_references
+            References Responded
+        - else
+          %p
+            = icon('check', class: 'small-1')
+            References Not Required
+
+      %td
+        -# - if !applicant.was_approved? && applicant.transcripts_required? && !applicant.transcripts_approved?
+        -#   = link_to 'Process Transcripts', '#transcripts', 'data-click-tab': true, class: 'btn btn-sm btn-primary'
+
+        -# - if !applicant.was_approved? && applicant.nwpta_form_required? && !applicant.nwpta_form_received?
+        -#   = link_to 'Receive NWPTA Form', '#nwpta-verification-form', 'data-click-tab': true, class: 'btn btn-sm btn-primary'
+
+    %tr
+      %td Application Complete
+      %td= applicant.completed_at&.strftime('%F') || '-'
+      %td
+      %td
+
+    %tr
+      %td Reviews
+      %td= applicant.reviewed_at&.strftime('%F') || '-'
+      %td
+        - applicant.reviewed_requirements.each do |requirement, completed|
+          - next if requirement.to_s == 'Applicant Reviews'
+
+          %p
+            = icon((completed ? 'check' : 'x'), class: 'small-1')
+            = requirement
+
+        - if applicant.applicant_reviews_required?
+          %p
+            - if applicant.reviewed_requirements['Applicant Reviews']
+              = icon('check', class: 'small-1')
+
+            = applicant.applicant_reviews.count(&:completed?)
+            = '/'
+            = applicant.min_applicant_reviews
+            Reviews Completed
+        - else
+          %p
+            = icon('check', class: 'small-1')
+            Reviews Not Required
+
+      %td
+        - if applicant.was_reviewed? && !applicant.was_approved?
+          = link_to 'Process Applicant', '#process', 'data-click-tab': true, class: 'btn btn-sm btn-primary'
+
+    - if applicant.declined_at.present?
+      %tr
+        %td Processed
+        %td= applicant.declined_at.strftime('%F')
+        %td
+          = icon('x', class: 'small-1')
+          Declined
+        %td
+
+    - if applicant.was_approved?
+      %tr
+        %td Processed
+        %td= applicant.approved_at&.strftime('%F')
+        %td
+          - if applicant.was_approved?
+            = icon('check', class: 'small-1')
+            Approved
+          - elsif applicant.declined?
+            = icon('x', class: 'small-1')
+            Declined
+          - else
+            = '-'
+        %td

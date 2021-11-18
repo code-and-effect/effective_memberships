@@ -4,9 +4,6 @@
       .col-sm
         %h5.card-title= applicant
 
-      .col-sm-auto.text-right
-        /= link_to('Edit', effective_memberships.applicant_build_path(:select)) if edit_applicants_wizard?
-
     %table.table
       %tbody
         %tr
@@ -16,7 +13,9 @@
         - if request.path.start_with?('/admin')
           %tr
             %th User
-            %td= link_to(applicant.user, edit_admin_user_path(applicant.user))
+            %td
+              - url = (edit_admin_user_path(applicant.user) rescue "/admin/users/#{applicant.user.to_param}/edit")
+              = link_to(applicant.user, url)
 
         - if applicant.from_membership_category.present?
           %tr
