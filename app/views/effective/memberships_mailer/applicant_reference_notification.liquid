@@ -1,11 +1,15 @@
 ---
-subject: 'Please review this person'
+subject: 'Your reference has been requested'
 from: 'admin@example.com'
 ---
-Hello Random guy,
+Hello {{ reference.name }},
 
-Go review this reference
+An applicant, {{ user.name }}, has added you as a reference.
 
-{{ url }}
+Would you please complete the reference declaration form at this url:
 
-Thank you
+{{ reference.url }}
+
+Thank you.
+
+Please contact us for assistance.

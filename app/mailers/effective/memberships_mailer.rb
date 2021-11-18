@@ -5,13 +5,18 @@ module Effective
     default from: -> { EffectiveMemberships.mailer_sender }
     layout -> { EffectiveMemberships.mailer_layout || 'effective_memberships_mailer_layout' }
 
-    def applicant_reference_notification(resource, opts = {})
-      @assigns = effective_memberships_email_assigns(resource).merge(
-        reference_name: resource.name,
-        applicant_name: resource.applicant.user.to_s,
-        url: effective_memberships.applicant_reference_url(resource.token)
-      )
+    def applicant_approved(resource, opts = {})
+      @assigns = assigns_for(resource)
+      mail(to: EffectiveMemberships.mailer_admin, **headers_for(resource, opts))
+    end
 
+    def applicant_declined(resource, opts = {})
+      @assigns = assigns_for(resource)
+      mail(to: EffectiveMemberships.mailer_admin, **headers_for(resource, opts))
+    end
+
+    def applicant_reference_notification(resource, opts = {})
+      @assigns = assigns_for(resource)
       mail(to: resource.email, **headers_for(resource, opts))
     end
 
@@ -21,8 +26,58 @@ module Effective
       resource.respond_to?(:log_changes_datatable) ? opts.merge(log: resource) : opts
     end
 
-    def effective_memberships_email_assigns(resource)
-      {}
+    def assigns_for(resource)
+      if resource.class.respond_to?(:effective_memberships_applicant?)
+        return applicant_assigns(resource).merge(user_assigns(resource.user))
+      end
+
+      if resource.kind_of?(Effective::ApplicantReference)
+        return reference_assigns(resource).merge(user_assigns(resource.applicant.user))
+      end
+
+      raise('unexpected resource')
+    end
+
+    def applicant_assigns(applicant)
+      raise('expected an applicant') unless applicant.class.respond_to?(:effective_memberships_applicant?)
+
+      values = {
+        date: (applicant.submitted_at || Time.zone.now).strftime('%F'),
+
+        to_category: applicant.membership_category.to_s,
+        from_category: applicant.from_membership_category.to_s,
+
+        url: effective_memberships.applicant_url(applicant),
+        admin_url: effective_memberships.edit_admin_applicant_url(applicant),
+      }
+
+      if applicant.declined_reason.present?
+        values.merge!(declined_reason: applicant.declined_reason)
+      end
+
+      { applicant: values }
+    end
+
+    def reference_assigns(applicant_reference)
+      raise('expected a reference') unless applicant_reference.kind_of?(Effective::ApplicantReference)
+
+      values = {
+        name: applicant_reference.name,
+        url: effective_memberships.applicant_reference_url(applicant_reference)
+      }
+
+      { reference: values }
+    end
+
+    def user_assigns(user)
+      raise('expected a user') unless user.class.respond_to?(:effective_memberships_user?)
+
+      values = {
+        name: user.to_s,
+        email: user.email
+      }
+
+      { user: values }
     end
 
   end
