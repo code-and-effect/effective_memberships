@@ -8,6 +8,20 @@ module Admin
     resource_scope -> { EffectiveMemberships.applicant_class.deep }
     datatable -> { Admin::EffectiveApplicantsDatatable.new }
 
+    submit :approve, 'Approve Applicant', success: -> {
+      [
+        "Successfully approved #{resource.user} #{resource}",
+        ("and sent #{resource.user.email} a notification" unless resource.email_form_skip)
+      ].compact.join(' ')
+    }
+
+    submit :decline, 'Decline Applicant', success: -> {
+      [
+        "Successfully declined #{resource.user} #{resource}",
+        ("and sent #{resource.user.email} a notification" unless resource.email_form_skip)
+      ].compact.join(' ')
+    }
+
     private
 
     def permitted_params
