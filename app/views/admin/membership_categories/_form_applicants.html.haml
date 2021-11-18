@@ -16,14 +16,14 @@
 
   %p The following steps will be required when applying for this membership category.
 
-  - f.object.applicant_wizard_steps += EffectiveMemberships.applicant_class.required_wizard_steps
+  - f.object.applicant_wizard_steps += EffectiveMemberships.Applicant.required_wizard_steps
   = f.checks :applicant_wizard_steps, f.object.applicant_wizard_steps_collection()
 
   %h3 Requirements
 
   %p The following numbers set the minimum number of required items an applicant must provide to complete the step. Leave blank for none.
 
-  - applicant = EffectiveMemberships.applicant_class.new
+  - applicant = EffectiveMemberships.Applicant.new
 
   %table.table
     %tbody

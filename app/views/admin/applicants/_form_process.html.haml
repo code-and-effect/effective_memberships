@@ -1,14 +1,18 @@
-%p The applicant has been completed, reviewed and is ready to process.
+%p
+  %span.badge.badge-secondary= applicant.status
+  = applicant.summary
 
 = tabs(list: { class: 'nav nav-pills'}) do
-  = tab 'Approve this Applicant' do
-    .card.mt-4
-      .card-body
-        %h5.card-title Approve
-        = render('admin/applicants/form_approve', applicant: applicant)
+  - if EffectiveResources.authorized?(self, :approve, applicant)
+    = tab 'Approve this Applicant' do
+      .card.mt-4
+        .card-body
+          %h5.card-title Approve
+          = render('admin/applicants/form_approve', applicant: applicant)
 
-  = tab 'Decline this Applicant' do
-    .card.mt-4
-      .card-body
-        %h5.card-title Decline
-        = render('admin/applicants/form_decline', applicant: applicant)
+  - if EffectiveResources.authorized?(self, :decline, applicant)
+    = tab 'Decline this Applicant' do
+      .card.mt-4
+        .card-body
+          %h5.card-title Decline
+          = render('admin/applicants/form_decline', applicant: applicant)

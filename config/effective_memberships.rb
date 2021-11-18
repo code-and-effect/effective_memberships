@@ -11,9 +11,10 @@ EffectiveMemberships.setup do |config|
   # Configure the class responsible for the membership categories.
   # This should extend from Effective::MembershipCategory
   # And handle all the business logic for your membership categories.
-  # config.membership_category = 'Effective::MembershipCategory'
-  # config.applicant = 'Effective::Applicant'
-  # config.fee = 'Effective::Fee'
+  # config.membership_category_class_name = 'Effective::MembershipCategory'
+  # config.applicant_class_name = 'Effective::Applicant'
+  # config.fee_class_name = 'Effective::Fee'
+  # config.registrar_class_name = 'Effective::Registrar'
 
   # Mailer Configuration
   # Configure the class responsible to send e-mails.

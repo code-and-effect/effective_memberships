@@ -80,7 +80,7 @@ module EffectiveMembershipsCategory
     validates :position, presence: true
 
     after_initialize(if: -> { new_record? }) do
-      self.applicant_wizard_steps = EffectiveMemberships.applicant_class.all_wizard_steps
+      self.applicant_wizard_steps = EffectiveMemberships.Applicant.all_wizard_steps
     end
 
     before_validation do
@@ -133,8 +133,8 @@ module EffectiveMembershipsCategory
   end
 
   def applicant_wizard_steps_collection
-    wizard_steps = EffectiveMemberships.applicant_class.const_get(:WIZARD_STEPS)
-    required_steps = EffectiveMemberships.applicant_class.required_wizard_steps
+    wizard_steps = EffectiveMemberships.Applicant.const_get(:WIZARD_STEPS)
+    required_steps = EffectiveMemberships.Applicant.required_wizard_steps
 
     wizard_steps.map do |step, title|
       [title, step, 'disabled' => required_steps.include?(step)]

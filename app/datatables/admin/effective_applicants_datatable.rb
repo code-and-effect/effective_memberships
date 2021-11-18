@@ -25,8 +25,8 @@ module Admin
       end
 
       col :category
-      col :membership_category, search: { collection: EffectiveMemberships.membership_category_class.all, polymorphic: false }
-      col :from_membership_category, search: { collection: EffectiveMemberships.membership_category_class.all, polymorphic: false }, visible: false
+      col :membership_category, search: { collection: EffectiveMemberships.MembershipCategory.all, polymorphic: false }
+      col :from_membership_category, search: { collection: EffectiveMemberships.MembershipCategory.all, polymorphic: false }, visible: false
 
       col :orders, visible: false
 
@@ -34,7 +34,7 @@ module Admin
     end
 
     collection do
-      applicants = EffectiveMemberships.applicant_class.deep.all
+      applicants = EffectiveMemberships.Applicant.deep.all
 
       if scope == :in_progress && attributes[:user_id].blank?
         applicants = applicants.where.not(status: :draft)

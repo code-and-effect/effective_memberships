@@ -8,7 +8,7 @@ module EffectiveMemberships
   def self.config_keys
     [
       :membership_categories_table_name, :applicants_table_name, :fees_table_name,
-      :membership_category, :applicant, :fee,
+      :membership_category_class_name, :applicant_class_name, :fee_class_name, :registrar_class_name,
       :layout,
       :mailer, :parent_mailer, :deliver_method, :mailer_layout, :mailer_sender, :mailer_admin, :use_effective_email_templates
     ]
@@ -16,14 +16,22 @@ module EffectiveMemberships
 
   include EffectiveGem
 
-  def self.membership_category_class
-    return membership_category.constantize if membership_category.present?
-    Effective::MembershipCategory
+  def self.MembershipCategory
+    membership_category_class_name ? membership_category_class_name.constantize : Effective::MembershipCategory
   end
 
-  def self.applicant_class
-    return applicant.constantize if applicant.present?
-    Effective::Applicant
+  def self.Applicant
+    applicant_class_name ? applicant_class_name.constantize : Effective::Applicant
+  end
+
+  def self.Fee
+    fee_class_name ? fee_class_name.constantize : Effective::Fee
+  end
+
+  # Singleton
+  def self.Registrar
+    klass = registrar_class_name ? registrar_class_name.constantize : Effective::Registrar
+    klass.new
   end
 
   def self.mailer_class
@@ -47,7 +55,7 @@ module EffectiveMemberships
 
     if defined?(Tenant)
       tenant = Tenant.current || raise('expected a current tenant')
-      args << { tenant: tenant }
+      args.last.kind_of?(Hash) ? args.last.merge!(tenant: tenant) : args << { tenant: tenant }
     end
 
     deliver_method = EffectiveMemberships.deliver_method || EffectiveResources.deliver_method

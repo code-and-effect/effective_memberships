@@ -124,7 +124,7 @@ module EffectiveMembershipsApplicant
     end
 
     before_validation(if: -> { current_step == :select && membership_category_id.present? }) do
-      self.membership_category_type ||= EffectiveMemberships.membership_category_class.name
+      self.membership_category_type ||= EffectiveMemberships.MembershipCategory.name
     end
 
     before_validation(if: -> { current_step == :experience }) do
@@ -211,6 +211,9 @@ module EffectiveMembershipsApplicant
       validates :declare_truth, acceptance: true
     end
 
+    # Admin Steps
+    validates :declined_reason, presence: true, if: -> { declined? }
+
     # These two try completed and try reviewed
     before_save(if: -> { submitted? }) { complete! }
     before_save(if: -> { completed? }) { review! }
@@ -284,7 +287,7 @@ module EffectiveMembershipsApplicant
 
   # Used by the select step
   def can_apply_membership_categories_collection
-    categories = EffectiveMemberships.membership_category_class.sorted.can_apply
+    categories = EffectiveMemberships.MembershipCategory.sorted.can_apply
 
     if user.blank? || user.membership_category.blank?
       return categories.where(can_apply_new: true)
@@ -484,9 +487,11 @@ module EffectiveMembershipsApplicant
     # Complete the wizard step. Just incase this is run out of order.
     wizard_steps[:checkout] ||= Time.zone.now
     wizard_steps[:submitted] ||= Time.zone.now
-    approved!
+    #approved!
 
     after_commit { send_email(:applicant_approved) }
+
+    EffectiveMemberships.Registrar.register!(user, to: membership_category)
 
     save!
   end

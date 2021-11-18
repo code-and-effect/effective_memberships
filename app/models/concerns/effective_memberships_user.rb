@@ -22,15 +22,18 @@ module EffectiveMembershipsUser
     has_many :fees
 
     effective_resource do
-      membership_joined_on    :date
+      membership_number                   :string   # A unique value
+      membership_joined_on                :date     # When they first receive a membership category
+      membership_registration_on          :date     # When the membership category last changed. Applied or reclassified.
+      membership_fees_paid_through_year   :integer  # The year they have paid upto.
+
+      membership_in_bad_standing             :boolean   # Calculated value. Is this user in bad standing? (fees due)
+      membership_in_bad_standing_reason      :text      # Reason for bad standing
+      membership_in_bad_standing_admin       :boolean   # Admin set this
 
       timestamps
     end
-  end
 
-  # Called by the applicants select screen
-  def applicant_membership_categories_collection
-    (membership_category || build_membership_category).class.for_applicant
   end
 
 end

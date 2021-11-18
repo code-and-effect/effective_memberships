@@ -28,7 +28,7 @@ class EffectiveApplicantReferencesDatatable < Effective::Datatable
   end
 
   def applicant
-    @applicant ||= EffectiveMemberships.applicant_class.where(id: attributes[:applicant_id]).first!
+    @applicant ||= EffectiveMemberships.Applicant.where(id: attributes[:applicant_id]).first!
   end
 
 end

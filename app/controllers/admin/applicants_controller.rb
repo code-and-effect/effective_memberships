@@ -5,7 +5,7 @@ module Admin
 
     include Effective::CrudController
 
-    resource_scope -> { EffectiveMemberships.applicant_class.deep }
+    resource_scope -> { EffectiveMemberships.Applicant.deep }
     datatable -> { Admin::EffectiveApplicantsDatatable.new }
 
     submit :approve, 'Approve Applicant', success: -> {

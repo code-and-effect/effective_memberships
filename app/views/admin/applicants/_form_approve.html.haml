@@ -5,7 +5,7 @@
   %h3 Category
   = f.static_field :membership_category, label: 'Applied for'
 
-  - categories = EffectiveMemberships.membership_category_class.all
+  - categories = EffectiveMemberships.MembershipCategory.all
   = f.select :membership_category_id, categories, label: 'Approve to'
 
   %h3 Email to send

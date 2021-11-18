@@ -16,13 +16,14 @@
       .mb-4= render 'effective/applicants/summary', applicant: applicant, namespace: :admin
       = render 'effective/applicants/applicant', applicant: applicant, namespace: :admin
 
+  - if applicant.was_submitted? && !applicant.was_approved?
+    = tab 'Process' do
+      = render 'admin/applicants/form_process', applicant: applicant
+
   - if applicant.persisted? && applicant.respond_to?(:log_changes_datatable)
     = tab 'Logs' do
       = render_inline_datatable(applicant.log_changes_datatable)
 
-  - if applicant.was_submitted? && !applicant.was_approved?
-    = tab 'Process' do
-      = render 'admin/applicants/form_process', applicant: applicant
 
   -# - if !applicant.nwpta_form_required? && !applicant.rsb_form_required?
   -#   = tab 'Transcripts' do

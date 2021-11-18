@@ -102,8 +102,10 @@
         %td Processed
         %td= applicant.declined_at.strftime('%F')
         %td
-          = icon('x', class: 'small-1')
+          = icon('check', class: 'small-1')
           Declined
+          %br
+          = applicant.declined_reason
         %td
 
     - if applicant.was_approved?
@@ -115,8 +117,10 @@
             = icon('check', class: 'small-1')
             Approved
           - elsif applicant.declined?
-            = icon('x', class: 'small-1')
+            = icon('check', class: 'small-1')
             Declined
+            %br
+            = applicant.declined_reason
           - else
             = '-'
         %td
