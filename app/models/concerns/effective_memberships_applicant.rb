@@ -54,9 +54,10 @@ module EffectiveMembershipsApplicant
       submitted: 'Submitted'
     )
 
+    log_changes(except: :wizard_steps) if respond_to?(:log_changes)
+
     has_many_attached :applicant_files
 
-    log_changes(except: :wizard_steps) if respond_to?(:log_changes)
 
     attr_accessor :declare_code_of_ethics
     attr_accessor :declare_truth
@@ -119,8 +120,8 @@ module EffectiveMembershipsApplicant
     scope :in_progress, -> { where.not(status: [:approved, :declined]) }
     scope :done, -> { where(status: [:approved, :declined]) }
 
-    before_validation(if: -> { current_step == :start && user.present? }) do
-      self.from_membership_category ||= user.membership_category
+    before_validation(if: -> { current_step == :start && user && user.membership }) do
+      self.from_membership_category ||= user.membership.category
     end
 
     before_validation(if: -> { current_step == :select && membership_category_id.present? }) do
@@ -289,13 +290,13 @@ module EffectiveMembershipsApplicant
   def can_apply_membership_categories_collection
     categories = EffectiveMemberships.MembershipCategory.sorted.can_apply
 
-    if user.blank? || user.membership_category.blank?
+    if user.blank? || user.membership.blank?
       return categories.where(can_apply_new: true)
     end
 
     categories.select do |cat|
       cat.can_apply_existing? ||
-      (cat.can_apply_restricted? && cat.can_apply_restricted_ids.include?(user.membership_category.id))
+      (cat.can_apply_restricted? && cat.can_apply_restricted_ids.include?(user.membership.category_id))
     end
   end
 
