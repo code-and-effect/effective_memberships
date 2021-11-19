@@ -1,6 +1,6 @@
 %h2 Applications
 
-- authorized = EffectiveResources.authorized?(self, :new, EffectiveMemberships.applicant_class)
+- authorized = EffectiveResources.authorized?(self, :new, EffectiveMemberships.Applicant)
 
 - datatable = EffectiveResources.best('EffectiveApplicantsDatatable').new(self)
 - in_progress = current_user.applicants.in_progress
