@@ -1,11 +1,13 @@
 module Effective
   class Registrar
 
-    def register!(user, to:)
+    def register!(user, to:, date: nil, number: nil)
       raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
       raise('expecting a memberships category') unless to.class.respond_to?(:effective_memberships_category?)
 
-      user.membership_change_date ||= Time.zone.now
+      # Default Date and next number
+      date ||= Time.zone.now
+      number = next_membership_number(user, to: to) if number.blank?
 
       # Build a membership
       membership = user.membership || user.build_membership
@@ -14,25 +16,28 @@ module Effective
       membership.category = to
 
       # Assign Dates
-      membership.joined_on ||= user.membership_change_date  # Only if not already present
-      membership.registration_on = user.membership_change_date  # Always new registration_on
+      membership.joined_on ||= date  # Only if not already present
+      membership.registration_on = date  # Always new registration_on
 
       # Assign Number
-      membership.number = next_membership_number(user, to: to)
+      membership.number = number
 
       # Save user
-      save!(user)
+      save!(user, date: date)
     end
 
     def next_membership_number(user, to:)
       raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
       raise('expecting a memberships category') unless to.class.respond_to?(:effective_memberships_category?)
+
+      # Just a simple number right now
+      Effective::Membership.all.max_number + 1
     end
 
     private
 
-    def save!(user)
-      user.build_registrant_history if user.valid?
+    def save!(user, date: Time.zone.now)
+      user.build_membership_history(start_on: date)
       user.save!
     end
 

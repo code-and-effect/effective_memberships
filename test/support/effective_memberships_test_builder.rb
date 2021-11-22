@@ -23,6 +23,54 @@ module EffectiveMembershipsTestBuilder
     applicant
   end
 
+  # Note, I'm skipping over review! and just setting reviewed!
+  # Because I don't wanna do all the completed requirements
+  # Use build_reviewable_applicant() if you want to test the applicant reviews on a reviewable submitted applicant
+  def build_reviewed_applicant(user: nil, membership_category: nil)
+    applicant = build_submitted_applicant(user: user, membership_category: membership_category)
+    applicant.reviewed!
+    applicant
+  end
+
+  def build_declined_applicant(user: nil, membership_category: nil)
+    applicant = build_reviewed_applicant(user: user, membership_category: membership_category)
+    applicant.declined_reason = 'Declined'
+    applicant.decline!
+    applicant
+  end
+
+  def build_approved_applicant(user: nil, membership_category: nil)
+    applicant = build_reviewed_applicant(user: user, membership_category: membership_category)
+    applicant.approve!
+    applicant
+  end
+
+  def build_reviewable_applicant(user: nil, membership_category: nil)
+    applicant = build_submitted_applicant(user: user, membership_category: membership_category)
+
+    # Build References
+    applicant.min_applicant_references.times do |x|
+      applicant.applicant_references.build(
+        name: "Reference Name #{x}",
+        email: "reference#{x}@somewhere.com",
+        phone: '(444) 444-4444',
+        known: Effective::ApplicantReference::KNOWNS.sample,
+        relationship: Effective::ApplicantReference::RELATIONSHIPS.sample,
+      )
+    end
+
+    applicant.status_steps[:references] = Time.zone.now
+
+    # Attach Files
+    file = Rails.root.join('db', 'seeds.rb')
+    applicant.applicant_files.attach(io: File.open(file), filename: 'seeds.rb')
+
+    applicant.status_steps[:files] = Time.zone.now
+
+    applicant.save!
+    applicant
+  end
+
   def create_applicant_reference!
     build_applicant_reference.tap(&:save!)
   end
@@ -37,6 +85,13 @@ module EffectiveMembershipsTestBuilder
       known: Effective::ApplicantReference::KNOWNS.sample,
       relationship: Effective::ApplicantReference::RELATIONSHIPS.sample,
     )
+  end
+
+  def build_applicant_review(applicant: nil, user: nil)
+    applicant ||= build_applicant()
+    user ||= build_user()
+
+    applicant.applicant_reviews.build(user: user)
   end
 
   def build_membership_category

@@ -12,6 +12,7 @@ module EffectiveMemberships
       ActiveSupport.on_load :active_record do
         ActiveRecord::Base.extend(EffectiveMembershipsUser::Base)
         ActiveRecord::Base.extend(EffectiveMembershipsApplicant::Base)
+        ActiveRecord::Base.extend(EffectiveMembershipsApplicantReview::Base)
         ActiveRecord::Base.extend(EffectiveMembershipsCategory::Base)
         ActiveRecord::Base.extend(EffectiveMembershipsFee::Base)
       end

@@ -7,8 +7,8 @@ module EffectiveMemberships
 
   def self.config_keys
     [
-      :membership_categories_table_name, :applicants_table_name, :fees_table_name,
-      :membership_category_class_name, :applicant_class_name, :fee_class_name, :registrar_class_name,
+      :membership_categories_table_name, :applicants_table_name, :applicant_reviews_table_name, :fees_table_name,
+      :membership_category_class_name, :applicant_class_name, :applicant_review_class_name, :fee_class_name, :registrar_class_name,
       :layout,
       :mailer, :parent_mailer, :deliver_method, :mailer_layout, :mailer_sender, :mailer_admin, :use_effective_email_templates
     ]
@@ -22,6 +22,10 @@ module EffectiveMemberships
 
   def self.Applicant
     applicant_class_name ? applicant_class_name.constantize : Effective::Applicant
+  end
+
+  def self.ApplicantReview
+    applicant_review_class_name ? applicant_review_class_name.constantize : Effective::ApplicantReview
   end
 
   def self.Fee

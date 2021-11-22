@@ -16,27 +16,17 @@ module EffectiveMembershipsUser
   end
 
   included do
-    attr_accessor :membership_change_date
-
     has_many :applicants
     has_many :fees
 
-    has_one :membership, class_name: 'Effective::Membership'
+    has_one :membership, inverse_of: :user, class_name: 'Effective::Membership'
     accepts_nested_attributes_for :membership
 
-    has_many :membership_histories, -> { Effective::MembershipHistory.sorted }, class_name: 'Effective::MembershipHistory'
+    has_many :membership_histories, -> { Effective::MembershipHistory.sorted }, inverse_of: :user, class_name: 'Effective::MembershipHistory'
     accepts_nested_attributes_for :membership_histories
 
     effective_resource do
       timestamps
-    end
-
-    validate(if: -> { membership_change_date.present? }) do
-      if membership_change_date > Time.zone.now.to_date
-        errors.add(:membership_change_date, "can't be in the future")
-      elsif membership_change_date < (Time.zone.now - 1.year).to_date
-        errors.add(:membership_change_date, "can't be more than 1 year in the past")
-      end
     end
 
   end
@@ -46,7 +36,7 @@ module EffectiveMembershipsUser
     raise('expected membership to be present') unless membership.present?
 
     # The date of change
-    start_on ||= (membership_change_date || Time.zone.now)
+    start_on ||= Time.zone.now
 
     # End the other membership histories
     membership_histories.each { |history| history.end_on ||= start_on }
@@ -57,7 +47,7 @@ module EffectiveMembershipsUser
       end_on: nil,
       membership_category: membership.category,
       number: membership.number,
-      in_bad_standing: membership.in_bad_standing
+      in_bad_standing: membership.in_bad_standing?
     )
   end
 

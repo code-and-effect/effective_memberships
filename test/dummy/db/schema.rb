@@ -103,6 +103,8 @@ ActiveRecord::Schema.define(version: 7) do
     t.string "degree_obtained"
     t.datetime "updated_at"
     t.datetime "created_at"
+    t.index ["applicant_id"], name: "index_applicant_educations_on_applicant_id"
+    t.index ["start_on"], name: "index_applicant_educations_on_start_on"
   end
 
   create_table "applicant_experiences", force: :cascade do |t|
@@ -118,6 +120,8 @@ ActiveRecord::Schema.define(version: 7) do
     t.text "tasks_performed"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.index ["applicant_id"], name: "index_applicant_experiences_on_applicant_id"
+    t.index ["start_on"], name: "index_applicant_experiences_on_start_on"
   end
 
   create_table "applicant_references", force: :cascade do |t|
@@ -137,6 +141,30 @@ ActiveRecord::Schema.define(version: 7) do
     t.datetime "last_notified_at"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.index ["applicant_id"], name: "index_applicant_references_on_applicant_id"
+    t.index ["token"], name: "index_applicant_references_on_token"
+  end
+
+  create_table "applicant_reviews", force: :cascade do |t|
+    t.string "token"
+    t.integer "applicant_id"
+    t.integer "user_id"
+    t.string "user_type"
+    t.string "status"
+    t.text "status_steps"
+    t.text "wizard_steps"
+    t.datetime "submitted_at"
+    t.string "recommendation"
+    t.text "comments"
+    t.boolean "conflict_of_interest"
+    t.boolean "education_accepted"
+    t.boolean "course_amounts_accepted"
+    t.boolean "courses_accepted"
+    t.boolean "experience_accepted"
+    t.boolean "references_accepted"
+    t.boolean "files_accepted"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "applicants", force: :cascade do |t|
@@ -155,12 +183,15 @@ ActiveRecord::Schema.define(version: 7) do
     t.datetime "reviewed_at"
     t.datetime "approved_at"
     t.datetime "declined_at"
-    t.datetime "declined_reason"
+    t.text "declined_reason"
     t.text "applicant_educations_details"
     t.integer "applicant_experiences_months"
     t.text "applicant_experiences_details"
     t.datetime "updated_at"
     t.datetime "created_at"
+    t.index ["status"], name: "index_applicants_on_status"
+    t.index ["token"], name: "index_applicants_on_token"
+    t.index ["user_id", "user_type"], name: "index_applicants_on_user_id_and_user_type"
   end
 
   create_table "cart_items", force: :cascade do |t|
@@ -224,6 +255,11 @@ ActiveRecord::Schema.define(version: 7) do
     t.boolean "tax_exempt", default: false
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.index ["category"], name: "index_fees_on_category"
+    t.index ["membership_category_id"], name: "index_fees_on_membership_category_id"
+    t.index ["parent_id", "parent_type"], name: "index_fees_on_parent_id_and_parent_type"
+    t.index ["purchased_order_id"], name: "index_fees_on_purchased_order_id"
+    t.index ["user_id", "user_type"], name: "index_fees_on_user_id_and_user_type"
   end
 
   create_table "membership_categories", force: :cascade do |t|
@@ -235,6 +271,12 @@ ActiveRecord::Schema.define(version: 7) do
     t.text "can_apply_restricted_ids"
     t.text "applicant_wizard_steps"
     t.integer "applicant_fee"
+    t.integer "min_applicant_educations"
+    t.integer "min_applicant_experiences_months"
+    t.integer "min_applicant_references"
+    t.integer "min_applicant_courses"
+    t.integer "min_applicant_files"
+    t.integer "min_applicant_reviews"
     t.integer "prorated_jan"
     t.integer "prorated_feb"
     t.integer "prorated_mar"
@@ -252,6 +294,43 @@ ActiveRecord::Schema.define(version: 7) do
     t.integer "renewal_fee"
     t.datetime "updated_at"
     t.datetime "created_at"
+    t.index ["position"], name: "index_membership_categories_on_position"
+    t.index ["title"], name: "index_membership_categories_on_title"
+  end
+
+  create_table "membership_histories", force: :cascade do |t|
+    t.integer "user_id"
+    t.string "user_type"
+    t.integer "membership_category_id"
+    t.string "membership_category_type"
+    t.date "start_on"
+    t.date "end_on"
+    t.string "number"
+    t.boolean "in_bad_standing"
+    t.text "notes"
+    t.datetime "updated_at"
+    t.datetime "created_at"
+    t.index ["start_on"], name: "index_membership_histories_on_start_on"
+    t.index ["user_id", "user_type"], name: "index_membership_histories_on_user_id_and_user_type"
+  end
+
+  create_table "memberships", force: :cascade do |t|
+    t.integer "user_id"
+    t.string "user_type"
+    t.integer "category_id"
+    t.string "category_type"
+    t.string "number"
+    t.date "joined_on"
+    t.date "registration_on"
+    t.integer "fees_paid_through_year"
+    t.boolean "in_bad_standing", default: false
+    t.boolean "in_bad_standing_admin", default: false
+    t.text "in_bad_standing_reason"
+    t.datetime "updated_at"
+    t.datetime "created_at"
+    t.index ["category_id", "category_type"], name: "index_memberships_on_category_id_and_category_type"
+    t.index ["number"], name: "index_memberships_on_number"
+    t.index ["user_id", "user_type"], name: "index_memberships_on_user_id_and_user_type", unique: true
   end
 
   create_table "order_items", force: :cascade do |t|
@@ -341,8 +420,6 @@ ActiveRecord::Schema.define(version: 7) do
     t.integer "roles_mask"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.integer "membership_category_id"
-    t.date "membership_joined_on"
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 

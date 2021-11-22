@@ -58,16 +58,28 @@ module EffectiveMembershipsApplicant
 
     has_many_attached :applicant_files
 
-
+    # Declarations Step
     attr_accessor :declare_code_of_ethics
     attr_accessor :declare_truth
 
+    # Admin Approve Step
+    attr_accessor :approved_membership_number
+    attr_accessor :approved_membership_date
+
+    # Application Namespace
     belongs_to :user, polymorphic: true
     accepts_nested_attributes_for :user
 
     belongs_to :membership_category, polymorphic: true, optional: true
     belongs_to :from_membership_category, polymorphic: true, optional: true
 
+    has_many :applicant_reviews, -> { order(:id) }, inverse_of: :applicant, dependent: :destroy
+    accepts_nested_attributes_for :applicant_reviews, reject_if: :all_blank, allow_destroy: true
+
+    has_many :fees, -> { order(:id) }, as: :parent, dependent: :nullify
+    accepts_nested_attributes_for :fees, reject_if: :all_blank, allow_destroy: true
+
+    # Effective Namespace
     has_many :applicant_courses, -> { order(:id) }, class_name: 'Effective::ApplicantCourse', inverse_of: :applicant, dependent: :destroy
     accepts_nested_attributes_for :applicant_courses, reject_if: :all_blank, allow_destroy: true
 
@@ -83,8 +95,6 @@ module EffectiveMembershipsApplicant
     has_many :orders, -> { order(:id) }, as: :parent, class_name: 'Effective::Order', dependent: :nullify
     accepts_nested_attributes_for :orders
 
-    has_many :fees, -> { order(:id) }, as: :parent, dependent: :nullify
-    accepts_nested_attributes_for :fees, reject_if: :all_blank, allow_destroy: true
 
     effective_resource do
       # Acts as Statused
@@ -131,6 +141,7 @@ module EffectiveMembershipsApplicant
     before_validation(if: -> { current_step == :experience }) do
       assign_applicant_experiences_months!
     end
+
 
     # All Steps validations
     validates :user, presence: true
@@ -212,7 +223,16 @@ module EffectiveMembershipsApplicant
       validates :declare_truth, acceptance: true
     end
 
-    # Admin Steps
+    # Admin Approve
+    validate(if: -> { approved_membership_date.present? }) do
+      if approved_membership_date.to_date > Time.zone.now.to_date
+        errors.add(:approved_membership_date, "can't be in the future")
+      elsif approved_membership_date.to_date < (Time.zone.now - 1.year).to_date
+        errors.add(:approved_membership_date, "can't be more than 1 year in the past")
+      end
+    end
+
+    # Admin Decline
     validates :declined_reason, presence: true, if: -> { declined? }
 
     # These two try completed and try reviewed
@@ -454,17 +474,13 @@ module EffectiveMembershipsApplicant
     completed!
   end
 
-  def min_applicant_reviews
-    0 # membership_category&.min_applicant_reviews.to_i
-  end
-
-  def applicant_reviews
-    []
-  end
-
   # Completed -> Reviewed requirements
   def applicant_reviews_required?
     (min_applicant_reviews > 0 || applicant_reviews.present?)
+  end
+
+  def min_applicant_reviews
+    membership_category&.min_applicant_reviews.to_i
   end
 
   # When an application is completed, these must be done to go to reviewed
@@ -488,12 +504,11 @@ module EffectiveMembershipsApplicant
     # Complete the wizard step. Just incase this is run out of order.
     wizard_steps[:checkout] ||= Time.zone.now
     wizard_steps[:submitted] ||= Time.zone.now
-    #approved!
+    approved!
 
     after_commit { send_email(:applicant_approved) }
 
-    EffectiveMemberships.Registrar.register!(user, to: membership_category)
-
+    EffectiveMemberships.Registrar.register!(user, to: membership_category, date: approved_membership_date, number: approved_membership_number)
     save!
   end
 

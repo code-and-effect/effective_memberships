@@ -40,6 +40,8 @@ module EffectiveMembershipsCategory
       min_applicant_courses             :integer
       min_applicant_files               :integer
 
+      min_applicant_reviews             :integer
+
       prorated_jan        :integer
       prorated_feb        :integer
       prorated_mar        :integer

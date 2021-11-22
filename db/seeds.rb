@@ -13,6 +13,8 @@ member = Effective::MembershipCategory.create!(
   title: "Full Member",
   can_apply_new: true,
   can_apply_existing: true,
+  min_applicant_references: 2,
+  min_applicant_reviews: 2,
   applicant_fee: 100_00,
   annual_fee: 250_00,
   prorated_jan: 120, prorated_feb: 110, prorated_mar: 100, prorated_apr: 90, prorated_may: 80, prorated_jun: 70,
@@ -22,6 +24,8 @@ member = Effective::MembershipCategory.create!(
 student = Effective::MembershipCategory.create!(
   title: "Student",
   can_apply_new: true,
+  min_applicant_references: 0,
+  min_applicant_reviews: 0,
   applicant_fee: 50_00,
   annual_fee: 125_00,
   prorated_jan: 120, prorated_feb: 110, prorated_mar: 100, prorated_apr: 90, prorated_may: 80, prorated_jun: 70,

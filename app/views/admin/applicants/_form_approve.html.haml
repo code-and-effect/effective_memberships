@@ -8,8 +8,16 @@
   - categories = EffectiveMemberships.MembershipCategory.all
   = f.select :membership_category_id, categories, label: 'Approve to'
 
-  %h3 Email to send
+  %h3 Number
+  %p
+    - if applicant.user.membership&.number_was.present?
+      The member will keep their existing membership number: #{applicant.user.membership.number}.
+    - else
+      - number = EffectiveMemberships.Registrar.next_membership_number(applicant.user, to: applicant.membership_category)
 
+      = f.text_field :approved_membership_number, hint: "leave blank to assign the next number: #{number}."
+
+  %h3 Email to send
   %p The following email will be sent:
   = email_form_fields(f, :applicant_approved)
 

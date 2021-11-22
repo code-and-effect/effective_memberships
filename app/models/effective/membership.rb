@@ -24,6 +24,8 @@ module Effective
 
     scope :deep, -> { includes(:user) }
     scope :sorted, -> { order(:id) }
+    #scope :numbers_as_integers, -> { select('CAST(number AS integer) AS number_as_integer').order('number_as_integer DESC') }
+    scope :numbers_as_integers, -> { select('CAST(number AS integer), *').order('number DESC') }
 
     before_validation { self.registration_on ||= joined_on }
 
@@ -37,6 +39,10 @@ module Effective
 
     validate(if: -> { user.present? }) do
       self.errors.add(:user_id, 'must be a memberships user') unless user.class.effective_memberships_user?
+    end
+
+    def self.max_number
+      maximum("CAST(number AS integer)") || 0
     end
 
     def to_s
