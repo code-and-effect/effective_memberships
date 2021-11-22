@@ -249,6 +249,8 @@ ActiveRecord::Schema.define(version: 7) do
     t.string "user_type"
     t.integer "parent_id"
     t.string "parent_type"
+    t.date "period"
+    t.datetime "due_at"
     t.string "title"
     t.integer "price"
     t.string "qb_item_name"

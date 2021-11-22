@@ -95,7 +95,6 @@ module EffectiveMembershipsApplicant
     has_many :orders, -> { order(:id) }, as: :parent, class_name: 'Effective::Order', dependent: :nullify
     accepts_nested_attributes_for :orders
 
-
     effective_resource do
       # Acts as Statused
       status                 :string, permitted: false
@@ -141,7 +140,6 @@ module EffectiveMembershipsApplicant
     before_validation(if: -> { current_step == :experience }) do
       assign_applicant_experiences_months!
     end
-
 
     # All Steps validations
     validates :user, presence: true
@@ -242,11 +240,6 @@ module EffectiveMembershipsApplicant
     # Clear required steps memoization
     after_save { @_required_steps = nil }
 
-    after_purchase do |_order|
-      raise('expected submit_order to be purchased') unless submit_order&.purchased?
-      submit_purchased!
-    end
-
     # This required_steps is defined inside the included do .. end block so it overrides the acts_as_wizard one.
     def required_steps
       return self.class.test_required_steps if Rails.env.test? && self.class.test_required_steps.present?
@@ -262,6 +255,12 @@ module EffectiveMembershipsApplicant
         end
       end
     end
+
+    after_purchase do |_order|
+      raise('expected submit_order to be purchased') unless submit_order&.purchased?
+      submit_purchased!
+    end
+
   end
 
   # Instance Methods
@@ -396,9 +395,7 @@ module EffectiveMembershipsApplicant
       user: user,
       category: 'Applicant',
       membership_category: membership_category,
-      price: membership_category.applicant_fee,
-      qb_item_name: membership_category.applicant_qb_item_name,
-      tax_exempt: membership_category.applicant_tax_exempt
+      price: membership_category.applicant_fee
     )
 
     submit_fees
@@ -506,9 +503,15 @@ module EffectiveMembershipsApplicant
     wizard_steps[:submitted] ||= Time.zone.now
     approved!
 
+    EffectiveMemberships.Registrar.register!(
+      user,
+      to: membership_category,
+      date: approved_membership_date.presence,       # Set by the Admin Process form, or nil
+      number: approved_membership_number.presence    # Set by the Admin Process form, or nil
+    )
+
     after_commit { send_email(:applicant_approved) }
 
-    EffectiveMemberships.Registrar.register!(user, to: membership_category, date: approved_membership_date, number: approved_membership_number)
     save!
   end
 

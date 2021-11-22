@@ -297,6 +297,9 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.integer :parent_id
       t.string :parent_type
 
+      t.date :period
+      t.datetime :due_at
+
       t.string :title
       t.integer :price
       t.string :qb_item_name

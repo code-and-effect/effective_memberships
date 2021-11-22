@@ -32,6 +32,19 @@ module EffectiveMembershipsUser
   end
 
   # Instance Methods
+  def build_prorated_fees(date: nil)
+    raise('must have an existing membership') unless membership.present?
+
+    date ||= Time.zone.now
+    period = EffectiveMemberships.Registrar.current_period(date: date)
+    price = membership.category.send("prorated_#{date.strftime('%b').downcase}").to_i
+
+    fee = fees.find { |fee| fee.category == 'Prorated' } || fees.build()
+    fee.assign_attributes(category: 'Prorated', period: period, price: price, due_at: date)
+
+    fee
+  end
+
   def build_membership_history(start_on: nil)
     raise('expected membership to be present') unless membership.present?
 

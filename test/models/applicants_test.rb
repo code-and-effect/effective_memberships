@@ -135,4 +135,35 @@ class ApplicantsTest < ActiveSupport::TestCase
     assert applicant.approved?
   end
 
+  test 'approving assigns the user membership' do
+    applicant = build_submitted_applicant()
+
+    assert applicant.user.membership.blank?
+    applicant.approve!
+
+    assert applicant.user.membership.present?
+    assert applicant.user.membership.category.present?
+    assert applicant.user.membership.number.present?
+    assert applicant.user.membership.joined_on.present?
+
+    assert_equal applicant.membership_category, applicant.user.membership.category
+  end
+
+  test 'approving creates prorated fees' do
+    user = build_user_with_address()
+    assert user.fees.blank?
+
+    applicant = build_submitted_applicant(user: user)
+    applicant.approve!
+
+    assert applicant.user.fees.present?
+    assert_equal 2, applicant.user.fees.length
+
+    applicant_fee = applicant.user.fees.find { |fee| fee.category == 'Applicant' }
+    assert_equal applicant_fee.price, applicant.membership_category.applicant_fee
+
+    prorated_fee = applicant.user.fees.find { |fee| fee.category == 'Prorated' }
+    assert_equal prorated_fee.price, applicant.membership_category.send("prorated_#{Time.zone.now.strftime('%b').downcase}").to_i
+  end
+
 end

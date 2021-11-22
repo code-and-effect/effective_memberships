@@ -15,7 +15,7 @@ module EffectiveMembershipsFee
     def effective_memberships_fee?; true; end
 
     def categories
-      ['Applicant']
+      ['Applicant', 'Prorated']
     end
 
   end
@@ -37,6 +37,9 @@ module EffectiveMembershipsFee
       title         :string
       category      :string
 
+      period        :date
+      due_at        :datetime
+
       price         :integer
       qb_item_name  :string
       tax_exempt    :boolean
@@ -49,10 +52,15 @@ module EffectiveMembershipsFee
 
     before_validation do
       self.title ||= build_title()
+      self.qb_item_name ||= build_qb_item_name()
+      self.tax_exempt ||= build_tax_exempt()
     end
 
     validates :title, presence: true
     validates :category, presence: true
+
+    # validates :period, presence: true
+    # validates :due_at, presence: true
 
     validates :price, presence: true
     validates :qb_item_name, presence: true
@@ -74,8 +82,15 @@ module EffectiveMembershipsFee
   private
 
   def build_title
-    return nil if category.blank?
-    "#{category} Fee"
+    "#{category} Fee" if category.present?
+  end
+
+  def build_qb_item_name
+    "#{category} Fee" if category.present?
+  end
+
+  def build_tax_exempt
+    false
   end
 
 end
