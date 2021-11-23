@@ -1,5 +1,5 @@
 .effective-applicant
-  - blacklist = [:start, :select, :ready, :review, :checkout, :submitted]
+  - blacklist = EffectiveMemberships.Applicant.required_wizard_steps
   - steps = applicant.required_steps - blacklist
 
   - steps.select { |step| applicant.has_completed_step?(step) }.each do |partial|

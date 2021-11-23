@@ -28,7 +28,6 @@ module EffectiveMembershipsUser
     effective_resource do
       timestamps
     end
-
   end
 
   # Instance Methods

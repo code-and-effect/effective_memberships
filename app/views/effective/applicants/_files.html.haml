@@ -22,3 +22,6 @@
             %td= title
             %td= size_tag
             %td= link_tag
+
+    - if applicant.applicant_files.blank?
+      %p No files attached

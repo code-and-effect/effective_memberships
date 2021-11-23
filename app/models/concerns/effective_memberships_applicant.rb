@@ -20,7 +20,7 @@ module EffectiveMembershipsApplicant
 
     # For effective_membership_category_applicant_wizard_steps_collection
     def required_wizard_steps
-      [:start, :select, :ready, :checkout, :submitted]
+      [:start, :select, :ready, :billing, :checkout, :submitted]
     end
 
   end
@@ -50,6 +50,7 @@ module EffectiveMembershipsApplicant
       files: 'Attach Files',
       declarations: 'Declarations',
       ready: 'Review',
+      billing: 'Billing',
       checkout: 'Checkout',
       submitted: 'Submitted'
     )
@@ -404,9 +405,13 @@ module EffectiveMembershipsApplicant
   def find_or_build_submit_order
     order = submit_order || orders.build(user: user)
 
+    # Adds fees, but does not overwrite any existing price.
     submit_fees.each do |fee|
       order.add(fee) unless order.purchasables.include?(fee)
     end
+
+    # From Billing Step
+    order.billing_address = user.billing_address
 
     order
   end
@@ -424,8 +429,8 @@ module EffectiveMembershipsApplicant
     true
   end
 
-  # User clicks on the Ready / Review step. Next step is Checkout
-  def ready!
+  # User clicks on the Billing step. Next step is Checkout
+  def billing!
     build_submit_fees_and_order
     save!
   end
