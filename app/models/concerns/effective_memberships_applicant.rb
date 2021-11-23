@@ -20,7 +20,7 @@ module EffectiveMembershipsApplicant
 
     # For effective_membership_category_applicant_wizard_steps_collection
     def required_wizard_steps
-      [:start, :select, :ready, :billing, :checkout, :submitted]
+      [:start, :select, :summary, :billing, :checkout, :submitted]
     end
 
   end
@@ -49,7 +49,7 @@ module EffectiveMembershipsApplicant
       references: 'References',
       files: 'Attach Files',
       declarations: 'Declarations',
-      ready: 'Review',
+      summary: 'Review',
       billing: 'Billing',
       checkout: 'Checkout',
       submitted: 'Submitted'
@@ -431,6 +431,11 @@ module EffectiveMembershipsApplicant
 
   # User clicks on the Billing step. Next step is Checkout
   def billing!
+    ready!
+  end
+
+  # Ready to check out
+  def ready!
     build_submit_fees_and_order
     save!
   end

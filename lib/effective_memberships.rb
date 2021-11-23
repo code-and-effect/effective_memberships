@@ -7,8 +7,8 @@ module EffectiveMemberships
 
   def self.config_keys
     [
-      :membership_categories_table_name, :applicants_table_name, :applicant_reviews_table_name, :fees_table_name,
-      :membership_category_class_name, :applicant_class_name, :applicant_review_class_name, :fee_class_name, :registrar_class_name,
+      :membership_categories_table_name, :applicants_table_name, :applicant_reviews_table_name, :fees_table_name, :fee_payments_table_name,
+      :membership_category_class_name, :applicant_class_name, :applicant_review_class_name, :fee_class_name, :fee_payment_class_name, :registrar_class_name,
       :layout,
       :mailer, :parent_mailer, :deliver_method, :mailer_layout, :mailer_sender, :mailer_admin, :use_effective_email_templates
     ]
@@ -17,30 +17,33 @@ module EffectiveMemberships
   include EffectiveGem
 
   def self.MembershipCategory
-    membership_category_class_name ? membership_category_class_name.constantize : Effective::MembershipCategory
+    membership_category_class_name&.constantize || Effective::MembershipCategory
   end
 
   def self.Applicant
-    applicant_class_name ? applicant_class_name.constantize : Effective::Applicant
+    applicant_class_name&.constantize || Effective::Applicant
   end
 
   def self.ApplicantReview
-    applicant_review_class_name ? applicant_review_class_name.constantize : Effective::ApplicantReview
+    applicant_review_class_name&.constantize || Effective::ApplicantReview
   end
 
   def self.Fee
-    fee_class_name ? fee_class_name.constantize : Effective::Fee
+    fee_class_name&.constantize || Effective::Fee
+  end
+
+  def self.FeePayment
+    fee_payment_class_name&.constantize || Effective::FeePayment
   end
 
   # Singleton
   def self.Registrar
-    klass = registrar_class_name ? registrar_class_name.constantize : Effective::Registrar
+    klass = registrar_class_name&.constantize || Effective::Registrar
     klass.new
   end
 
   def self.mailer_class
-    return mailer.constantize if mailer.present?
-    Effective::MembershipsMailer
+    mailer&.constantize || Effective::MembershipsMailer
   end
 
   def self.parent_mailer_class

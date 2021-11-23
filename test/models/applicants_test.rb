@@ -35,7 +35,7 @@ class ApplicantsTest < ActiveSupport::TestCase
     # When membership category only wants demographics
     applicant.membership_category.update!(applicant_wizard_steps: [:demographics])
     applicant.save!
-    assert_equal [:start, :select, :demographics, :ready, :checkout, :submitted], applicant.required_steps
+    assert_equal [:start, :select, :demographics, :summary, :billing, :checkout, :submitted], applicant.required_steps
 
     # When no membership category
     applicant.update!(membership_category: nil)

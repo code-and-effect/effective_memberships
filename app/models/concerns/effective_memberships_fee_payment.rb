@@ -19,7 +19,7 @@ module EffectiveMembershipsFeePayment
     end
 
     def required_wizard_steps
-      [:start, :select, :ready, :billing, :checkout, :submitted]
+      [:start, :select, :summary, :billing, :checkout, :submitted]
     end
 
   end
@@ -37,7 +37,7 @@ module EffectiveMembershipsFeePayment
       start: 'Start',
       demographics: 'Demographics',
       declarations: 'Declarations',
-      ready: 'Review',
+      summary: 'Review',
       billing: 'Billing',
       checkout: 'Checkout',
       submitted: 'Submitted'
@@ -163,6 +163,8 @@ module EffectiveMembershipsFeePayment
       order.add(fee) unless order.purchasables.include?(fee)
     end
 
+    order.billing_address = user.billing_address
+
     order
   end
 
@@ -180,6 +182,10 @@ module EffectiveMembershipsFeePayment
   end
 
   # User clicks on the Billing Submit. Next step is Checkout
+  def billing!
+    ready!
+  end
+
   def ready!
     build_submit_fees_and_order
     save!
