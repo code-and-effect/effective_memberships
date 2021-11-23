@@ -19,9 +19,8 @@ module EffectiveMembershipsFeePayment
     end
 
     def required_wizard_steps
-      [:start, :select, :summary, :billing, :checkout, :submitted]
+      [:start, :summary, :billing, :checkout, :submitted]
     end
-
   end
 
   included do
@@ -118,7 +117,10 @@ module EffectiveMembershipsFeePayment
       raise('expected submit_order to be purchased') unless submit_order&.purchased?
       submit_purchased!
     end
+  end
 
+  def to_s
+    'Fee Payment'
   end
 
   # Instance Methods

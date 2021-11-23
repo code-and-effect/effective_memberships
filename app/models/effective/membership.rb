@@ -24,8 +24,6 @@ module Effective
 
     scope :deep, -> { includes(:user) }
     scope :sorted, -> { order(:id) }
-    #scope :numbers_as_integers, -> { select('CAST(number AS integer) AS number_as_integer').order('number_as_integer DESC') }
-    scope :numbers_as_integers, -> { select('CAST(number AS integer), *').order('number DESC') }
 
     before_validation { self.registration_on ||= joined_on }
 

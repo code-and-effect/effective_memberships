@@ -34,6 +34,10 @@ module EffectiveMembershipsCategory
       applicant_fee              :integer
       applicant_wizard_steps     :text
 
+      renewal_fee                :integer
+      late_fee                   :integer
+      fee_payment_wizard_steps   :text
+
       min_applicant_educations          :integer
       min_applicant_experiences_months  :integer
       min_applicant_references          :integer
@@ -41,6 +45,7 @@ module EffectiveMembershipsCategory
       min_applicant_files               :integer
 
       min_applicant_reviews             :integer
+      applicant_review_wizard_steps     :text
 
       prorated_jan        :integer
       prorated_feb        :integer
@@ -66,6 +71,7 @@ module EffectiveMembershipsCategory
 
     serialize :can_apply_restricted_ids, Array
     serialize :applicant_wizard_steps, Array
+    serialize :fee_payment_wizard_steps, Array
 
     scope :deep, -> { includes(:rich_texts) }
     scope :sorted, -> { order(:position) }
@@ -83,6 +89,8 @@ module EffectiveMembershipsCategory
 
     after_initialize(if: -> { new_record? }) do
       self.applicant_wizard_steps = EffectiveMemberships.Applicant.all_wizard_steps
+      self.applicant_review_wizard_steps = EffectiveMemberships.ApplicantReview.all_wizard_steps
+      self.fee_payment_wizard_steps = EffectiveMemberships.FeePayment.all_wizard_steps
     end
 
     before_validation do
@@ -126,9 +134,26 @@ module EffectiveMembershipsCategory
     Array(self[:applicant_wizard_steps]).map(&:to_sym) - [nil, '']
   end
 
+  def fee_payment_wizard_steps
+    Array(self[:fee_payment_wizard_steps]).map(&:to_sym) - [nil, '']
+  end
+
+  def applicant_review_wizard_steps
+    Array(self[:applicant_review_wizard_steps]).map(&:to_sym) - [nil, '']
+  end
+
   def applicant_wizard_steps_collection
     wizard_steps = EffectiveMemberships.Applicant.const_get(:WIZARD_STEPS)
     required_steps = EffectiveMemberships.Applicant.required_wizard_steps
+
+    wizard_steps.map do |step, title|
+      [title, step, 'disabled' => required_steps.include?(step)]
+    end
+  end
+
+  def fee_payment_wizard_steps_collection
+    wizard_steps = EffectiveMemberships.FeePayment.const_get(:WIZARD_STEPS)
+    required_steps = EffectiveMemberships.FeePayment.required_wizard_steps
 
     wizard_steps.map do |step, title|
       [title, step, 'disabled' => required_steps.include?(step)]

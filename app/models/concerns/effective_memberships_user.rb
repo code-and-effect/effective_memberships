@@ -18,6 +18,7 @@ module EffectiveMembershipsUser
   included do
     has_many :applicants
     has_many :fees
+    has_many :fee_payments
 
     has_one :membership, inverse_of: :user, class_name: 'Effective::Membership'
     accepts_nested_attributes_for :membership
@@ -28,6 +29,10 @@ module EffectiveMembershipsUser
     effective_resource do
       timestamps
     end
+  end
+
+  def outstanding_fee_payment_fees
+    fees.select { |fee| fee.fee_payment_fee? && !fee.purchased? }
   end
 
   # Instance Methods

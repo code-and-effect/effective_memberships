@@ -1,0 +1,18 @@
+%h2 Membership
+- membership = current_user.membership
+
+- if membership.present?
+  %p
+    = succeed('.') do
+      You are a #{membership.category} member
+
+      - if membership.number.present?
+        = "##{membership.number}"
+
+      who joined on #{membership.joined_on.strftime('%F')}
+
+      - if membership.registration_on > membership.joined_on
+        and last changed categories on #{membership.registration_on.strftime('%F')}
+
+- else
+  %p You are not a member.

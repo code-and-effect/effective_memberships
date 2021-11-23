@@ -1,0 +1,9 @@
+.card
+  .card-body
+    .row
+      .col-sm
+        %h5.card-title= fee_payment.wizard_step_title(:demographics)
+      .col-sm-auto.text-right
+        = link_to('Edit', wizard_path(:demographics)) if edit_effective_fee_payments_wizard?
+
+    = render 'effective/fee_payments/demographics_user', fee_payment: fee_payment, user: fee_payment.user

@@ -12,6 +12,10 @@ EffectiveMemberships::Engine.routes.draw do
     resources :applicant_references, only: [:new, :create, :show, :update] do
       post :notify, on: :member
     end
+
+    resources :fee_payments, only: [:new, :show] do
+      resources :build, controller: :fee_payments, only: [:show, :update]
+    end
   end
 
   namespace :admin do

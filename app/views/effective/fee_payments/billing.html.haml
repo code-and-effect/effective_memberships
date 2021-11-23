@@ -1,0 +1,14 @@
+= render 'layout' do
+  %h1= @page_title
+
+  - raise('expected user to respond to billing_address') unless resource.user.respond_to?(:billing_address)
+
+  %p Please confirm your billing address.
+
+  = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+    = f.hidden_field :id
+
+    = f.fields_for(:user, f.object.user) do |fu|
+      = effective_address_fields(fu, :billing)
+
+    = f.save 'Save and Continue'

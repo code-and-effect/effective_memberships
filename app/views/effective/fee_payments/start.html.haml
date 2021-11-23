@@ -1,0 +1,17 @@
+= render 'layout' do
+  %h1= @page_title
+
+  %p Welcome #{current_user}!
+
+  - if resource.fees.blank?
+    %p You have no fees due at this time.
+    = link_to 'Home', root_path, class: 'btn btn-primary'
+
+  - if resource.fees.present?
+    %p You have the following fees due at this time:
+
+    = render_purchasables(resource.fees)
+
+    = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+      = f.hidden_field :id
+      = f.save 'Start Fee Payment'

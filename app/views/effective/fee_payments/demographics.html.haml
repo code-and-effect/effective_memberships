@@ -1,0 +1,12 @@
+= render 'layout' do
+  %h1= @page_title
+
+  %p Please help us keep your demographic information up to date.
+
+  = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+    = f.hidden_field :id
+
+    = f.fields_for(:user, f.object.user) do |fu|
+      = render 'effective/fee_payments/demographics_fields', f: fu
+
+    = f.save 'Save and Continue'

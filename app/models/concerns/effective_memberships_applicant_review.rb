@@ -13,6 +13,15 @@ module EffectiveMembershipsApplicantReview
 
   module ClassMethods
     def effective_memberships_applicant_review?; true; end
+
+    def all_wizard_steps
+      const_get(:WIZARD_STEPS).keys
+    end
+
+    # For effective_membership_category_applicant_wizard_steps_collection
+    def required_wizard_steps
+      [:start, :recommendation, :submitted]
+    end
   end
 
   included do

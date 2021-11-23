@@ -1,8 +1,11 @@
 EffectiveMemberships.setup do |config|
   config.membership_categories_table_name = :membership_categories
+
   config.applicants_table_name = :applicants
-  config.fees_table_name = :fees
   config.applicant_reviews_table_name = :applicant_reviews
+
+  config.fees_table_name = :fees
+  config.fee_payments_table_name = :fee_payments
 
   # Layout Settings
   # Configure the Layout per controller, or all at once

@@ -15,7 +15,7 @@ module EffectiveMembershipsFee
     def effective_memberships_fee?; true; end
 
     def categories
-      ['Applicant', 'Prorated']
+      ['Applicant', 'Prorated', 'Renewal', 'Late', 'Other']
     end
 
   end
@@ -77,6 +77,10 @@ module EffectiveMembershipsFee
   # Used by applicant.applicant_submit_fees
   def applicant_submit_fee?
     category == 'Applicant'
+  end
+
+  def fee_payment_fee?
+    category != 'Applicant'
   end
 
   private

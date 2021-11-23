@@ -1,0 +1,11 @@
+= effective_form_with(model: [:admin, membership_category], engine: true) do |f|
+  %h2 Fee Payments
+
+  %h3 Wizard Steps
+
+  %p The following steps will be required when purchasing fees for this membership category.
+
+  - f.object.fee_payment_wizard_steps += EffectiveMemberships.FeePayment.required_wizard_steps
+  = f.checks :fee_payment_wizard_steps, f.object.fee_payment_wizard_steps_collection()
+
+  = effective_submit(f)

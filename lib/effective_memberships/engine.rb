@@ -15,6 +15,7 @@ module EffectiveMemberships
         ActiveRecord::Base.extend(EffectiveMembershipsApplicantReview::Base)
         ActiveRecord::Base.extend(EffectiveMembershipsCategory::Base)
         ActiveRecord::Base.extend(EffectiveMembershipsFee::Base)
+        ActiveRecord::Base.extend(EffectiveMembershipsFeePayment::Base)
       end
     end
 

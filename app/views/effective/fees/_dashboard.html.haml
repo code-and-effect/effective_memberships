@@ -1,0 +1,10 @@
+%h2 Fees
+- fees = current_user.outstanding_fee_payment_fees
+
+- if fees.present?
+  %p You have #{pluralize(fees.length , 'outstanding fee')}.
+
+  %p= link_to 'Make a fee payment', effective_memberships.new_fee_payment_path, class: 'btn btn-sm btn-primary'
+
+- else
+  %p You have no outstanding fees at this time. Thank you!
