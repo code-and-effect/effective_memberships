@@ -38,14 +38,18 @@ module Effective
       Effective::Membership.all.max_number + 1
     end
 
-    def current_period_cutoff_date(date:)
-      year = date.year
-      Time.zone.local(year, 10, 1) # Fees are for next year after October 1st
+    def current_period
+      period_on(date: Time.zone.now)
     end
 
-    def current_period(date: Time.zone.now)
-      cutoff = current_period_cutoff_date(date: date)
+    def period(date:)
+      cutoff = period_cutoff_date(date: date)
       (date < cutoff) ? date.beginning_of_year : date.advance(years: 1).beginning_of_year
+    end
+
+    def period_cutoff_date(date:)
+      year = date.year
+      Time.zone.local(year, 10, 1) # Fees are for next year after October 1st
     end
 
     protected

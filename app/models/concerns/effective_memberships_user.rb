@@ -39,12 +39,18 @@ module EffectiveMembershipsUser
   def build_prorated_fees(date: nil)
     raise('must have an existing membership') unless membership.present?
 
-    date ||= Time.zone.now
-    period = EffectiveMemberships.Registrar.current_period(date: date)
-    price = membership.category.send("prorated_#{date.strftime('%b').downcase}").to_i
-
     fee = fees.find { |fee| fee.category == 'Prorated' } || fees.build()
-    fee.assign_attributes(category: 'Prorated', period: period, price: price, due_at: date)
+    raise('already has purchased prorated fee') if fee.purchased?
+
+    date ||= Time.zone.now
+
+    fee.assign_attributes(
+      category: 'Prorated',
+      membership_category: membership.category,
+      price: membership.category.prorated_fee(date: date),
+      period: EffectiveMemberships.Registrar.period(date: date),
+      due_at: date
+    )
 
     fee
   end

@@ -136,25 +136,22 @@ module EffectiveMembershipsFeePayment
     can_revisit_completed_steps(step)
   end
 
+  def outstanding_fees
+    user&.outstanding_fee_payment_fees
+  end
+
   # All Fees and Orders
   def submit_fees
-    fees.select { |fee| fee.applicant_submit_fee? }
+    fees
   end
 
   def submit_order
-    orders.find { |order| order.purchasables.any?(&:applicant_submit_fee?) }
+    orders.first
   end
 
+  # We take over the user's outstanding fees.
   def find_or_build_submit_fees
-    return submit_fees if submit_fees.present?
-
-    fees.build(
-      user: user,
-      category: 'Applicant',
-      membership_category: membership_category,
-      price: membership_category.applicant_fee
-    )
-
+    Array(outstanding_fees).each { |fee| fees << fee }
     submit_fees
   end
 

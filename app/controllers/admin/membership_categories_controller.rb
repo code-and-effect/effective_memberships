@@ -5,13 +5,14 @@ module Admin
 
     include Effective::CrudController
 
-    resource_scope -> { EffectiveMemberships.MembershipCategory.deep }
+    resource_scope -> { EffectiveMemberships.MembershipCategory.deep.all }
     datatable -> { Admin::EffectiveMembershipCategoriesDatatable.new }
 
     private
 
     def permitted_params
-      params.require(:membership_category).permit!
+      model = (params.key?(:effective_membership_category) ? :effective_membership_category : :membership_category)
+      params.require(model).permit!
     end
 
   end

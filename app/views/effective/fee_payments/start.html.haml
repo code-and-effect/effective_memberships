@@ -3,14 +3,14 @@
 
   %p Welcome #{current_user}!
 
-  - if resource.fees.blank?
+  - if resource.outstanding_fees.blank?
     %p You have no fees due at this time.
     = link_to 'Home', root_path, class: 'btn btn-primary'
 
-  - if resource.fees.present?
+  - if resource.outstanding_fees.present?
     %p You have the following fees due at this time:
 
-    = render_purchasables(resource.fees)
+    = render_purchasables(resource.outstanding_fees)
 
     = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
       = f.hidden_field :id

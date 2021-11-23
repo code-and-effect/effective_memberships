@@ -5,7 +5,7 @@ module Admin
 
     include Effective::CrudController
 
-    resource_scope -> { EffectiveMemberships.Applicant.deep }
+    resource_scope -> { EffectiveMemberships.Applicant.deep.all }
     datatable -> { Admin::EffectiveApplicantsDatatable.new }
 
     submit :approve, 'Approve Applicant', success: -> {
@@ -25,7 +25,8 @@ module Admin
     private
 
     def permitted_params
-      params.require(:applicant).permit!
+      model = (params.key?(:effective_applicant) ? :effective_applicant : :applicant)
+      params.require(model).permit!
     end
 
   end
