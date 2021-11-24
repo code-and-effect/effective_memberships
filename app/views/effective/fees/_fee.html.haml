@@ -1,0 +1,37 @@
+%table.table
+  %tbody
+    %tr
+      %th Category
+      %td= fee.category
+
+    - if fee.membership_category.present?
+      %tr
+        %th Membership Category
+        %td
+          - if request.path.start_with?('/admin')
+            = link_to(fee.membership_category, effective_memberships.edit_admin_membership_category_path(fee.membership_category))
+          - else
+            = fee.membership_category
+
+    - if request.path.start_with?('/admin')
+      %tr
+        %th User
+        %td
+          - url = (edit_admin_user_path(fee.user) rescue "/admin/users/#{fee.user.to_param}/edit")
+          = link_to(fee.user, url)
+
+    %tr
+      %th Purchased
+      %td
+        - if fee.purchased_order.present?
+          = link_to(fee.purchased_order, effective_orders.admin_order_path(fee.purchased_order))
+        - else
+          Not Purchased
+
+    %tr
+      %th Period
+      %td= fee.period
+
+    %tr
+      %th Price
+      %td= price_to_currency(fee.price)

@@ -18,7 +18,7 @@ module Admin
       end
 
       unless attributes[:applicant_id] || attributes[:fee_payment_id]
-        col :parent, search: :string
+        col :parent, search: :string, visible: false
       end
 
       col :category, search: EffectiveMemberships.fee_categories
@@ -26,7 +26,7 @@ module Admin
       col :price, as: :price
       col :purchased?, as: :boolean
 
-      col :membership_category
+      col :membership_category, search: { collection: EffectiveMemberships.MembershipCategory.all, polymorphic: false }
 
       if attributes[:applicant_id]
         actions_col(new: false)

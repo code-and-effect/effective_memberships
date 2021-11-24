@@ -1,0 +1,12 @@
+- raise('fees may not be edited') if fee.persisted?
+
+= effective_form_with(model: [:admin, fee], engine: true) do |f|
+  - if inline_datatable?
+    = f.hidden_field :user_id
+  - else
+    = f.select :user_id, {'Members' => current_user.class.members.sorted }, polymorphic: true
+
+  = f.select :category, EffectiveMemberships.new_fee_categories
+  = f.price_field :price
+
+  = effective_submit(f)

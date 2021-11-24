@@ -61,6 +61,11 @@ module EffectiveMemberships
     (required + additional).uniq.sort
   end
 
+  def self.new_fee_categories
+    blacklist = ['Applicant', 'Prorated', 'Renewal', 'Late']
+    fee_categories - blacklist
+  end
+
   def self.send_email(email, *args)
     raise('expected args to be an Array') unless args.kind_of?(Array)
 

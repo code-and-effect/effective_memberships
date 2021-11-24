@@ -5,14 +5,18 @@
   = f.check_box :create_renewal_fees, label: 'Yes, renewal fees should be created'
 
   = f.show_if(:create_renewal_fees, true) do
-    %p Charged to members, every January 2, to renew their dues.
+    - date = EffectiveMemberships.Registrar.renewal_fee_date(date: Time.zone.now)
+
+    %p Charged to members, every #{date.strftime('%B %d')}, to renew their dues.
     = f.price_field :renewal_fee
 
   %h3 Late Fees
   = f.check_box :create_late_fees, label: 'Yes, late fees should be created'
 
   = f.show_if(:create_late_fees, true) do
-    %p Charged to members, on January 2, with outstanding renewal fees
+    - date = EffectiveMemberships.Registrar.late_fee_date(date: Time.zone.now)
+
+    %p Charged to members, on #{date.strftime('%B %d')}, with outstanding renewal fees
     = f.price_field :late_fee
 
   = effective_submit(f)

@@ -30,6 +30,8 @@ module EffectiveMembershipsUser
     effective_resource do
       timestamps
     end
+
+    scope :members, -> { joins(:membership) }
   end
 
   def outstanding_fee_payment_fees

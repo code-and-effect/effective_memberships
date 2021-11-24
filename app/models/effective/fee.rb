@@ -1,6 +1,5 @@
 module Effective
   class Fee < ActiveRecord::Base
-    attr_accessor :current_date
     acts_as_purchasable
 
     log_changes(to: :user) if respond_to?(:log_changes)
@@ -36,6 +35,10 @@ module Effective
       additional = user.additional_fee_attributes(self)
       raise('expected a Hash of attributes') unless additional.kind_of?(Hash)
       assign_attributes(additional)
+    end
+
+    before_validation(if: -> { user.present? }) do
+      self.membership_category ||= user.membership&.category
     end
 
     before_validation do
@@ -83,11 +86,11 @@ module Effective
     private
 
     def default_period
-      EffectiveMemberships.Registrar.period(date: (@current_date || Time.zone.now))
+      EffectiveMemberships.Registrar.current_period
     end
 
     def default_due_at
-      (@current_date || Time.zone.now)
+      Time.zone.now
     end
 
     def default_qb_item_name
