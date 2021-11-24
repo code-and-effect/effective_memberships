@@ -22,8 +22,32 @@ module Effective
       timestamps
     end
 
-    scope :deep, -> { includes(:user) }
+    scope :deep, -> { includes(:category, user: [:fees, :membership]) }
     scope :sorted, -> { order(:id) }
+
+    scope :with_paid_fees_through, -> (period = nil) {
+      period ||= EffectiveMemberships.Registrar.current_period
+      where(arel_table[:fees_paid_through_period].gteq(period))
+    }
+
+    scope :with_unpaid_fees_through, -> (period = nil) {
+      period ||= EffectiveMemberships.Registrar.current_period
+      where(fees_paid_through_period: nil).or(where(arel_table[:fees_paid_through_period].lt(period)))
+    }
+
+    scope :create_renewal_fees, -> (period = nil) {
+      deep
+        .with_unpaid_fees_through(period)
+        #.where.not(fees_paid_through_period: nil) # Must have purchased a Prorated or Renewal Fee before
+        .where(category_id: EffectiveMemberships.MembershipCategory.create_renewal_fees)
+    }
+
+    scope :create_late_fees, -> (period = nil) {
+      deep
+        .with_unpaid_fees_through(period)
+        .where.not(fees_paid_through_period: nil) # Must have purchased a Prorated or Renewal Fee before
+        .where(category_id: EffectiveMemberships.MembershipCategory.create_late_fees)
+    }
 
     before_validation { self.registration_on ||= joined_on }
 

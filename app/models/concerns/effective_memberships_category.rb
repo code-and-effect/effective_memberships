@@ -63,9 +63,9 @@ module EffectiveMembershipsCategory
 
       # Renewals
       create_renewal_fees   :boolean
-      create_late_fees      :boolean
-
       renewal_fee           :integer
+
+      create_late_fees      :boolean
       late_fee              :integer
 
       timestamps
@@ -84,7 +84,9 @@ module EffectiveMembershipsCategory
       .or(where(can_apply_restricted: true))
     }
 
-    scope :for_applicant, -> { deep.sorted.can_apply }
+    # For the create_fees rake task
+    scope :create_renewal_fees, -> { where(create_renewal_fees: true) }
+    scope :create_late_fees, -> { where(create_late_fees: true) }
 
     validates :title, presence: true, uniqueness: true
     validates :position, presence: true

@@ -1,7 +1,6 @@
 module Effective
   class Fee < ActiveRecord::Base
     attr_accessor :current_date
-
     acts_as_purchasable
 
     log_changes(to: :user) if respond_to?(:log_changes)
@@ -63,6 +62,13 @@ module Effective
 
     def to_s
       title.presence || 'New Fee'
+    end
+
+    def late?
+      return false if due_at.blank?
+      return false if purchased?
+
+      due_at < Time.zone.now
     end
 
     # Used by applicant.applicant_submit_fees

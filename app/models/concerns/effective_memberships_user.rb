@@ -42,20 +42,64 @@ module EffectiveMembershipsUser
     {}
   end
 
-  def build_prorated_fees(date: nil)
+  def build_prorated_fee(date: nil)
     raise('must have an existing membership') unless membership.present?
 
-    fee = fees.find { |fee| fee.category == 'Prorated' } || fees.build()
-    raise('already has purchased prorated fee') if fee.purchased?
-
     date ||= Time.zone.now
+    price = membership.category.prorated_fee(date: date)
+    period = EffectiveMemberships.Registrar.period(date: date)
+
+    fee = fees.find { |fee| fee.category == 'Prorated' } || fees.build()
+    return fee if fee.purchased?
 
     fee.assign_attributes(
       category: 'Prorated',
       membership_category: membership.category,
-      price: membership.category.prorated_fee(date: date),
-      period: EffectiveMemberships.Registrar.period(date: date),
+      price: price,
+      period: period,
       due_at: date
+    )
+
+    fee
+  end
+
+  def build_renewal_fee(period:, due_at:)
+    raise('must have an existing membership') unless membership.present?
+
+    fee = fees.find { |fee| fee.category == 'Renewal' && fee.period == period } || fees.build()
+    return fee if fee.purchased?
+
+    fee.assign_attributes(
+      category: 'Renewal',
+      membership_category: membership.category,
+      price: membership.category.renewal_fee.to_i,
+      period: period,
+      due_at: due_at
+    )
+
+    fee
+  end
+
+  def build_late_fee(period:, force: false)
+    raise('must have an existing membership') unless membership.present?
+
+    # Return existing
+    fee = fees.find { |fee| fee.category == 'Late' && fee.period == period }
+    return fee if fee.purchased?
+
+    # Only build the late fee if there is a late renewal fee for the same period
+    renewal_fee = fees.find { |fee| fee.category == 'Renewal' && fee.period == period }
+    return unless (renewal_fee&.late? || force?)
+
+    # Build the late fee
+    fee ||= fees.build()
+
+    fee.assign_attributes(
+      category: 'Late',
+      membership_category: membership.category,
+      price: membership.category.late_fee.to_i,
+      period: period,
+      due_at: Time.zone.now
     )
 
     fee
