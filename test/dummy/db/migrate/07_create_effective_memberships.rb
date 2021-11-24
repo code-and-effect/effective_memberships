@@ -15,6 +15,8 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.text :applicant_wizard_steps
       t.integer :applicant_fee
 
+      t.text :applicant_review_wizard_steps
+
       t.integer :min_applicant_educations
       t.integer :min_applicant_experiences_months
       t.integer :min_applicant_references
@@ -22,6 +24,8 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.integer :min_applicant_files
 
       t.integer :min_applicant_reviews
+
+      t.text :fee_payment_wizard_steps
 
       t.integer :prorated_jan
       t.integer :prorated_feb
@@ -37,10 +41,11 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.integer :prorated_dec
 
       # Renewals
-      t.boolean :can_renew, default: true
-
-      t.integer :annual_fee
+      t.boolean :create_renewal_fees, default: false
       t.integer :renewal_fee
+
+      t.boolean :create_late_fees, default: false
+      t.integer :late_fee
 
       t.datetime :updated_at
       t.datetime :created_at
@@ -60,7 +65,7 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.string :number
       t.date :joined_on
       t.date :registration_on
-      t.integer :fees_paid_through_year
+      t.date :fees_paid_through_period
 
       t.boolean :in_bad_standing, default: false
       t.boolean :in_bad_standing_admin, default: false
@@ -81,6 +86,8 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
 
       t.integer :membership_category_id
       t.string :membership_category_type
+
+      t.date :period
 
       t.date :start_on
       t.date :end_on
@@ -225,7 +232,6 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.datetime :updated_at
     end
 
-
     create_table :applicant_course_names do |t|
       t.integer :applicant_course_area_id
 
@@ -251,6 +257,7 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.datetime :updated_at
     end
 
+    # Applicant Reviews
     create_table :applicant_reviews do |t|
       t.string :token
       t.integer :applicant_id
@@ -289,7 +296,9 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.string :category
 
       t.integer :purchased_order_id
+
       t.integer :membership_category_id
+      t.string :membership_category_type
 
       t.integer :user_id
       t.string :user_type
@@ -302,6 +311,7 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
 
       t.string :title
       t.integer :price
+
       t.string :qb_item_name
       t.boolean :tax_exempt, default: false
 
@@ -315,6 +325,34 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
 
     add_index :fees, [:user_id, :user_type]
     add_index :fees, [:parent_id, :parent_type]
+
+    # Fee Payments
+    create_table :fee_payments do |t|
+      t.string :token
+
+      t.integer :user_id
+      t.string :user_type
+
+      t.integer :membership_category_id
+      t.string :membership_category_type
+
+      # Acts as Statused
+      t.string :status
+      t.text :status_steps
+
+      # Acts as Wizard
+      t.text :wizard_steps
+
+      # Dates
+      t.datetime :submitted_at
+
+      t.datetime :updated_at
+      t.datetime :created_at
+    end
+
+    add_index :fee_payments, [:user_id, :user_type]
+    add_index :fee_payments, :status
+    add_index :fee_payments, :token
 
   end
 end

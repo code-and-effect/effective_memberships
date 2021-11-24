@@ -5,8 +5,7 @@ module Admin
 
     include Effective::CrudController
 
-    resource_scope -> { EffectiveMemberships.Fee.deep.all }
-    datatable -> { Admin::EffectiveFeesDatatable.new }
+    resource_scope -> { Effective::Fee.deep.all }
 
     private
 

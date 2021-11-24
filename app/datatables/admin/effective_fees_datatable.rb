@@ -21,7 +21,7 @@ module Admin
         col :parent, search: :string
       end
 
-      col :category
+      col :category, search: EffectiveMemberships.fee_categories
       col :period
       col :price, as: :price
       col :purchased?, as: :boolean
@@ -36,7 +36,7 @@ module Admin
     end
 
     collection do
-      scope = EffectiveMemberships.Fee.deep.all
+      scope = Effective::Fee.deep.all
 
       if attributes[:user_id]
         scope = scope.where(user_id: attributes[:user_id])

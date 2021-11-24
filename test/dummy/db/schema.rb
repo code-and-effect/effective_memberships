@@ -241,10 +241,28 @@ ActiveRecord::Schema.define(version: 7) do
     t.datetime "updated_at"
   end
 
+  create_table "fee_payments", force: :cascade do |t|
+    t.string "token"
+    t.integer "user_id"
+    t.string "user_type"
+    t.integer "membership_category_id"
+    t.string "membership_category_type"
+    t.string "status"
+    t.text "status_steps"
+    t.text "wizard_steps"
+    t.datetime "submitted_at"
+    t.datetime "updated_at"
+    t.datetime "created_at"
+    t.index ["status"], name: "index_fee_payments_on_status"
+    t.index ["token"], name: "index_fee_payments_on_token"
+    t.index ["user_id", "user_type"], name: "index_fee_payments_on_user_id_and_user_type"
+  end
+
   create_table "fees", force: :cascade do |t|
     t.string "category"
     t.integer "purchased_order_id"
     t.integer "membership_category_id"
+    t.string "membership_category_type"
     t.integer "user_id"
     t.string "user_type"
     t.integer "parent_id"
@@ -273,12 +291,14 @@ ActiveRecord::Schema.define(version: 7) do
     t.text "can_apply_restricted_ids"
     t.text "applicant_wizard_steps"
     t.integer "applicant_fee"
+    t.text "applicant_review_wizard_steps"
     t.integer "min_applicant_educations"
     t.integer "min_applicant_experiences_months"
     t.integer "min_applicant_references"
     t.integer "min_applicant_courses"
     t.integer "min_applicant_files"
     t.integer "min_applicant_reviews"
+    t.text "fee_payment_wizard_steps"
     t.integer "prorated_jan"
     t.integer "prorated_feb"
     t.integer "prorated_mar"
@@ -291,9 +311,10 @@ ActiveRecord::Schema.define(version: 7) do
     t.integer "prorated_oct"
     t.integer "prorated_nov"
     t.integer "prorated_dec"
-    t.boolean "can_renew", default: true
-    t.integer "annual_fee"
+    t.boolean "create_renewal_fees", default: false
     t.integer "renewal_fee"
+    t.boolean "create_late_fees", default: false
+    t.integer "late_fee"
     t.datetime "updated_at"
     t.datetime "created_at"
     t.index ["position"], name: "index_membership_categories_on_position"
@@ -305,6 +326,7 @@ ActiveRecord::Schema.define(version: 7) do
     t.string "user_type"
     t.integer "membership_category_id"
     t.string "membership_category_type"
+    t.date "period"
     t.date "start_on"
     t.date "end_on"
     t.string "number"
@@ -324,7 +346,7 @@ ActiveRecord::Schema.define(version: 7) do
     t.string "number"
     t.date "joined_on"
     t.date "registration_on"
-    t.integer "fees_paid_through_year"
+    t.date "fees_paid_through_period"
     t.boolean "in_bad_standing", default: false
     t.boolean "in_bad_standing_admin", default: false
     t.text "in_bad_standing_reason"

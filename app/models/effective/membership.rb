@@ -11,8 +11,8 @@ module Effective
       joined_on                :date     # When they first receive a membership category
 
       # Tracking
-      registration_on          :date     # When the membership category last changed. Applied or reclassified.
-      fees_paid_through_year   :integer  # The year they have paid upto.
+      registration_on           :date     # When the membership category last changed. Applied or reclassified.
+      fees_paid_through_period  :date     # The period they have paid upto.
 
       # In Bad Standing
       in_bad_standing          :boolean   # Calculated value. Is this user in bad standing? (fees due)

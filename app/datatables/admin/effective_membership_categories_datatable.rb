@@ -9,7 +9,8 @@ module Admin
 
       col :title
       col :applicant_fee, as: :price
-      col :annual_fee, as: :price
+      col :renewal_fee, as: :price
+      col :late_fee, as: :price
       col :rich_text_body, label: 'Body'
 
       actions_col

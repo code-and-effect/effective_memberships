@@ -7,6 +7,8 @@ module Effective
       start_on       :date
       end_on         :date
 
+      period          :date
+
       number         :string
 
       in_bad_standing     :boolean

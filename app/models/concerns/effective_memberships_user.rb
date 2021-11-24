@@ -17,8 +17,9 @@ module EffectiveMembershipsUser
 
   included do
     has_many :applicants
-    has_many :fees
     has_many :fee_payments
+
+    has_many :fees, -> { Effective::Fee.sorted }, inverse_of: :user, class_name: 'Effective::Fee'
 
     has_one :membership, inverse_of: :user, class_name: 'Effective::Membership'
     accepts_nested_attributes_for :membership
@@ -36,6 +37,11 @@ module EffectiveMembershipsUser
   end
 
   # Instance Methods
+  def additional_fee_attributes(fee)
+    raise('expected an Effective::Fee') unless fee.kind_of?(Effective::Fee)
+    {}
+  end
+
   def build_prorated_fees(date: nil)
     raise('must have an existing membership') unless membership.present?
 

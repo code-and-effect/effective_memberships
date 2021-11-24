@@ -7,8 +7,9 @@ module EffectiveMemberships
 
   def self.config_keys
     [
-      :membership_categories_table_name, :applicants_table_name, :applicant_reviews_table_name, :fees_table_name, :fee_payments_table_name,
-      :membership_category_class_name, :applicant_class_name, :applicant_review_class_name, :fee_class_name, :fee_payment_class_name, :registrar_class_name,
+      :membership_categories_table_name, :applicants_table_name, :applicant_reviews_table_name, :fee_payments_table_name,
+      :membership_category_class_name, :applicant_class_name, :applicant_review_class_name, :fee_payment_class_name, :registrar_class_name,
+      :additional_fee_categories,
       :layout,
       :mailer, :parent_mailer, :deliver_method, :mailer_layout, :mailer_sender, :mailer_admin, :use_effective_email_templates
     ]
@@ -26,10 +27,6 @@ module EffectiveMemberships
 
   def self.ApplicantReview
     applicant_review_class_name&.constantize || Effective::ApplicantReview
-  end
-
-  def self.Fee
-    fee_class_name&.constantize || Effective::Fee
   end
 
   def self.FeePayment
@@ -55,6 +52,13 @@ module EffectiveMemberships
     else
       ActionMailer::Base
     end
+  end
+
+  def self.fee_categories
+    required = ['Applicant', 'Prorated', 'Renewal', 'Late', 'Admin']
+    additional = Array(additional_fee_categories)
+
+    (required + additional).uniq.sort
   end
 
   def self.send_email(email, *args)

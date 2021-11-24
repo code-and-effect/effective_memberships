@@ -54,7 +54,7 @@ module EffectiveMembershipsFeePayment
 
     belongs_to :membership_category, polymorphic: true, optional: true
 
-    has_many :fees, -> { order(:id) }, as: :parent, dependent: :nullify
+    has_many :fees, -> { order(:id) }, as: :parent, class_name: 'Effective::Fee', dependent: :nullify
     accepts_nested_attributes_for :fees, reject_if: :all_blank, allow_destroy: true
 
     # Effective Namespace

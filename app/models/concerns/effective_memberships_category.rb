@@ -34,19 +34,17 @@ module EffectiveMembershipsCategory
       applicant_fee              :integer
       applicant_wizard_steps     :text
 
-      renewal_fee                :integer
-      late_fee                   :integer
-      fee_payment_wizard_steps   :text
-
       min_applicant_educations          :integer
       min_applicant_experiences_months  :integer
       min_applicant_references          :integer
       min_applicant_courses             :integer
       min_applicant_files               :integer
 
+      # Applicant Reviews
       min_applicant_reviews             :integer
       applicant_review_wizard_steps     :text
 
+      # Prorated Fees
       prorated_jan        :integer
       prorated_feb        :integer
       prorated_mar        :integer
@@ -60,11 +58,15 @@ module EffectiveMembershipsCategory
       prorated_nov        :integer
       prorated_dec        :integer
 
-      # Renewals
-      can_renew             :boolean
+      # Fee Payments
+      fee_payment_wizard_steps   :text
 
-      annual_fee            :integer
+      # Renewals
+      create_renewal_fees   :boolean
+      create_late_fees      :boolean
+
       renewal_fee           :integer
+      late_fee              :integer
 
       timestamps
     end

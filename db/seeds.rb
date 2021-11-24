@@ -16,7 +16,8 @@ member = Effective::MembershipCategory.create!(
   min_applicant_references: 2,
   min_applicant_reviews: 2,
   applicant_fee: 100_00,
-  annual_fee: 250_00,
+  renewal_fee: 250_00,
+  late_fee: 50_00,
   prorated_jan: 120, prorated_feb: 110, prorated_mar: 100, prorated_apr: 90, prorated_may: 80, prorated_jun: 70,
   prorated_jul: 60, prorated_aug: 50, prorated_sep: 40, prorated_oct: 30, prorated_nov: 20, prorated_dec: 10
 )
@@ -27,7 +28,8 @@ student = Effective::MembershipCategory.create!(
   min_applicant_references: 0,
   min_applicant_reviews: 0,
   applicant_fee: 50_00,
-  annual_fee: 125_00,
+  renewal_fee: 125_00,
+  late_fee: 25_00,
   prorated_jan: 120, prorated_feb: 110, prorated_mar: 100, prorated_apr: 90, prorated_may: 80, prorated_jun: 70,
   prorated_jul: 60, prorated_aug: 50, prorated_sep: 40, prorated_oct: 30, prorated_nov: 20, prorated_dec: 10
 )
@@ -39,7 +41,7 @@ retired = Effective::MembershipCategory.create!(
   can_apply_restricted: true,
   can_apply_restricted_ids: [member.id],
   applicant_fee: 0,
-  annual_fee: 0,
+  renewal_fee: 0,
   prorated_jan: 0, prorated_feb: 0, prorated_mar: 0, prorated_apr: 0, prorated_may: 0, prorated_jun: 0,
   prorated_jul: 0, prorated_aug: 0, prorated_sep: 0, prorated_oct: 0, prorated_nov: 0, prorated_dec: 0
 )

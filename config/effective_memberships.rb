@@ -1,10 +1,7 @@
 EffectiveMemberships.setup do |config|
   config.membership_categories_table_name = :membership_categories
-
   config.applicants_table_name = :applicants
   config.applicant_reviews_table_name = :applicant_reviews
-
-  config.fees_table_name = :fees
   config.fee_payments_table_name = :fee_payments
 
   # Layout Settings
@@ -18,8 +15,11 @@ EffectiveMemberships.setup do |config|
   # config.membership_category_class_name = 'Effective::MembershipCategory'
   # config.applicant_class_name = 'Effective::Applicant'
   # config.applicant_review_class_name = 'Effective::ApplicantReview'
-  # config.fee_class_name = 'Effective::Fee'
   # config.registrar_class_name = 'Effective::Registrar'
+
+  # Fee Categories
+  # The defaults include: Applicant, Prorated, Renewal, Late, Admin
+  # config.additional_fee_categories = []
 
   # Mailer Configuration
   # Configure the class responsible to send e-mails.
