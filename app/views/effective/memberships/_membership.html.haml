@@ -1,0 +1,29 @@
+%table.table
+  %tbody
+    %tr
+      %th Joined
+      %td= membership.joined_on.strftime('%F')
+
+    %tr
+      %th Registered
+      %td= membership.registration_on.strftime('%F')
+
+    %tr
+      %th Category
+      %td= membership.category
+
+    %tr
+      %th Number
+      %td= membership.number
+
+    %tr
+      %th Fees Paid
+      %td= membership.fees_paid_through_period&.strftime('%F')
+
+    %tr
+      %th In Bad Standing
+      %td
+        - if membership.in_bad_standing?
+          %p Yes. #{membership.in_bad_standing_reason}
+        - else
+          = '-'

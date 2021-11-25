@@ -1,5 +1,6 @@
 %h2 Fees
 - fees = current_user.outstanding_fee_payment_fees
+- membership = current_user.membership
 
 - if fees.present?
   %p You have #{pluralize(fees.length , 'outstanding fee')}.
@@ -8,3 +9,12 @@
 
 - else
   %p You have no outstanding fees at this time. Thank you!
+
+- if membership.present?
+  - if membership.category.create_renewal_fees?
+    - date = EffectiveMemberships.Registrar.renewal_fee_date(date: Time.zone.now)
+    %p Annual fees become available for purchase on #{date.strftime('%B %d')} of each year.
+
+  - if membership.category.create_late_fees?
+    - date = EffectiveMemberships.Registrar.late_fee_date(date: Time.zone.now)
+    %p Late fees will be applied on #{date.strftime('%B %d')}.

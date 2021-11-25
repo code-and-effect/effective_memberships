@@ -43,6 +43,24 @@ module Effective
       save!(user, date: date)
     end
 
+    def reclassify!(user, to:, from:, date: nil)
+      raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
+      raise('expecting a to memberships category') unless to.class.respond_to?(:effective_memberships_category?)
+      raise('expecting a from memberships category') unless from.class.respond_to?(:effective_memberships_category?)
+      raise('user must have an existing membership. use register! instead') if user.membership.blank?
+      raise('expected to and from to be different') if from == to
+      raise('expected to and from to be different') if user.membership.category == to
+
+      date ||= Time.zone.now
+
+      membership = user.membership
+
+      membership.category = to
+      membership.registration_on = date
+
+      save!(user, date: date)
+    end
+
     def next_membership_number(user, to:)
       raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
       raise('expecting a memberships category') unless to.class.respond_to?(:effective_memberships_category?)

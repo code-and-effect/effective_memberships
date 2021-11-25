@@ -118,7 +118,7 @@ module Effective
 
     def default_title
       [
-        period&.strftime('%y').presence,
+        period&.strftime('%Y').presence,
         membership_category.to_s.presence,
         category.presence,
         'Fee'

@@ -145,6 +145,12 @@ module EffectiveMembershipsApplicant
     # All Steps validations
     validates :user, presence: true
 
+    with_options(if: -> { current_step == :start && user.present? }) do
+      validate do
+        self.errors.add(:base, 'may not have outstanding fees') if user.outstanding_fee_payment_fees.present?
+      end
+    end
+
     # Select Step
     with_options(if: -> { current_step == :select || has_completed_step?(:select) }) do
       validates :membership_category, presence: true
@@ -282,7 +288,7 @@ module EffectiveMembershipsApplicant
   end
 
   def summary
-    case status
+    case status_was
     when 'draft'
       "Applicant has not yet completed the #{category} wizard steps or paid to submit this application. This application will transition to 'submitted' after payment has been collected."
     when 'submitted'

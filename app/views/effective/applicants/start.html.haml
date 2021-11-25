@@ -3,6 +3,16 @@
 
   %p Welcome #{current_user}!
 
-  = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
-    = f.hidden_field :id
-    = f.save 'Save and Continue'
+  - fees = resource.user.outstanding_fee_payment_fees
+
+  - if fees.present?
+    %p You have #{pluralize(fees.length , 'outstanding fee')}.
+    %p
+      Please
+      = link_to 'Make a fee payment', effective_memberships.new_fee_payment_path
+      before continuing with any applications
+
+  - if fees.blank?
+    = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+      = f.hidden_field :id
+      = f.save 'Save and Continue'
