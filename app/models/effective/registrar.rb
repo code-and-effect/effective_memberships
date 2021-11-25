@@ -58,6 +58,12 @@ module Effective
       membership.category = to
       membership.registration_on = date
 
+      fee = user.build_prorated_fee(date: date)
+      raise('already has purchased prorated fee') if fee.purchased?
+
+      fee = user.build_discount_fee(date: date, from: from)
+      raise('already has purchased discount fee') if fee.purchased?
+
       save!(user, date: date)
     end
 

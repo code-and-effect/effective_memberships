@@ -134,6 +134,10 @@ module EffectiveMembershipsCategory
     send("prorated_#{date.strftime('%b').downcase}").to_i
   end
 
+  def discount_fee(date:)
+    0 - prorated_fee(date: date)
+  end
+
   def can_apply_restricted_ids
     Array(self[:can_apply_restricted_ids]) - [nil, '']
   end
