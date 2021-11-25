@@ -38,7 +38,7 @@ module Effective
     scope :create_renewal_fees, -> (period = nil) {
       deep
         .with_unpaid_fees_through(period)
-        #.where.not(fees_paid_through_period: nil) # Must have purchased a Prorated or Renewal Fee before
+        .where.not(fees_paid_through_period: nil) # Must have purchased a Prorated or Renewal Fee before
         .where(category_id: EffectiveMemberships.MembershipCategory.create_renewal_fees)
     }
 

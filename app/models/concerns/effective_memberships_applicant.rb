@@ -77,9 +77,6 @@ module EffectiveMembershipsApplicant
     has_many :applicant_reviews, -> { order(:id) }, inverse_of: :applicant, dependent: :destroy
     accepts_nested_attributes_for :applicant_reviews, reject_if: :all_blank, allow_destroy: true
 
-    has_many :fees, -> { order(:id) }, as: :parent, dependent: :nullify
-    accepts_nested_attributes_for :fees, reject_if: :all_blank, allow_destroy: true
-
     # Effective Namespace
     has_many :applicant_courses, -> { order(:id) }, class_name: 'Effective::ApplicantCourse', inverse_of: :applicant, dependent: :destroy
     accepts_nested_attributes_for :applicant_courses, reject_if: :all_blank, allow_destroy: true
@@ -92,6 +89,9 @@ module EffectiveMembershipsApplicant
 
     has_many :applicant_references, -> { order(:id) }, class_name: 'Effective::ApplicantReference', inverse_of: :applicant, dependent: :destroy
     accepts_nested_attributes_for :applicant_references, reject_if: :all_blank, allow_destroy: true
+
+    has_many :fees, -> { order(:id) }, as: :parent, class_name: 'Effective::Fee', dependent: :nullify
+    accepts_nested_attributes_for :fees, reject_if: :all_blank, allow_destroy: true
 
     has_many :orders, -> { order(:id) }, as: :parent, class_name: 'Effective::Order', dependent: :nullify
     accepts_nested_attributes_for :orders

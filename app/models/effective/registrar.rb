@@ -5,8 +5,8 @@ module Effective
       Date.new(date.year, 12, 1) # Fees roll over every December 1st
     end
 
-    def late_fee_date(date:)
-      Date.new(date.year, 2, 1) # Fees are late after February 1st
+    def late_fee_date(period:)
+      Date.new(period.year, 2, 1) # Fees are late after February 1st
     end
 
     def register!(user, to:, date: nil, number: nil)
@@ -62,7 +62,7 @@ module Effective
     def create_fees!(period: nil)
       # The current period, based on Time.zone.now
       period ||= current_period
-      due_at = late_fee_date(date: period)
+      due_at = late_fee_date(period: period)
 
       # Renewal Fees
       Effective::Membership.create_renewal_fees(period).find_each do |membership|
@@ -82,6 +82,12 @@ module Effective
       end
 
       true
+    end
+
+    def fee_payment_purchased!(user)
+      raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
+      user.assign_current_membership_status
+      user.save!
     end
 
     protected

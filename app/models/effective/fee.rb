@@ -19,6 +19,7 @@ module Effective
       title         :string
 
       period        :date
+
       due_at        :datetime
 
       price         :integer
@@ -74,6 +75,13 @@ module Effective
       due_at < Time.zone.now
     end
 
+    def in_bad_standing?
+      return false if due_at.blank?
+      return false if purchased?
+      return false unless late?
+
+    end
+
     # Used by applicant.applicant_submit_fees
     def applicant_submit_fee?
       category == 'Applicant'
@@ -81,6 +89,11 @@ module Effective
 
     def fee_payment_fee?
       category != 'Applicant'
+    end
+
+    # Will advance a membership.fees_paid_through_year value when purchased
+    def membership_period_fee?
+      category == 'Prorated' || category == 'Renewal'
     end
 
     private

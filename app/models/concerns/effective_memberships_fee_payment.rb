@@ -115,6 +115,7 @@ module EffectiveMembershipsFeePayment
 
     after_purchase do |_order|
       raise('expected submit_order to be purchased') unless submit_order&.purchased?
+      EffectiveMemberships.Registrar.fee_payment_purchased!(user)
       submit_purchased!
     end
   end

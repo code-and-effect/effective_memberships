@@ -38,6 +38,10 @@ module EffectiveMembershipsUser
     fees.select { |fee| fee.fee_payment_fee? && !fee.purchased? }
   end
 
+  def max_fees_paid_through_period
+    fees.select { |fee| fee.membership_period_fee? && fee.purchased? }.max(&:period)
+  end
+
   # Instance Methods
   def additional_fee_attributes(fee)
     raise('expected an Effective::Fee') unless fee.kind_of?(Effective::Fee)
@@ -82,16 +86,16 @@ module EffectiveMembershipsUser
     fee
   end
 
-  def build_late_fee(period:, force: false)
+  def build_late_fee(period:)
     raise('must have an existing membership') unless membership.present?
 
-    # Return existing
+    # Return existing but do not build yet
     fee = fees.find { |fee| fee.category == 'Late' && fee.period == period }
-    return fee if fee.purchased?
+    return fee if fee&.purchased?
 
-    # Only build the late fee if there is a late renewal fee for the same period
+    # Only continue if there is a late renewal fee for the same period
     renewal_fee = fees.find { |fee| fee.category == 'Renewal' && fee.period == period }
-    return unless (renewal_fee&.late? || force?)
+    return unless fee.present? || renewal_fee&.late?
 
     # Build the late fee
     fee ||= fees.build()
@@ -105,6 +109,17 @@ module EffectiveMembershipsUser
     )
 
     fee
+  end
+
+  def assign_current_membership_status
+    raise('expected membership to be present') unless membership.present?
+
+    # Assign fees_paid_through_period
+    membership.fees_paid_through_period = max_fees_paid_through_period()
+
+    membership.in_bad_standing =
+    membership.in_bad_standing ||= membership.in_bad_standing_admin # Admin set it
+
   end
 
   def build_membership_history(start_on: nil)

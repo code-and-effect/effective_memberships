@@ -109,6 +109,15 @@ module EffectiveMembershipsTestBuilder
     )
   end
 
+  # This is actually a create, cause register! calls save
+  def build_member(membership_category: nil)
+    membership_category ||= Effective::MembershipCategory.where(title: 'Full Member').first!
+    user = build_user_with_address()
+
+    EffectiveMemberships.Registrar.register!(user, to: membership_category)
+    user
+  end
+
   def create_user!
     build_user.tap { |user| user.save! }
   end

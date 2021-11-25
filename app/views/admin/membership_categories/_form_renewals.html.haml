@@ -14,7 +14,8 @@
   = f.check_box :create_late_fees, label: 'Yes, late fees should be created'
 
   = f.show_if(:create_late_fees, true) do
-    - date = EffectiveMemberships.Registrar.late_fee_date(date: Time.zone.now)
+    - period = EffectiveMemberships.Registrar.current_period
+    - date = EffectiveMemberships.Registrar.late_fee_date(period: period)
 
     %p Charged to members, on #{date.strftime('%B %d')}, with outstanding renewal fees
     = f.price_field :late_fee
