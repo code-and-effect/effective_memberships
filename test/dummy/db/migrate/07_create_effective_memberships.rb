@@ -307,7 +307,8 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.string :parent_type
 
       t.date :period
-      t.datetime :due_at
+      t.date :late_on
+      t.date :bad_standing_on
 
       t.string :title
       t.integer :price

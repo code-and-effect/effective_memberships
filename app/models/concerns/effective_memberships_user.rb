@@ -38,6 +38,10 @@ module EffectiveMembershipsUser
     fees.select { |fee| fee.fee_payment_fee? && !fee.purchased? }
   end
 
+  def bad_standing_fees
+    fees.select { |fee| fee.bad_standing? }
+  end
+
   def max_fees_paid_through_period
     fees.select { |fee| fee.membership_period_fee? && fee.purchased? }.max(&:period)
   end
@@ -62,14 +66,13 @@ module EffectiveMembershipsUser
       category: 'Prorated',
       membership_category: membership.category,
       price: price,
-      period: period,
-      due_at: date
+      period: period
     )
 
     fee
   end
 
-  def build_renewal_fee(period:, due_at:)
+  def build_renewal_fee(period:, late_on:, bad_standing_on:)
     raise('must have an existing membership') unless membership.present?
 
     fee = fees.find { |fee| fee.category == 'Renewal' && fee.period == period } || fees.build()
@@ -80,7 +83,8 @@ module EffectiveMembershipsUser
       membership_category: membership.category,
       price: membership.category.renewal_fee.to_i,
       period: period,
-      due_at: due_at
+      late_on: late_on,
+      bad_standing_on: bad_standing_on
     )
 
     fee
@@ -105,21 +109,29 @@ module EffectiveMembershipsUser
       membership_category: membership.category,
       price: membership.category.late_fee.to_i,
       period: period,
-      due_at: Time.zone.now
     )
 
     fee
   end
 
-  def assign_current_membership_status
+  def update_membership_status!
     raise('expected membership to be present') unless membership.present?
 
-    # Assign fees_paid_through_period
+    # Assign fees paid through period
     membership.fees_paid_through_period = max_fees_paid_through_period()
 
-    membership.in_bad_standing =
-    membership.in_bad_standing ||= membership.in_bad_standing_admin # Admin set it
+    # Assign in bad standing
+    if bad_standing_fees.present?
+      membership.in_bad_standing = true
+      membership.in_bad_standing_reason = 'Unpaid Fees' unless membership.in_bad_standing_reason.present?
+    end
 
+    if membership.changed?
+      build_membership_history()
+      save!
+    end
+
+    true
   end
 
   def build_membership_history(start_on: nil)

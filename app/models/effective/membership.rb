@@ -6,15 +6,14 @@ module Effective
     log_changes(to: :user) if respond_to?(:log_changes)
 
     effective_resource do
-      # Unique member number and date
+      # Membership Info
       number                   :string   # A unique value
       joined_on                :date     # When they first receive a membership category
-
-      # Tracking
       registration_on           :date     # When the membership category last changed. Applied or reclassified.
+
+      # Membership Status
       fees_paid_through_period  :date     # The period they have paid upto.
 
-      # In Bad Standing
       in_bad_standing          :boolean   # Calculated value. Is this user in bad standing? (fees due)
       in_bad_standing_reason   :text      # Reason for bad standing
       in_bad_standing_admin    :boolean   # Admin set this

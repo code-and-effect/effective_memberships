@@ -9,6 +9,10 @@ module Effective
       Date.new(period.year, 2, 1) # Fees are late after February 1st
     end
 
+    def bad_standing_date(period:)
+      Date.new(period.year, 3, 1) # Membership in bad standing after March 1st
+    end
+
     def register!(user, to:, date: nil, number: nil)
       raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
       raise('expecting a memberships category') unless to.class.respond_to?(:effective_memberships_category?)
@@ -62,18 +66,19 @@ module Effective
     def create_fees!(period: nil)
       # The current period, based on Time.zone.now
       period ||= current_period
-      due_at = late_fee_date(period: period)
+      late_on = late_fee_date(period: period)
+      bad_standing_on = bad_standing_date(period: period)
 
-      # Renewal Fees
+      # Create Renewal Fees
       Effective::Membership.create_renewal_fees(period).find_each do |membership|
-        fee = membership.user.build_renewal_fee(period: period, due_at: due_at)
+        fee = membership.user.build_renewal_fee(period: period, late_on: late_on, bad_standing_on: bad_standing_on)
         raise("expected build_renewal_fee to return a fee for period #{period}") unless fee.kind_of?(Effective::Fee)
         next if fee.purchased?
 
         fee.save!
       end
 
-      # Late Fees
+      # Create Late Fees
       Effective::Membership.create_late_fees(period).find_each do |membership|
         fee = membership.user.build_late_fee(period: period)
         next if fee.blank? || fee.purchased?
@@ -81,13 +86,17 @@ module Effective
         fee.save!
       end
 
+      # Update Membership Status - Assign In Bad Standing
+      Effective::Membership.deep.with_unpaid_fees_through(period).find_each do |membership|
+        membership.user.update_membership_status!
+      end
+
       true
     end
 
     def fee_payment_purchased!(user)
       raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
-      user.assign_current_membership_status
-      user.save!
+      user.update_membership_status!
     end
 
     protected

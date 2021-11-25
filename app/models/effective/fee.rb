@@ -20,7 +20,8 @@ module Effective
 
       period        :date
 
-      due_at        :datetime
+      late_on           :date
+      bad_standing_on   :date
 
       price         :integer
       qb_item_name  :string
@@ -44,10 +45,11 @@ module Effective
 
     before_validation do
       self.period ||= default_period()
-      self.due_at ||= default_due_at()
+      self.late_on ||= default_late_on()
+      self.bad_standing_on ||= default_bad_standing_on()
 
       self.qb_item_name ||= default_qb_item_name()
-      self.tax_exempt ||= default_tax_exempt()
+      self.tax_exempt = default_tax_exempt() if tax_exempt.nil?
 
       self.title ||= default_title()
     end
@@ -57,11 +59,15 @@ module Effective
 
     validates :title, presence: true
     validates :period, presence: true
-    validates :due_at, presence: true
     validates :qb_item_name, presence: true
 
     validate(if: -> { category.present? }) do
       self.errors.add(:category, 'is not included') unless EffectiveMemberships.fee_categories.include?(category)
+    end
+
+    with_options(if: -> { category == 'Renewal' }) do
+      validates :late_on, presence: true
+      validates :bad_standing_on, presence: true
     end
 
     def to_s
@@ -69,17 +75,17 @@ module Effective
     end
 
     def late?
-      return false if due_at.blank?
+      return false if late_on.blank?
       return false if purchased?
 
-      due_at < Time.zone.now
+      late_on <= Time.zone.now.to_date
     end
 
-    def in_bad_standing?
-      return false if due_at.blank?
+    def bad_standing?
+      return false if bad_standing_on.blank?
       return false if purchased?
-      return false unless late?
 
+      bad_standing_on <= Time.zone.now.to_date
     end
 
     # Used by applicant.applicant_submit_fees
@@ -102,16 +108,12 @@ module Effective
       EffectiveMemberships.Registrar.current_period
     end
 
-    def default_due_at
-      Time.zone.now
+    def default_late_on
+      nil
     end
 
-    def default_qb_item_name
-      "#{category} Fee"
-    end
-
-    def default_tax_exempt
-      false
+    def default_bad_standing_on
+      nil
     end
 
     def default_title
@@ -121,6 +123,14 @@ module Effective
         category.presence,
         'Fee'
       ].join(' ')
+    end
+
+    def default_qb_item_name
+      "#{category} Fee"
+    end
+
+    def default_tax_exempt
+      false
     end
 
   end
