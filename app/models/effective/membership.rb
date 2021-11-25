@@ -25,25 +25,22 @@ module Effective
     scope :sorted, -> { order(:id) }
 
     scope :with_paid_fees_through, -> (period = nil) {
-      period ||= EffectiveMemberships.Registrar.current_period
-      where(arel_table[:fees_paid_through_period].gteq(period))
+      where(arel_table[:fees_paid_through_period].gteq(period || EffectiveMemberships.Registrar.current_period))
     }
 
     scope :with_unpaid_fees_through, -> (period = nil) {
-      period ||= EffectiveMemberships.Registrar.current_period
-      where(fees_paid_through_period: nil).or(where(arel_table[:fees_paid_through_period].lt(period)))
+      where(arel_table[:fees_paid_through_period].lt(period || EffectiveMemberships.Registrar.current_period))
+      .or(where(fees_paid_through_period: nil))
     }
 
     scope :create_renewal_fees, -> (period = nil) {
-      deep
-        .with_unpaid_fees_through(period)
+      deep.with_unpaid_fees_through(period)
         .where.not(fees_paid_through_period: nil) # Must have purchased a Prorated or Renewal Fee before
         .where(category_id: EffectiveMemberships.MembershipCategory.create_renewal_fees)
     }
 
     scope :create_late_fees, -> (period = nil) {
-      deep
-        .with_unpaid_fees_through(period)
+      deep.with_unpaid_fees_through(period)
         .where.not(fees_paid_through_period: nil) # Must have purchased a Prorated or Renewal Fee before
         .where(category_id: EffectiveMemberships.MembershipCategory.create_late_fees)
     }

@@ -63,11 +63,11 @@ module Effective
 
     # This is intended to be run once per day in a rake task
     # Create Renewal and Late fees
-    def create_fees!(period: nil)
+    def create_fees!(period: nil, late_on: nil, bad_standing_on: nil)
       # The current period, based on Time.zone.now
       period ||= current_period
-      late_on = late_fee_date(period: period)
-      bad_standing_on = bad_standing_date(period: period)
+      late_on ||= late_fee_date(period: period)
+      bad_standing_on ||= bad_standing_date(period: period)
 
       # Create Renewal Fees
       Effective::Membership.create_renewal_fees(period).find_each do |membership|

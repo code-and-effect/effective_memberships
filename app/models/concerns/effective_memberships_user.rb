@@ -43,7 +43,7 @@ module EffectiveMembershipsUser
   end
 
   def max_fees_paid_through_period
-    fees.select { |fee| fee.membership_period_fee? && fee.purchased? }.max(&:period)
+    fees.select { |fee| fee.membership_period_fee? && fee.purchased? }.map(&:period).max
   end
 
   # Instance Methods

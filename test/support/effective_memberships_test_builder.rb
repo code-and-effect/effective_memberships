@@ -1,5 +1,19 @@
 module EffectiveMembershipsTestBuilder
 
+  def build_member(membership_category: nil)
+    membership_category ||= Effective::MembershipCategory.where(title: 'Full Member').first!
+    user = build_user_with_address()
+
+    EffectiveMemberships.Registrar.register!(user, to: membership_category)
+
+    fp = EffectiveMemberships.FeePayment.new(user: user)
+    fp.ready!
+    fp.submit_order.purchase!
+    user.reload
+
+    user
+  end
+
   def create_effective_applicant!
     build_effective_applicant.tap(&:save!)
   end
@@ -104,18 +118,9 @@ module EffectiveMembershipsTestBuilder
       applicant_fee: 100_00,
       renewal_fee: 250_00,
       late_fee: 25_00,
-      prorated_jan: 120, prorated_feb: 110, prorated_mar: 100, prorated_apr: 90, prorated_may: 80, prorated_jun: 70,
-      prorated_jul: 60, prorated_aug: 50, prorated_sep: 40, prorated_oct: 30, prorated_nov: 20, prorated_dec: 10
+      prorated_jan: 120_00, prorated_feb: 110_00, prorated_mar: 100_00, prorated_apr: 90_00, prorated_may: 80_00, prorated_jun: 70_00,
+      prorated_jul: 60_00, prorated_aug: 50_00, prorated_sep: 40_00, prorated_oct: 30_00, prorated_nov: 20_00, prorated_dec: 10_00
     )
-  end
-
-  # This is actually a create, cause register! calls save
-  def build_member(membership_category: nil)
-    membership_category ||= Effective::MembershipCategory.where(title: 'Full Member').first!
-    user = build_user_with_address()
-
-    EffectiveMemberships.Registrar.register!(user, to: membership_category)
-    user
   end
 
   def create_user!
