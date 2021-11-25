@@ -1,17 +1,16 @@
 module Effective
   class MembershipHistory < ActiveRecord::Base
     belongs_to :user, polymorphic: true
+
     belongs_to :membership_category, polymorphic: true
 
     effective_resource do
       start_on       :date
       end_on         :date
 
-      period          :date
-
-      number         :string
-
+      number              :string
       in_bad_standing     :boolean
+
       notes               :text
 
       timestamps

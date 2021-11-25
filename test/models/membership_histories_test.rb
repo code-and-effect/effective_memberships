@@ -4,7 +4,7 @@ class MembershipHistoriesTest < ActiveSupport::TestCase
 
   test 'membership histories are created and set previous end dates' do
     user = build_member()
-    binding.pry
+    first_category = user.membership.category
 
     assert_equal 1, user.membership_histories.length
 
@@ -14,24 +14,16 @@ class MembershipHistoriesTest < ActiveSupport::TestCase
 
     assert_equal 2, user.membership_histories.length
 
+    first = user.membership_histories.first
+    last = user.membership_histories.last
 
-    # history = rpbio.registrant_histories.last
+    assert_equal Time.zone.now.to_date, last.start_on
+    assert_equal user.membership.number, last.number
+    assert_equal user.membership.category, last.membership_category
+    assert (last.in_bad_standing == false)
+    assert last.end_on.nil?
 
-    # assert_equal Time.zone.now.to_date, history.start_on
-    # assert_equal rpbio.number, history.number
-    # assert_equal rpbio.registrant_category, history.registrant_category
-    # assert history.on_leave?
-    # assert history.end_on.blank?
-
-    # # Return from leave
-    # Register.reinstate!(rpbio, to: rpbio.registrant_category)
-    # assert_equal 3, rpbio.registrant_histories.length
-
-    # history.reload
-    # assert_equal Time.zone.now.to_date, history.end_on
-
-    # history2 = rpbio.registrant_histories.last
-    # refute history2.on_leave?
-    # assert history2.end_on.blank?
+    assert_equal Time.zone.now.to_date, first.end_on
+    assert_equal first_category, first.membership_category
   end
 end
