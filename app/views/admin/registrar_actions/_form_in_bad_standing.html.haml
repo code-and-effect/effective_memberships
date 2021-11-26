@@ -1,0 +1,17 @@
+= effective_form_with(model: [:admin, registrar_action], url: effective_memberships.admin_registrar_actions_path) do |f|
+  = f.hidden_field :user_id
+  = f.hidden_field :user_type
+
+  - membership = f.object.user.membership
+
+  - if membership.in_bad_standing?
+    %p This user is in bad standing with the following reason: #{membership.in_bad_standing_reason}
+  - else
+    %p This user is in good standing
+
+  - if membership.in_good_standing?
+    = f.text_area :bad_standing_reason
+    = f.submit 'Set In Bad Standing'
+
+  - if membership.in_bad_standing_admin?
+    = f.submit 'Remove In Bad Standing'

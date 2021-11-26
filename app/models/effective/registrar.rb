@@ -67,6 +67,38 @@ module Effective
       save!(user, date: date)
     end
 
+    def bad_standing!(user, reason:, date: nil)
+      raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
+      raise('expected a member') unless user.membership.present?
+      raise('expected user to be in good standing') if user.membership.in_bad_standing?
+
+      # Date
+      date ||= Time.zone.now
+      membership = user.membership
+
+      membership.in_bad_standing = true
+      membership.in_bad_standing_admin = true
+      membership.in_bad_standing_reason = reason
+
+      save!(user, date: date)
+    end
+
+    def good_standing!(user, date: nil)
+      raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
+      raise('expected a member') unless user.membership.present?
+      raise('expected user to be in bad standing') unless user.membership.in_bad_standing?
+
+      # Date
+      date ||= Time.zone.now
+      membership = user.membership
+
+      membership.in_bad_standing = false
+      membership.in_bad_standing_admin = false
+      membership.in_bad_standing_reason = nil
+
+      save!(user, date: date)
+    end
+
     def next_membership_number(user, to:)
       raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
       raise('expecting a memberships category') unless to.class.respond_to?(:effective_memberships_category?)

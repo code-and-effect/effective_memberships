@@ -67,5 +67,9 @@ module Effective
       'membership'
     end
 
+    def in_good_standing?
+      !in_bad_standing?
+    end
+
   end
 end

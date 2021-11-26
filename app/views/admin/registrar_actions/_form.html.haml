@@ -1,0 +1,10 @@
+- if user.membership.blank?
+  %p No membership present
+
+- if user.membership.present?
+  - registrar_action = Effective::RegistrarAction.new(current_user: current_user, user: user)
+
+  .card
+    .card-body
+      %h5.card-title In Bad Standing
+      = render 'admin/registrar_actions/form_in_bad_standing', registrar_action: registrar_action
