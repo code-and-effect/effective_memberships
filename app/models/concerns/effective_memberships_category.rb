@@ -16,12 +16,12 @@ module EffectiveMembershipsCategory
   end
 
   included do
-    log_changes if respond_to?(:log_changes)
+    log_changes(except: :memberships) if respond_to?(:log_changes)
 
     # rich_text_body - Used by the select step
     has_many_rich_texts
 
-    has_many :memberships, class_name: 'Effective::Membership'
+    has_many :memberships, class_name: 'Effective::Membership', as: :category
 
     effective_resource do
       title                 :string

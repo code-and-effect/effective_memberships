@@ -87,8 +87,6 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.integer :membership_category_id
       t.string :membership_category_type
 
-      t.date :period
-
       t.date :start_on
       t.date :end_on
 
@@ -118,6 +116,8 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.integer :from_membership_category_id
       t.string :from_membership_category_type
 
+      t.string :category
+
       # Acts as Statused
       t.string :status
       t.text :status_steps
@@ -141,6 +141,9 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       # Applicant Experiences
       t.integer :applicant_experiences_months
       t.text :applicant_experiences_details
+
+      # Additional Information
+      t.text :additional_information
 
       t.datetime :updated_at
       t.datetime :created_at

@@ -59,6 +59,8 @@ module EffectiveMembershipsApplicant
 
     has_many_attached :applicant_files
 
+    CATEGORIES = ['Apply to Join', 'Apply to Reclassify']
+
     # Declarations Step
     attr_accessor :declare_code_of_ethics
     attr_accessor :declare_truth
@@ -97,6 +99,8 @@ module EffectiveMembershipsApplicant
     accepts_nested_attributes_for :orders
 
     effective_resource do
+      category               :string
+
       # Acts as Statused
       status                 :string, permitted: false
       status_steps           :text, permitted: false
@@ -118,6 +122,9 @@ module EffectiveMembershipsApplicant
       applicant_experiences_months   :integer
       applicant_experiences_details  :text
 
+      # Additional Information
+      additional_information         :text
+
       # Acts as Wizard
       wizard_steps           :text, permitted: false
 
@@ -130,8 +137,10 @@ module EffectiveMembershipsApplicant
     scope :in_progress, -> { where.not(status: [:approved, :declined]) }
     scope :done, -> { where(status: [:approved, :declined]) }
 
-    before_validation(if: -> { current_step == :start && user && user.membership }) do
-      self.from_membership_category ||= user.membership.category
+    # Set Apply to Join or Reclassification
+    before_validation(if: -> { new_record? && user.present? }) do
+      self.category ||= (user.membership.blank? ? 'Apply to Join' : 'Apply for Reclassification')
+      self.from_membership_category ||= user.membership&.category
     end
 
     before_validation(if: -> { current_step == :select && membership_category_id.present? }) do
@@ -145,14 +154,20 @@ module EffectiveMembershipsApplicant
     # All Steps validations
     validates :user, presence: true
 
+    validate(if: -> { reclassification? }) do
+      errors.add(:membership_category_id, "can't reclassify to existing category") if membership_category_id == from_membership_category_id
+    end
+
+    # Start Step
     with_options(if: -> { current_step == :start && user.present? }) do
       validate do
-        self.errors.add(:base, 'may not have outstanding fees') if user.outstanding_fee_payment_fees.present?
+        errors.add(:base, 'may not have outstanding fees') if user.outstanding_fee_payment_fees.present?
       end
     end
 
     # Select Step
     with_options(if: -> { current_step == :select || has_completed_step?(:select) }) do
+      validates :category, presence: true, inclusion: { in: CATEGORIES }
       validates :membership_category, presence: true
     end
 
@@ -263,14 +278,36 @@ module EffectiveMembershipsApplicant
       end
     end
 
-    after_purchase do |_order|
+    after_purchase do |_|
       raise('expected submit_order to be purchased') unless submit_order&.purchased?
       submit_purchased!
     end
-
   end
 
   # Instance Methods
+  def to_s
+    if category.present? && membership_category.present?
+      [
+        user.to_s,
+        '-',
+        category,
+        'for',
+        membership_category,
+        ("from #{from_membership_category}" if reclassification?)
+      ].compact.join(' ')
+    else
+      'New Applicant'
+    end
+  end
+
+  def apply_to_join?
+    category == 'Apply to Join'
+  end
+
+  def reclassification?
+    category == 'Apply to Reclassify'
+  end
+
   def in_progress?
     !approved? && !declined?
   end
@@ -281,10 +318,6 @@ module EffectiveMembershipsApplicant
 
   def can_visit_step?(step)
     can_revisit_completed_steps(step)
-  end
-
-  def category
-    'Apply to Join'
   end
 
   def summary

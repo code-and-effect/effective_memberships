@@ -150,6 +150,7 @@ module Effective
       true
     end
 
+    # Called in the after_purchase of fee payment
     def fee_payment_purchased!(user)
       raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
       user.update_membership_status!

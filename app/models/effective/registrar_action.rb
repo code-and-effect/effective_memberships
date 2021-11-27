@@ -11,15 +11,12 @@ module Effective
     attr_accessor :bad_standing_reason
 
     # All Action Validations
+    validates :current_action, presence: true
     validates :current_user, presence: true
     validates :user, presence: true
 
     # Bad Standing
     validates :bad_standing_reason, presence: true, if: -> { current_action == :bad_standing }
-
-    def to_s
-      'registrant action'
-    end
 
     def good_standing!
       update!(current_action: :good_standing)
@@ -31,24 +28,24 @@ module Effective
       EffectiveMemberships.Registrar.bad_standing!(user, reason: bad_standing_reason)
     end
 
-    def save!
-      valid? ? true : raise('invalid')
-    end
-
     def update!(atts)
       assign_attributes(atts); save!
     end
 
+    def save!
+      valid? ? true : raise('invalid')
+    end
+
     def user
-      @user || (@user_type.constantize.find(@user_id) if @user_type && @user_id)
+      @user ||= (@user_type.constantize.find(@user_id) if @user_type && @user_id)
     end
 
     def user_type
-      @user_type || @user&.class&.name
+      @user_type || (@user.class.name if @user)
     end
 
     def user_id
-      @user_id || @user&.id
+      @user_id || (@user.id if @user)
     end
 
   end
