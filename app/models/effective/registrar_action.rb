@@ -28,7 +28,7 @@ module Effective
 
     def bad_standing!
       update!(current_action: :bad_standing)
-      EffectiveMemberships.Registrar.bad_standing!(user, admin: true, reason: bad_standing_reason)
+      EffectiveMemberships.Registrar.bad_standing!(user, reason: bad_standing_reason)
     end
 
     def save!

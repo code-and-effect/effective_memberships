@@ -10,7 +10,6 @@ module Effective
 
       number              :string
       in_bad_standing     :boolean
-
       notes               :text
 
       timestamps
@@ -18,7 +17,7 @@ module Effective
 
     serialize :extra, Hash
 
-    scope :deep, -> { includes(:user, :category) }
+    scope :deep, -> { includes(:user, :membership_category) }
     scope :sorted, -> { order(:start_on) }
 
     validates :start_on, presence: true

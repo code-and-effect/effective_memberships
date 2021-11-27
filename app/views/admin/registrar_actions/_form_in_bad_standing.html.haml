@@ -1,17 +1,44 @@
-= effective_form_with(model: [:admin, registrar_action], url: effective_memberships.admin_registrar_actions_path) do |f|
-  = f.hidden_field :user_id
-  = f.hidden_field :user_type
+.card
+  .card-body
+    %h5.card-title Not In Good Standing
 
-  - membership = f.object.user.membership
+    = effective_form_with(model: [:admin, registrar_action], url: effective_memberships.admin_registrar_actions_path) do |f|
+      = f.hidden_field :user_id
+      = f.hidden_field :user_type
 
-  - if membership.in_bad_standing?
-    %p This user is in bad standing with the following reason: #{membership.in_bad_standing_reason}
-  - else
-    %p This user is in good standing
+      - membership = f.object.user.membership
 
-  - if membership.in_good_standing?
-    = f.text_area :bad_standing_reason
-    = f.submit 'Set In Bad Standing'
+      - period = EffectiveMemberships.Registrar.current_period
+      - date = EffectiveMemberships.Registrar.bad_standing_date(period: period)
 
-  - if membership.in_bad_standing_admin?
-    = f.submit 'Remove In Bad Standing'
+      %p.text-muted
+        Members with outstanding renewal fees are automatically marked
+        not in good standing on #{date.strftime('%B %d')}.
+        The status is cleared when they pay their fees.
+        You can also mark a member as always not in good standing.
+
+      = f.static_field :current_action, label: 'Current Status' do
+        #{membership.user}
+
+        - if membership.in_bad_standing_admin?
+          was marked In Bad Standing by an Admin with the following reason: #{membership.in_bad_standing_reason}.
+        - elsif membership.in_bad_standing?
+          was automatically marked In Bad Standing with the following reason: #{membership.in_bad_standing_reason}.
+        - else
+          is In Good Standing
+
+      - if membership.in_good_standing?
+        = f.check_box :current_action, label: 'Yes, set this member in bad standing'
+
+        = f.show_if :current_action, true do
+          = f.text_area :bad_standing_reason, required: true
+
+          = f.submit 'Set In Bad Standing', border: false, center: true,
+            'data-confirm': "Really set #{f.object.user} in bad standing?"
+
+      - if membership.in_bad_standing_admin?
+        = f.check_box :current_action, label: 'Yes, remove in bad standing status'
+
+        = f.show_if :current_action, true do
+          = f.submit 'Remove In Bad Standing', border: false, center: true,
+            'data-confirm': "Really remove #{f.object.user} bad standing?"

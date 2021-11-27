@@ -1,7 +1,7 @@
 module Admin
   class EffectiveMembershipHistoriesDatatable < Effective::Datatable
     datatable do
-      order :start_on
+      order :id, :desc
 
       col :updated_at, visible: false
       col :created_at, visible: false
@@ -15,7 +15,7 @@ module Admin
       col :membership_category
 
       col :number
-      col :in_good_standing
+      col :in_bad_standing
 
       actions_col
     end

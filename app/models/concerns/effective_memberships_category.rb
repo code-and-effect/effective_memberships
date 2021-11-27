@@ -21,6 +21,8 @@ module EffectiveMembershipsCategory
     # rich_text_body - Used by the select step
     has_many_rich_texts
 
+    has_many :memberships, class_name: 'Effective::Membership'
+
     effective_resource do
       title                 :string
       position              :integer
