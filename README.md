@@ -1,5 +1,7 @@
 # Effective Memberships
 
+TODO: This Readme is inaccurate and severely incomplete.
+
 Membership categories, applications to join and reclassify, annual dues payments.
 
 Works with action_text for content bodies, and active_storage for file uploads.
