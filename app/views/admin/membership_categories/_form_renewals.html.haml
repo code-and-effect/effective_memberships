@@ -20,4 +20,13 @@
     %p Charged to members, on #{date.strftime('%B %d')}, with outstanding renewal fees
     = f.price_field :late_fee
 
+  %h3 Bad Standing
+  = f.check_box :create_bad_standing, label: 'Yes, bad standing status should be applied'
+
+  = f.show_if(:create_bad_standing, true) do
+    - period = EffectiveMemberships.Registrar.current_period
+    - date = EffectiveMemberships.Registrar.bad_standing_date(period: period)
+
+    %p Members with outstanding fees, on #{date.strftime('%B %d')}, will automatically be marked in bad standing.
+
   = effective_submit(f)
