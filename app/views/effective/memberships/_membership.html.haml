@@ -18,7 +18,7 @@
 
     %tr
       %th Fees Paid Through
-      %td= membership.fees_paid_through_period&.strftime('%F')
+      %td= membership.fees_paid_through_period&.strftime('%F') || '-'
 
     %tr
       %th In Bad Standing

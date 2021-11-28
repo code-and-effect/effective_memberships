@@ -1,6 +1,5 @@
 = effective_form_with(model: [:admin, applicant], engine: true) do |f|
-  %p
-    The #{applicant} will be <strong>approved</strong> to the following membership category.
+  %p The #{applicant} will be <strong>approved</strong> to the following membership category.
 
   %h3 Category
   = f.static_field :membership_category, label: 'Applied for'
@@ -14,8 +13,19 @@
       The member will keep their existing membership number: #{applicant.user.membership.number}.
     - else
       - number = EffectiveMemberships.Registrar.next_membership_number(applicant.user, to: applicant.membership_category)
-
       = f.text_field :approved_membership_number, hint: "leave blank to assign the next number: #{number}."
+
+  %h3 Fees
+  %p The following fee(s) will be created:
+  - month = Time.zone.now.strftime('%B')
+
+  %ul
+    - if applicant.apply_to_join?
+      %li A #{month} prorated fee
+
+    - if applicant.reclassification?
+      %li A #{month} prorated fee to the new category
+      %li A #{month} discount fee from their old category
 
   %h3 Email to send
   %p The following email will be sent:

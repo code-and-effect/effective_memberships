@@ -23,6 +23,9 @@ module EffectiveMembershipsApplicant
       [:start, :select, :summary, :billing, :checkout, :submitted]
     end
 
+    def categories
+      ['Apply to Join', 'Apply to Reclassify']
+    end
   end
 
   included do
@@ -58,8 +61,6 @@ module EffectiveMembershipsApplicant
     log_changes(except: :wizard_steps) if respond_to?(:log_changes)
 
     has_many_attached :applicant_files
-
-    CATEGORIES = ['Apply to Join', 'Apply to Reclassify']
 
     # Declarations Step
     attr_accessor :declare_code_of_ethics
@@ -139,7 +140,7 @@ module EffectiveMembershipsApplicant
 
     # Set Apply to Join or Reclassification
     before_validation(if: -> { new_record? && user.present? }) do
-      self.category ||= (user.membership.blank? ? 'Apply to Join' : 'Apply for Reclassification')
+      self.category ||= (user.membership.blank? ? 'Apply to Join' : 'Apply to Reclassify')
       self.from_membership_category ||= user.membership&.category
     end
 
@@ -167,7 +168,7 @@ module EffectiveMembershipsApplicant
 
     # Select Step
     with_options(if: -> { current_step == :select || has_completed_step?(:select) }) do
-      validates :category, presence: true, inclusion: { in: CATEGORIES }
+      validates :category, presence: true
       validates :membership_category, presence: true
     end
 
@@ -552,12 +553,18 @@ module EffectiveMembershipsApplicant
     wizard_steps[:submitted] ||= Time.zone.now
     approved!
 
-    EffectiveMemberships.Registrar.register!(
-      user,
-      to: membership_category,
-      date: approved_membership_date.presence,       # Set by the Admin Process form, or nil
-      number: approved_membership_number.presence    # Set by the Admin Process form, or nil
-    )
+    if apply_to_join?
+      EffectiveMemberships.Registrar.register!(
+        user,
+        to: membership_category,
+        date: approved_membership_date.presence,       # Set by the Admin Process form, or nil
+        number: approved_membership_number.presence    # Set by the Admin Process form, or nil
+      )
+    elsif reclassification?
+      EffectiveMemberships.Registrar.reclassify!(user, to: membership_category)
+    else
+      raise('unsupported applicant approval category')
+    end
 
     after_commit { send_email(:applicant_approved) }
 

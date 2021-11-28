@@ -14,8 +14,12 @@ module Admin
       success: -> { "#{resource.user} is now In Good Standing" },
       redirect: -> { admin_users_path(resource) }
 
+    submit :reclassify, 'Reclassify',
+      success: -> { "#{resource.user} has been reclassified to #{resource.user.membership.category}" },
+      redirect: -> { admin_users_path(resource) }
+
     after_error do
-      flash[:danger] = resource_flash(:danger, resource, commit_action[:action])
+      flash.keep
       redirect_to admin_users_path(resource)
     end
 

@@ -13,7 +13,7 @@ module Effective
       Date.new(period.year, 3, 1) # Membership in bad standing after March 1st
     end
 
-    def register!(user, to:, date: nil, number: nil)
+    def register!(user, to:, date: nil, number: nil, skip_fees: false)
       raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
       raise('expecting a memberships category') unless to.class.respond_to?(:effective_memberships_category?)
       raise('user has existing membership. use reclassify! instead.') if user.membership.present?
@@ -36,20 +36,24 @@ module Effective
       membership.number = number
 
       # Build Fees
-      fee = user.build_prorated_fee(date: date)
-      raise('already has purchased prorated fee') if fee.purchased?
+      unless skip_fees
+        fee = user.build_prorated_fee(date: date)
+        raise('already has purchased prorated fee') if fee.purchased?
+      end
 
       # Save user
       save!(user, date: date)
     end
 
-    def reclassify!(user, to:, from:, date: nil)
+    def reclassify!(user, to:, date: nil, skip_fees: false)
       raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
+      raise('user must have an existing membership. use register! instead') if user.membership.blank?
+
+      from = user.membership.category
+
       raise('expecting a to memberships category') unless to.class.respond_to?(:effective_memberships_category?)
       raise('expecting a from memberships category') unless from.class.respond_to?(:effective_memberships_category?)
-      raise('user must have an existing membership. use register! instead') if user.membership.blank?
       raise('expected to and from to be different') if from == to
-      raise('expected to and from to be different') if user.membership.category == to
 
       date ||= Time.zone.now
 
@@ -58,11 +62,13 @@ module Effective
       membership.category = to
       membership.registration_on = date
 
-      fee = user.build_prorated_fee(date: date)
-      raise('already has purchased prorated fee') if fee.purchased?
+      unless skip_fees
+        fee = user.build_prorated_fee(date: date)
+        raise('already has purchased prorated fee') if fee.purchased?
 
-      fee = user.build_discount_fee(date: date, from: from)
-      raise('already has purchased discount fee') if fee.purchased?
+        fee = user.build_discount_fee(date: date, from: from)
+        raise('already has purchased discount fee') if fee.purchased?
+      end
 
       save!(user, date: date)
     end

@@ -18,14 +18,13 @@
         You can also mark a member as always not in good standing.
 
       = f.static_field :current_action, label: 'Current Status' do
-        #{membership.user}
 
         - if membership.in_bad_standing_admin?
-          was marked In Bad Standing by an Admin with the following reason: #{membership.in_bad_standing_reason}.
+          In Bad Standing (set by an Admin) with the following reason: #{membership.in_bad_standing_reason}.
         - elsif membership.in_bad_standing?
-          was automatically marked In Bad Standing with the following reason: #{membership.in_bad_standing_reason}.
+          In Bad Standing with the following reason: #{membership.in_bad_standing_reason}.
         - else
-          is In Good Standing
+          In Good Standing
 
       - if membership.in_good_standing?
         = f.check_box :current_action, label: 'Yes, set this member in bad standing'

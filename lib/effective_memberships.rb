@@ -55,15 +55,14 @@ module EffectiveMemberships
   end
 
   def self.fee_categories
-    required = ['Applicant', 'Prorated', 'Renewal', 'Late', 'Admin']
+    required = ['Applicant', 'Prorated', 'Discount', 'Renewal', 'Late', 'Admin']
     additional = Array(additional_fee_categories)
 
     (required + additional).uniq.sort
   end
 
   def self.new_fee_categories
-    blacklist = ['Applicant', 'Prorated', 'Renewal', 'Late']
-    fee_categories - blacklist
+    ['Admin']
   end
 
   def self.send_email(email, *args)

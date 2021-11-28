@@ -16,60 +16,23 @@
       .mb-4= render 'effective/applicants/summary', applicant: applicant, namespace: :admin
       = render 'effective/applicants/applicant', applicant: applicant, namespace: :admin
 
+  - # Just normal tabs now
   - if applicant.was_submitted? && !applicant.was_approved?
     = tab 'Process' do
       = render 'admin/applicants/form_process', applicant: applicant
 
+  - if applicant.fees.present?
+    = tab 'Fees' do
+      .mb-4= render_inline_datatable(Admin::EffectiveFeesDatatable.new(applicant_id: applicant.to_param))
+
+  - if applicant.orders.present?
+    = tab 'Orders' do
+      .mb-4= render_datatable(Admin::EffectiveOrdersDatatable.new(parent_id: applicant.id, parent_type: EffectiveMemberships.Applicant.name, user_id: applicant.user_id))
+
+  - if applicant.user.applicants.any? { |other| other.was_submitted? && other.id != applicant.id }
+    = tab 'Other Applications' do
+      = render_datatable(Admin::EffectiveApplicantsDatatable.new(user_id: applicant.user_id, except_id: applicant.id))
+
   - if applicant.persisted? && applicant.respond_to?(:log_changes_datatable)
     = tab 'Logs' do
       = render_inline_datatable(applicant.log_changes_datatable)
-
-
-  -# - if !applicant.nwpta_form_required? && !applicant.rsb_form_required?
-  -#   = tab 'Transcripts' do
-  -#     = render '/admin/applicants/form_transcripts', applicant: applicant, namespace: :admin
-
-  -# - if applicant.was_submitted? && applicant.nwpta_form_required?
-  -#   = tab 'NWPTA Verification Form' do
-  -#     = render '/admin/applicants/form_nwpta', applicant: applicant, namespace: :admin
-
-  -# - if applicant.was_submitted? && applicant.rsb_form_required?
-  -#   = tab 'RSB Authorization Form' do
-  -#     = render '/admin/applicants/form_rsb', applicant: applicant, namespace: :admin
-
-  -# - if !applicant.was_approved?
-  -#   = tab 'Request Review' do
-  -#     .mb-4= render '/admin/applicants/form_reviews', applicant: applicant
-
-  -# - if applicant.applicant_reviews_available? || applicant.applicant_reviews.present?
-  -#   = tab 'Reviews' do
-  -#     .mb-4= render_inline_datatable(Admin::ApplicantReviewsDatatable.new(applicant_id: applicant.id))
-
-
-  -# - if applicant.fees.present?
-  -#   = tab 'Fees' do
-  -#     .mb-4= render_inline_datatable(Admin::FeesDatatable.new(applicant_id: applicant.id))
-
-  -# - if applicant.orders.present?
-  -#   = tab 'Orders' do
-  -#     .mb-4= render_datatable(Admin::EffectiveOrdersDatatable.new(parent_id: applicant.id, parent_type: 'Applicant', user_id: applicant.user.id))
-
-  -# - if applicant.user.applicants.any? { |other| other.was_submitted? && other.id != applicant.id }
-  -#   = tab 'Other Applications' do
-  -#     = render_datatable(Admin::ApplicantsDatatable.new(user_id: applicant.user_id, except_id: applicant.id))
-
-  -# = tab 'Comments' do
-  -#   = render_inline_datatable(Admin::CommentsDatatable.new(commentable_type: 'Applicant', commentable_id: applicant.id))
-
-  -# = tab 'Documents' do
-  -#   = render_inline_datatable(Admin::DocumentsDatatable.new(documentable_type: 'Applicant', documentable_id: applicant.id, user_id: applicant.user.id))
-
-  -#   - datatable = Admin::ActiveStorageDatatable.new(self, record_type: 'Applicant', record_id: applicant.id, user_id: applicant.user.id)
-
-  -#   - if datatable.present?
-  -#     %h3 Additional uploads:
-  -#     = render_simple_datatable(datatable)
-
-  -# - if applicant.persisted?
-  -#   = tab 'Logs' do
-  -#     = render_datatable(applicant.log_changes_datatable)

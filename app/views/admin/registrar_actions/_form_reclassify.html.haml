@@ -1,0 +1,37 @@
+.card
+  .card-body
+    %h5.card-title Reclassification
+
+    = effective_form_with(model: [:admin, registrar_action], url: effective_memberships.admin_registrar_actions_path) do |f|
+      = f.hidden_field :user_id
+      = f.hidden_field :user_type
+
+      - membership = f.object.user.membership
+
+      - period = EffectiveMemberships.Registrar.current_period
+      - date = EffectiveMemberships.Registrar.bad_standing_date(period: period)
+
+      %p.text-muted
+        Change a member's existing category and optionally create fees.
+
+      %p The member will keep their existing membership number: #{membership.number}.
+
+      = f.static_field :current_action, label: 'Current Category' do
+        = membership.category.to_s
+
+      - categories = EffectiveMemberships.MembershipCategory.all.where.not(id: membership.category_id)
+      = f.select :membership_category_id, categories, label: 'Reclassify to', required: true
+
+      = f.check_box :skip_fees, label: 'Yes, skip creating fees and just set the category'
+
+      = f.hide_if :skip_fees, true do
+        %p The following fee(s) will be created:
+        - month = Time.zone.now.strftime('%B')
+
+        %ul
+          %li A #{month} prorated fee to the new category
+          %li A #{month} discount fee from their old category
+
+        %p The member will be required to return to the website and make a fee payment
+
+      = f.submit 'Reclassify', border: false, center: true, 'data-confirm': "Really reclassify #{f.object.user}?"
