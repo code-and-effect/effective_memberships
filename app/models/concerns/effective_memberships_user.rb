@@ -145,11 +145,11 @@ module EffectiveMembershipsUser
 
     # Assign in bad standing
     if bad_standing_fees.present?
-      membership.in_bad_standing = true
-      membership.in_bad_standing_reason = 'Unpaid Fees' unless membership.in_bad_standing_reason.present?
+      membership.bad_standing = true
+      membership.bad_standing_reason = 'Unpaid Fees' unless membership.bad_standing_reason.present?
     end
 
-    if membership.in_bad_standing_changed?
+    if membership.bad_standing_changed?
       build_membership_history()
       save!
     end
@@ -172,7 +172,7 @@ module EffectiveMembershipsUser
       end_on: nil,
       membership_category: membership.category,
       number: membership.number,
-      in_bad_standing: membership.in_bad_standing?
+      bad_standing: membership.bad_standing?
     )
   end
 

@@ -23,7 +23,7 @@
     %tr
       %th In Bad Standing
       %td
-        - if membership.in_bad_standing?
-          %p Yes. #{membership.in_bad_standing_reason}
+        - if membership.bad_standing?
+          %p Yes. #{membership.bad_standing_reason}
         - else
           = '-'

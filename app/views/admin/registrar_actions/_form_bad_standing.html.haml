@@ -19,14 +19,14 @@
 
       = f.static_field :current_action, label: 'Current Status' do
 
-        - if membership.in_bad_standing_admin?
-          In Bad Standing (set by an Admin) with the following reason: #{membership.in_bad_standing_reason}.
-        - elsif membership.in_bad_standing?
-          In Bad Standing with the following reason: #{membership.in_bad_standing_reason}.
+        - if membership.bad_standing_admin?
+          In Bad Standing (set by an Admin) with the following reason: #{membership.bad_standing_reason}.
+        - elsif membership.bad_standing?
+          In Bad Standing with the following reason: #{membership.bad_standing_reason}.
         - else
           In Good Standing
 
-      - if membership.in_good_standing?
+      - if membership.good_standing?
         = f.check_box :current_action, label: 'Yes, set this member in bad standing'
 
         = f.show_if :current_action, true do
@@ -35,7 +35,7 @@
           = f.submit 'Set In Bad Standing', border: false, center: true,
             'data-confirm': "Really set #{f.object.user} in bad standing?"
 
-      - if membership.in_bad_standing_admin?
+      - if membership.bad_standing_admin?
         = f.check_box :current_action, label: 'Yes, remove in bad standing status'
 
         = f.show_if :current_action, true do

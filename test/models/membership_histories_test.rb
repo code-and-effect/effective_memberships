@@ -20,7 +20,7 @@ class MembershipHistoriesTest < ActiveSupport::TestCase
     assert_equal Time.zone.now.to_date, last.start_on
     assert_equal user.membership.number, last.number
     assert_equal user.membership.category, last.membership_category
-    assert (last.in_bad_standing == false)
+    assert (last.bad_standing == false)
     assert last.end_on.nil?
 
     assert_equal Time.zone.now.to_date, first.end_on

@@ -70,6 +70,8 @@ module EffectiveMembershipsCategory
       create_late_fees      :boolean
       late_fee              :integer
 
+      create_bad_standing  :boolean
+
       timestamps
     end
 
@@ -89,6 +91,7 @@ module EffectiveMembershipsCategory
     # For the create_fees rake task
     scope :create_renewal_fees, -> { where(create_renewal_fees: true) }
     scope :create_late_fees, -> { where(create_late_fees: true) }
+    scope :create_bad_standing, -> { where(create_bad_standing: true) }
 
     validates :title, presence: true, uniqueness: true
     validates :position, presence: true

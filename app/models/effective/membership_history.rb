@@ -9,7 +9,7 @@ module Effective
       end_on         :date
 
       number              :string
-      in_bad_standing     :boolean
+      bad_standing     :boolean
       notes               :text
 
       timestamps

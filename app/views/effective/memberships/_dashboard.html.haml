@@ -14,10 +14,10 @@
       - if membership.registration_on > membership.joined_on
         and last changed categories on #{membership.registration_on.strftime('%F')}
 
-    - if membership.in_bad_standing?
+    - if membership.bad_standing?
       %p
         = succeed('.') do
-          Your membership is in bad standing with the following reason: #{membership.in_bad_standing_reason}
+          Your membership is in bad standing with the following reason: #{membership._reason}
 
 - else
   %p You are not a member.

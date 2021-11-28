@@ -15,7 +15,7 @@ module Admin
       col :membership_category
 
       col :number
-      col :in_bad_standing
+      col :bad_standing
 
       actions_col
     end

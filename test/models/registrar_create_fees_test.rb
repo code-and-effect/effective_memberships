@@ -86,7 +86,7 @@ class RegistrarCreateFeesTest < ActiveSupport::TestCase
     # No one is in bad standing
     Effective::Membership.update_all(fees_paid_through_period: last_period)
     Effective::Fee.update_all(period: last_period)
-    assert_equal 0, Effective::Membership.where(in_bad_standing: true).count
+    assert_equal 0, Effective::Membership.where(bad_standing: true).count
 
     # Create Renewal Fees
     EffectiveMemberships.Registrar.create_fees!(bad_standing_on: Time.zone.now + 1.day)
@@ -97,11 +97,11 @@ class RegistrarCreateFeesTest < ActiveSupport::TestCase
 
     # Update The Renewal Fees so they're all in bad standing
     Effective::Fee.where(category: 'Renewal').update_all(bad_standing_on: Time.zone.now - 1.minute)
-    assert_equal 0, Effective::Membership.where(in_bad_standing: true).count
+    assert_equal 0, Effective::Membership.where(bad_standing: true).count
 
     # Create Fees Should mark them in bad standing
     EffectiveMemberships.Registrar.create_fees!
-    assert_equal 3, Effective::Membership.where(in_bad_standing: true).count
+    assert_equal 3, Effective::Membership.where(bad_standing: true).count
 
     # Running it a second time makes no changes
     EffectiveMemberships.Registrar.create_fees!

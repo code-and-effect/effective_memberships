@@ -14,9 +14,9 @@ module Effective
       # Membership Status
       fees_paid_through_period  :date     # The period they have paid upto.
 
-      in_bad_standing          :boolean   # Calculated value. Is this user in bad standing? (fees due)
-      in_bad_standing_reason   :text      # Reason for bad standing
-      in_bad_standing_admin    :boolean   # Admin set this
+      bad_standing          :boolean   # Calculated value. Is this user in bad standing? (fees due)
+      bad_standing_reason   :text      # Reason for bad standing
+      bad_standing_admin    :boolean   # Admin set this
 
       timestamps
     end
@@ -45,6 +45,12 @@ module Effective
         .where(category_id: EffectiveMemberships.MembershipCategory.create_late_fees)
     }
 
+    scope :create_bad_standing, -> (period = nil) {
+      deep.with_unpaid_fees_through(period)
+        .where.not(fees_paid_through_period: nil) # Must have purchased a Prorated or Renewal Fee before
+        .where(category_id: EffectiveMemberships.MembershipCategory.create_bad_standing)
+    }
+
     before_validation { self.registration_on ||= joined_on }
 
     validates :number, presence: true, uniqueness: true
@@ -67,8 +73,8 @@ module Effective
       'membership'
     end
 
-    def in_good_standing?
-      !in_bad_standing?
+    def good_standing?
+      !bad_standing?
     end
 
   end
