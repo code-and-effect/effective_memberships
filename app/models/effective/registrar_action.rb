@@ -1,3 +1,5 @@
+# Form Object for the Admin Change Status screens
+
 module Effective
   class RegistrarAction
     include ActiveModel::Model
@@ -26,7 +28,7 @@ module Effective
     validates :membership_category_id, presence: true, if: -> { current_action == :reclassify }
 
     def to_s
-      'action' # Empty string
+      'action'
     end
 
     def good_standing!

@@ -46,4 +46,22 @@ class FeePaymentsTest < ActiveSupport::TestCase
     assert_equal EffectiveMemberships.Registrar.current_period, user.membership.fees_paid_through_period
   end
 
+  test 'fee payments updates bad standing' do
+    user = build_member()
+
+    user.membership.update!(bad_standing: true, bad_standing_reason: "Late Fees", fees_paid_through_period: nil)
+    user.fees.each { |fee| fee.update_column(:purchased_order_id, nil) }
+
+    fp = EffectiveMemberships.FeePayment.new(user: user)
+    fp.ready!
+    fp.submit_order.purchase!
+
+    user.reload
+
+    assert user.membership.fees_paid_through_period.present?
+
+    refute user.membership.bad_standing?
+    assert user.membership.good_standing?
+  end
+
 end

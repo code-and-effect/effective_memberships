@@ -154,6 +154,7 @@ module EffectiveMembershipsApplicant
 
     # All Steps validations
     validates :user, presence: true
+    validates :from_membership_category, presence: true, if: -> { reclassification? }
 
     validate(if: -> { reclassification? }) do
       errors.add(:membership_category_id, "can't reclassify to existing category") if membership_category_id == from_membership_category_id

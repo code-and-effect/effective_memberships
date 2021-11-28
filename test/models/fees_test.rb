@@ -105,4 +105,35 @@ class FeesTest < ActiveSupport::TestCase
     assert_equal fee, fee3
   end
 
+  test 'build discount fee' do
+    user = build_member()
+
+    now = Time.zone.now
+    period = EffectiveMemberships.Registrar.current_period
+
+    to = user.membership.category
+    from = EffectiveMemberships.MembershipCategory.where.not(id: user.membership.category_id).first!
+
+    to.update!("prorated_#{now.strftime('%b').downcase}" => 100_00)
+    from.update!("prorated_#{now.strftime('%b').downcase}" => 75_00)
+
+    # Build discount fee
+    fee = user.build_discount_fee(from: from)
+
+    assert_equal 'Discount', fee.category
+    assert_equal -75_00, fee.price
+    assert_equal to, fee.membership_category
+    assert_equal period, fee.period
+
+    assert fee.save!
+
+    # Now see if it's indempotent
+    fee2 = user.build_discount_fee(from: from)
+    assert_equal fee, fee2
+
+    user.reload
+    fee3 = user.build_discount_fee(from: from)
+    assert_equal fee, fee3
+  end
+
 end

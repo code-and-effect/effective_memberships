@@ -110,7 +110,10 @@ module Effective
       raise('expecting a memberships category') unless to.class.respond_to?(:effective_memberships_category?)
 
       # Just a simple number right now
-      Effective::Membership.all.max_number + 1
+      number = (Effective::Membership.all.max_number || 0) + 1
+
+      # Returns a string
+      number.to_s
     end
 
     def current_period

@@ -144,9 +144,14 @@ module EffectiveMembershipsUser
     membership.fees_paid_through_period = max_fees_paid_through_period()
 
     # Assign in bad standing
-    if bad_standing_fees.present?
+    if membership.bad_standing_admin?
+      # Nothing to do
+    elsif bad_standing_fees.present?
       membership.bad_standing = true
-      membership.bad_standing_reason = 'Unpaid Fees' unless membership.bad_standing_reason.present?
+      membership.bad_standing_reason = 'Unpaid Fees'
+    else
+      membership.bad_standing = false
+      membership.bad_standing_reason = nil
     end
 
     if membership.bad_standing_changed? || membership_histories.blank?

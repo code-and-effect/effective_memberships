@@ -8,9 +8,9 @@ module Effective
       start_on       :date
       end_on         :date
 
-      number              :string
-      bad_standing     :boolean
-      notes               :text
+      number         :string
+      bad_standing   :boolean
+      notes          :text
 
       timestamps
     end

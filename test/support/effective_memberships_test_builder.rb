@@ -18,11 +18,12 @@ module EffectiveMembershipsTestBuilder
     build_effective_applicant.tap(&:save!)
   end
 
-  def build_applicant(user: nil, membership_category: nil)
+  def build_applicant(user: nil, category: nil, membership_category: nil)
     membership_category ||= Effective::MembershipCategory.where(title: 'Full Member').first!
     user ||= build_user_with_address()
 
-    #category ||= 'Apply to Join' if user.registrant_category.blank?
+    category ||= 'Apply to Join' if user.membership.blank?
+    category ||= 'Apply to Reclassify' if user.membership.present?
 
     applicant = Effective::Applicant.new(user: user, membership_category: membership_category)
     applicant.save!
