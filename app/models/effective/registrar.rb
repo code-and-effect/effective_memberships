@@ -143,6 +143,8 @@ module Effective
         fee.save!
       end
 
+      GC.start
+
       # Create Late Fees
       Effective::Membership.create_late_fees(period).find_each do |membership|
         fee = membership.user.build_late_fee(period: period)
@@ -150,6 +152,8 @@ module Effective
 
         fee.save!
       end
+
+      GC.start
 
       # Update Membership Status - Assign In Bad Standing
       Effective::Membership.deep.with_unpaid_fees_through(period).find_each do |membership|
