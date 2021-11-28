@@ -318,6 +318,7 @@ ActiveRecord::Schema.define(version: 7) do
     t.integer "renewal_fee"
     t.boolean "create_late_fees", default: false
     t.integer "late_fee"
+    t.boolean "create_bad_standing", default: false
     t.datetime "updated_at"
     t.datetime "created_at"
     t.index ["position"], name: "index_membership_categories_on_position"
@@ -332,7 +333,7 @@ ActiveRecord::Schema.define(version: 7) do
     t.date "start_on"
     t.date "end_on"
     t.string "number"
-    t.boolean "in_bad_standing"
+    t.boolean "bad_standing"
     t.text "notes"
     t.datetime "updated_at"
     t.datetime "created_at"
@@ -349,9 +350,9 @@ ActiveRecord::Schema.define(version: 7) do
     t.date "joined_on"
     t.date "registration_on"
     t.date "fees_paid_through_period"
-    t.boolean "in_bad_standing", default: false
-    t.boolean "in_bad_standing_admin", default: false
-    t.text "in_bad_standing_reason"
+    t.boolean "bad_standing", default: false
+    t.boolean "bad_standing_admin", default: false
+    t.text "bad_standing_reason"
     t.datetime "updated_at"
     t.datetime "created_at"
     t.index ["category_id", "category_type"], name: "index_memberships_on_category_id_and_category_type"

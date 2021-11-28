@@ -149,7 +149,7 @@ module EffectiveMembershipsUser
       membership.bad_standing_reason = 'Unpaid Fees' unless membership.bad_standing_reason.present?
     end
 
-    if membership.bad_standing_changed?
+    if membership.bad_standing_changed? || membership_histories.blank?
       build_membership_history()
       save!
     end
