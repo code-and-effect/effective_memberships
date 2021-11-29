@@ -7,7 +7,6 @@ module Admin
       col :created_at, visible: false
       col :id, visible: false
 
-      col :period, visible: false
       col :start_on
       col :end_on
 
@@ -15,7 +14,9 @@ module Admin
       col :membership_category
 
       col :number
+
       col :bad_standing
+      col :removed
 
       actions_col
     end

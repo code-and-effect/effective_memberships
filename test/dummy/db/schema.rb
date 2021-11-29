@@ -333,7 +333,8 @@ ActiveRecord::Schema.define(version: 7) do
     t.date "start_on"
     t.date "end_on"
     t.string "number"
-    t.boolean "bad_standing"
+    t.boolean "bad_standing", default: false
+    t.boolean "removed", default: false
     t.text "notes"
     t.datetime "updated_at"
     t.datetime "created_at"

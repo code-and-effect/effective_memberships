@@ -22,6 +22,9 @@ module EffectiveMembershipsUser
     has_many :fees, -> { order(:id) }, inverse_of: :user, class_name: 'Effective::Fee', dependent: :nullify
     accepts_nested_attributes_for :fees, reject_if: :all_blank, allow_destroy: true
 
+    has_many :orders, -> { order(:id) }, inverse_of: :user, class_name: 'Effective::Order', dependent: :nullify
+    accepts_nested_attributes_for :orders, reject_if: :all_blank, allow_destroy: true
+
     has_one :membership, inverse_of: :user, class_name: 'Effective::Membership'
     accepts_nested_attributes_for :membership
 
@@ -39,12 +42,25 @@ module EffectiveMembershipsUser
     fees.select { |fee| fee.fee_payment_fee? && !fee.purchased? }
   end
 
+  def outstanding_fee_payment_orders
+    orders.select { |order| order.parent_type.to_s.include?('FeePayment') && !order.purchased? }
+  end
+
   def bad_standing_fees
     fees.select { |fee| fee.bad_standing? }
   end
 
   def max_fees_paid_through_period
     fees.select { |fee| fee.membership_period_fee? && fee.purchased? }.map(&:period).max
+  end
+
+  def membership_removed?
+    membership.blank? && membership_histories.any? { |history| history.removed? }
+  end
+
+  def membership_removed_on
+    return nil unless membership_removed?
+    membership_histories.find { |history| history.removed? }.start_on
   end
 
   # Instance Methods
@@ -168,6 +184,7 @@ module EffectiveMembershipsUser
 
     # The date of change
     start_on ||= Time.zone.now
+    removed = membership.marked_for_destruction?
 
     # End the other membership histories
     membership_histories.each { |history| history.end_on ||= start_on }
@@ -176,9 +193,10 @@ module EffectiveMembershipsUser
     membership_histories.build(
       start_on: start_on,
       end_on: nil,
-      membership_category: membership.category,
-      number: membership.number,
-      bad_standing: membership.bad_standing?
+      removed: removed,
+      bad_standing: membership.bad_standing?,
+      membership_category: (membership.category unless removed),
+      number: (membership.number unless removed)
     )
   end
 

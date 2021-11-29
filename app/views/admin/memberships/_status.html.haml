@@ -1,0 +1,6 @@
+- if user.membership.present?
+  = render 'effective/memberships/membership', membership: user.membership
+- elsif user.membership_removed?
+  %p Removed on #{user.membership_removed_on.strftime('%F')}
+- else
+  %p Not a member

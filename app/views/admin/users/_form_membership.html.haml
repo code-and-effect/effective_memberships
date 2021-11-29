@@ -1,5 +1,0 @@
-%p User is a #{user.class}
-
-= effective_form_with(model: [:admin, user]) do |f|
-  = f.select :membership_category_id, EffectiveMemberships.MembershipCategory.sorted
-  = effective_submit(f)

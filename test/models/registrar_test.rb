@@ -74,4 +74,44 @@ class RegistrarTest < ActiveSupport::TestCase
     assert_equal period, user.membership.fees_paid_through_period
   end
 
+  test 'remove' do
+    user = build_member()
+    date = Time.zone.now + 1.year
+
+    # Create unpurchased fees
+    user.build_renewal_fee(period: date, late_on: date, bad_standing_on: date)
+    user.save!
+
+    # Create unpurchased order
+    fp = EffectiveMemberships.FeePayment.new(user: user)
+    fp.ready!
+
+    # User is a member with outstanding fees and orders
+    assert user.membership.present?
+    assert user.outstanding_fee_payment_fees.present?
+    assert user.orders.select { |order| order.purchased? == false }.present?
+
+    refute user.membership_removed?
+    refute user.membership_histories.any? { |history| history.removed? }
+
+    assert EffectiveMemberships.Registrar.remove!(user)
+    user.reload
+    user.membership_histories.reload
+
+    # User is removed and outstanding fees and orders deleted
+    assert user.membership.blank?
+    assert user.outstanding_fee_payment_fees.blank?
+    assert user.orders.select { |order| order.purchased? == false }.blank?
+
+    # Membership history
+    history = user.membership_histories.last
+
+    assert history.removed?
+    assert history.membership_category.blank?
+    assert history.number.blank?
+
+    assert user.membership_removed?
+    assert_equal Time.zone.now.to_date, user.membership_removed_on
+  end
+
 end

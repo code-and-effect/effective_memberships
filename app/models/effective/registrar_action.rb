@@ -51,6 +51,11 @@ module Effective
       EffectiveMemberships.Registrar.fees_paid!(user)
     end
 
+    def remove!
+      update!(current_action: :remove)
+      EffectiveMemberships.Registrar.remove!(user)
+    end
+
     def update!(atts)
       assign_attributes(atts); save!
     end

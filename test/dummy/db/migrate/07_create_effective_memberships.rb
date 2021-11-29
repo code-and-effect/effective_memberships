@@ -94,7 +94,8 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
 
       t.string :number
 
-      t.boolean :bad_standing
+      t.boolean :bad_standing, default: false
+      t.boolean :removed, default: false
 
       t.text :notes
 

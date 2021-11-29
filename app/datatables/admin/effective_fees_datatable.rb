@@ -22,7 +22,6 @@ module Admin
       end
 
       col :category, search: EffectiveMemberships.fee_categories
-      col :period
       col :price, as: :price
       col :purchased?, as: :boolean
 

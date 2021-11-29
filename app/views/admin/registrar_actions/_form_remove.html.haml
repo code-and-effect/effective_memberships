@@ -1,0 +1,17 @@
+.card
+  .card-body
+    %h5.card-title Remove
+
+    = effective_form_with(model: [:admin, registrar_action], url: effective_memberships.admin_registrar_actions_path) do |f|
+      = f.hidden_field :user_id
+      = f.hidden_field :user_type
+
+      %p.text-muted
+        This action will remove this user's membership and
+        delete any unpurchased fee payment fees and orders.
+
+      = f.check_box :current_action, label: 'Yes, remove membership'
+
+      = f.show_if :current_action, true do
+        = f.submit 'Remove', border: false, center: true,
+          'data-confirm': "Really remove #{f.object.user}?"

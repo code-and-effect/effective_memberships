@@ -22,6 +22,10 @@ module Admin
       success: -> { "#{resource.user} has now paid their fees through #{resource.user.membership.fees_paid_through_period&.strftime('%F')}" },
       redirect: -> { admin_users_path(resource) }
 
+    submit :remove, 'Remove',
+      success: -> { "#{resource.user} has been removed" },
+      redirect: -> { admin_users_path(resource) }
+
     after_error do
       flash.keep
       redirect_to admin_users_path(resource)
