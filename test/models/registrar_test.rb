@@ -60,12 +60,18 @@ class RegistrarTest < ActiveSupport::TestCase
   test 'fees paid' do
     user = build_user()
     membership_category ||= Effective::MembershipCategory.where(title: 'Full Member').first!
+    period = EffectiveMemberships.Registrar.current_period
 
     EffectiveMemberships.Registrar.register!(user, to: membership_category)
 
     assert_equal 1, user.outstanding_fee_payment_fees.length
     assert user.membership.present?
     assert user.membership.fees_paid_through_period.blank?
+
+    assert EffectiveMemberships.Registrar.fees_paid!(user)
+
+    assert_equal 0, user.outstanding_fee_payment_fees.length
+    assert_equal period, user.membership.fees_paid_through_period
   end
 
 end
