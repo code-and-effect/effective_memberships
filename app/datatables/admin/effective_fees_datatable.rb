@@ -28,6 +28,8 @@ module Admin
 
       col :membership_category, search: { collection: EffectiveMemberships.MembershipCategory.all, polymorphic: false }
 
+      aggregate :total
+
       if attributes[:applicant_id]
         actions_col(new: false)
       else

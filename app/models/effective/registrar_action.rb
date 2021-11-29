@@ -46,6 +46,11 @@ module Effective
       EffectiveMemberships.Registrar.reclassify!(user, to: membership_category, skip_fees: skip_fees?)
     end
 
+    def fees_paid!
+      update!(current_action: :fees_paid)
+      EffectiveMemberships.Registrar.fees_paid!(user)
+    end
+
     def update!(atts)
       assign_attributes(atts); save!
     end

@@ -105,6 +105,23 @@ module Effective
       save!(user, date: date)
     end
 
+    def fees_paid!(user, date: nil)
+      raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
+      raise('expected a member') unless user.membership.present?
+
+      # Date
+      date ||= Time.zone.now
+      period = period(date: date)
+
+      if user.outstanding_fee_payment_fees.present?
+        fp = FeePayment.new(user: user)
+        fp.ready!
+        fp.submit_order.purchase!(skip_buyer_validations: true, email: false)
+      end
+
+      user.membership.update!(fees_paid_through_period: period)
+    end
+
     def next_membership_number(user, to:)
       raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
       raise('expecting a memberships category') unless to.class.respond_to?(:effective_memberships_category?)

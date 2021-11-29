@@ -452,7 +452,7 @@ module EffectiveMembershipsApplicant
     end
 
     # From Billing Step
-    order.billing_address = user.billing_address
+    order.billing_address = user.billing_address if user.billing_address.present?
 
     order
   end

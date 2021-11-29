@@ -85,7 +85,9 @@ class ApplicantsTest < ActiveSupport::TestCase
     applicant = build_submitted_applicant()
     applicant.declined_reason = 'Test declined'
 
-    assert_email { applicant.decline! }
+    assert_email do
+      EffectiveResources.transaction { applicant.decline! }
+    end
 
     assert_equal 'declined', applicant.status
     assert applicant.declined?
@@ -103,7 +105,9 @@ class ApplicantsTest < ActiveSupport::TestCase
       email_form_body: 'Test Declined Body'
     )
 
-    assert_email(body: 'Test Declined Body', subject: 'Test Declined Subject') { applicant.decline! }
+    assert_email(body: 'Test Declined Body', subject: 'Test Declined Subject') do
+      EffectiveResources.transaction { applicant.decline! }
+    end
 
     assert_equal 'declined', applicant.status
     assert applicant.declined?
@@ -112,7 +116,9 @@ class ApplicantsTest < ActiveSupport::TestCase
   test 'approving an applicant sends an email' do
     applicant = build_submitted_applicant()
 
-    assert_email { applicant.approve! }
+    assert_email do
+      EffectiveResources.transaction { applicant.approve! }
+    end
 
     assert_equal 'approved', applicant.status
     assert applicant.approved?
@@ -129,7 +135,9 @@ class ApplicantsTest < ActiveSupport::TestCase
       email_form_body: 'Test Approved Body'
     )
 
-    assert_email(body: 'Test Approved Body', subject: 'Test Approved Subject') { applicant.approve! }
+    assert_email(body: 'Test Approved Body', subject: 'Test Approved Subject') do
+      EffectiveResources.transaction { applicant.approve! }
+    end
 
     assert_equal 'approved', applicant.status
     assert applicant.approved?
@@ -139,7 +147,7 @@ class ApplicantsTest < ActiveSupport::TestCase
     applicant = build_submitted_applicant()
 
     assert applicant.user.membership.blank?
-    applicant.approve!
+    EffectiveResources.transaction { applicant.approve! }
 
     assert applicant.user.membership.present?
     assert applicant.user.membership.category.present?
@@ -154,7 +162,7 @@ class ApplicantsTest < ActiveSupport::TestCase
     assert user.fees.blank?
 
     applicant = build_submitted_applicant(user: user)
-    applicant.approve!
+    EffectiveResources.transaction { applicant.approve! }
 
     assert applicant.user.fees.present?
     assert_equal 2, applicant.user.fees.length

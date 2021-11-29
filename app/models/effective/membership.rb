@@ -7,16 +7,16 @@ module Effective
 
     effective_resource do
       # Membership Info
-      number                   :string   # A unique value
-      joined_on                :date     # When they first receive a membership category
+      number                    :string   # A unique value
+      joined_on                 :date     # When they first receive a membership category
       registration_on           :date     # When the membership category last changed. Applied or reclassified.
 
       # Membership Status
       fees_paid_through_period  :date     # The period they have paid upto.
 
-      bad_standing          :boolean   # Calculated value. Is this user in bad standing? (fees due)
-      bad_standing_reason   :text      # Reason for bad standing
-      bad_standing_admin    :boolean   # Admin set this
+      bad_standing              :boolean   # Calculated value. Is this user in bad standing? (fees due)
+      bad_standing_admin        :boolean   # Admin set this
+      bad_standing_reason       :text      # Reason for bad standing
 
       timestamps
     end

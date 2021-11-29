@@ -57,4 +57,15 @@ class RegistrarTest < ActiveSupport::TestCase
     assert user.membership.bad_standing_reason.blank?
   end
 
+  test 'fees paid' do
+    user = build_user()
+    membership_category ||= Effective::MembershipCategory.where(title: 'Full Member').first!
+
+    EffectiveMemberships.Registrar.register!(user, to: membership_category)
+
+    assert_equal 1, user.outstanding_fee_payment_fees.length
+    assert user.membership.present?
+    assert user.membership.fees_paid_through_period.blank?
+  end
+
 end

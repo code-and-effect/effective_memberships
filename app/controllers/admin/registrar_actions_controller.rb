@@ -18,6 +18,10 @@ module Admin
       success: -> { "#{resource.user} has been reclassified to #{resource.user.membership.category}" },
       redirect: -> { admin_users_path(resource) }
 
+    submit :fees_paid, 'Mark Fees Paid',
+      success: -> { "#{resource.user} has now paid their fees through #{resource.user.membership.fees_paid_through_period&.strftime('%F')}" },
+      redirect: -> { admin_users_path(resource) }
+
     after_error do
       flash.keep
       redirect_to admin_users_path(resource)

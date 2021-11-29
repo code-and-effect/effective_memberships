@@ -24,7 +24,7 @@ class ApplicantsReclassifyTest < ActiveSupport::TestCase
     to = EffectiveMemberships.MembershipCategory.where.not(id: from.id).first!
 
     applicant = build_submitted_applicant(user: user, membership_category: to)
-    applicant.approve!
+    EffectiveResources.transaction { applicant.approve! }
 
     assert_equal 3, applicant.user.fees.length
 

@@ -67,10 +67,7 @@ module Effective
     def notify!
       raise('expected reference email') unless email.present?
 
-      after_commit do
-        EffectiveMemberships.send_email(:applicant_reference_notification, self)
-      end
-
+      EffectiveMemberships.send_email(:applicant_reference_notification, self)
       update!(last_notified_at: Time.zone.now)
     end
 

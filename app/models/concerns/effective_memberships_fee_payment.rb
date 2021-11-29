@@ -163,7 +163,7 @@ module EffectiveMembershipsFeePayment
       order.add(fee) unless order.purchasables.include?(fee)
     end
 
-    order.billing_address = user.billing_address
+    order.billing_address = user.billing_address if user.billing_address.present?
 
     order
   end
