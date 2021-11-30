@@ -12,8 +12,9 @@ module Effective
     # Bad Standing
     attr_accessor :bad_standing_reason
 
-    # Reclassify
+    # Reclassify & Register
     attr_accessor :membership_category_id
+    attr_accessor :membership_number
     attr_accessor :skip_fees
 
     # All Action Validations
@@ -24,8 +25,9 @@ module Effective
     # Bad Standing
     validates :bad_standing_reason, presence: true, if: -> { current_action == :bad_standing }
 
-    # Reclassification
-    validates :membership_category_id, presence: true, if: -> { current_action == :reclassify }
+    # Reclassification & Register
+    validates :membership_category_id, presence: true,
+      if: -> { current_action == :reclassify || current_action == :register }
 
     def to_s
       'action'
@@ -54,6 +56,11 @@ module Effective
     def remove!
       update!(current_action: :remove)
       EffectiveMemberships.Registrar.remove!(user)
+    end
+
+    def register!
+      update!(current_action: :register)
+      EffectiveMemberships.Registrar.register!(user, to: membership_category, number: membership_number.presence, skip_fees: skip_fees?)
     end
 
     def update!(atts)

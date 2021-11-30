@@ -18,6 +18,23 @@ class RegistrarTest < ActiveSupport::TestCase
     assert user.fees.find { |fee| fee.category == 'Prorated' }
   end
 
+  test 'register with skip_fees' do
+    user = build_user()
+    category = EffectiveMemberships.MembershipCategory.first
+
+    refute user.membership.present?
+    assert_equal 0, user.fees.length
+
+    next_number = EffectiveMemberships.Registrar.next_membership_number(user, to: category)
+    assert EffectiveMemberships.Registrar.register!(user, to: category, skip_fees: true)
+
+    assert user.membership.present?
+    assert_equal next_number, user.membership.number
+
+    assert_equal 0, user.fees.length
+    assert user.membership.fees_paid_through_period.present?
+  end
+
   test 'reclassify' do
     user = build_member()
     user.fees.delete_all

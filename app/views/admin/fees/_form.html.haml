@@ -5,7 +5,7 @@
   - else
     = f.select :user_id, {'Members' => current_user.class.members.sorted }, polymorphic: true
 
-  = f.select :category, EffectiveMemberships.new_fee_categories
+  = f.select :category, EffectiveMemberships.custom_fee_categories
   = f.price_field :price
 
   - if fee.new_record?

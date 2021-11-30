@@ -6,6 +6,18 @@ module Admin
     include Effective::CrudController
     resource_scope -> { Effective::RegistrarAction }
 
+    submit :register, 'Register',
+      success: -> { "#{resource.user} is now a #{resource.user.membership.category} member" },
+      redirect: -> { admin_users_path(resource) }
+
+    submit :reclassify, 'Reclassify',
+      success: -> { "#{resource.user} has been reclassified to #{resource.user.membership.category}" },
+      redirect: -> { admin_users_path(resource) }
+
+    submit :remove, 'Remove',
+      success: -> { "#{resource.user} has been removed" },
+      redirect: -> { admin_users_path(resource) }
+
     submit :bad_standing, 'Set In Bad Standing',
       success: -> { "#{resource.user} is now In Bad Standing" },
       redirect: -> { admin_users_path(resource) }
@@ -14,16 +26,8 @@ module Admin
       success: -> { "#{resource.user} is now In Good Standing" },
       redirect: -> { admin_users_path(resource) }
 
-    submit :reclassify, 'Reclassify',
-      success: -> { "#{resource.user} has been reclassified to #{resource.user.membership.category}" },
-      redirect: -> { admin_users_path(resource) }
-
     submit :fees_paid, 'Mark Fees Paid',
       success: -> { "#{resource.user} has now paid their fees through #{resource.user.membership.fees_paid_through_period&.strftime('%F')}" },
-      redirect: -> { admin_users_path(resource) }
-
-    submit :remove, 'Remove',
-      success: -> { "#{resource.user} has been removed" },
       redirect: -> { admin_users_path(resource) }
 
     after_error do

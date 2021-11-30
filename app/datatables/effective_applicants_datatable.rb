@@ -18,10 +18,11 @@ class EffectiveApplicantsDatatable < Effective::Datatable
     col :status
 
     actions_col(show: false) do |applicant|
-      if applicant.in_progress?
-        link_to 'Continue', effective_memberships.applicant_build_path(applicant, applicant.next_step), class: 'btn btn-outline-primary', 'data-turbolinks' => false
+      if applicant.draft?
+        dropdown_link_to('Continue', effective_memberships.applicant_build_path(applicant, applicant.next_step), 'data-turbolinks' => false)
+        dropdown_link_to('Delete', effective_memberships.applicant_path(applicant), 'data-confirm': "Really delete #{applicant}?", 'data-method': :delete)
       else
-        link_to 'Show', effective_memberships.applicant_path(applicant), class: 'btn btn-outline-primary'
+        dropdown_link_to('Show', effective_memberships.applicant_path(applicant))
       end
     end
   end

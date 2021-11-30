@@ -71,7 +71,7 @@ module Effective
     end
 
     def to_s
-      title.presence || 'New Fee'
+      title.presence || default_title()
     end
 
     def late?
@@ -100,6 +100,10 @@ module Effective
     # Will advance a membership.fees_paid_through_year value when purchased
     def membership_period_fee?
       category == 'Prorated' || category == 'Renewal'
+    end
+
+    def custom_fee?
+      EffectiveMemberships.custom_fee_categories.include?(category)
     end
 
     private

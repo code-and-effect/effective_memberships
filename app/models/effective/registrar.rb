@@ -20,6 +20,7 @@ module Effective
 
       # Default Date and next number
       date ||= Time.zone.now
+      period = period(date: date)
       number = next_membership_number(user, to: to) if number.blank?
 
       # Build a membership
@@ -35,7 +36,10 @@ module Effective
       # Assign Number
       membership.number = number
 
-      # Build Fees
+      # Assign fees paid through period
+      membership.fees_paid_through_period = period if skip_fees
+
+      # Or, Build Fees
       unless skip_fees
         fee = user.build_prorated_fee(date: date)
         raise('already has purchased prorated fee') if fee.purchased?
@@ -69,6 +73,23 @@ module Effective
         fee = user.build_discount_fee(date: date, from: from)
         raise('already has purchased discount fee') if fee.purchased?
       end
+
+      save!(user, date: date)
+    end
+
+    def remove!(user, date: nil)
+      raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
+      raise('expected a member') unless user.membership.present?
+
+      # Date
+      date ||= Time.zone.now
+
+      # Remove Membership
+      user.membership.mark_for_destruction
+
+      # Delete unpurchased fees and orders
+      user.outstanding_fee_payment_fees.each { |fee| fee.mark_for_destruction }
+      user.outstanding_fee_payment_orders.each { |order| order.mark_for_destruction }
 
       save!(user, date: date)
     end
@@ -120,23 +141,6 @@ module Effective
       end
 
       user.membership.update!(fees_paid_through_period: period)
-    end
-
-    def remove!(user, date: nil)
-      raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
-      raise('expected a member') unless user.membership.present?
-
-      # Date
-      date ||= Time.zone.now
-
-      # Remove Membership
-      user.membership.mark_for_destruction
-
-      # Delete unpurchased fees and orders
-      user.outstanding_fee_payment_fees.each { |fee| fee.mark_for_destruction }
-      user.outstanding_fee_payment_orders.each { |order| order.mark_for_destruction }
-
-      save!(user, date: date)
     end
 
     def next_membership_number(user, to:)

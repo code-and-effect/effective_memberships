@@ -61,7 +61,8 @@ module EffectiveMemberships
     (required + additional).uniq.sort
   end
 
-  def self.new_fee_categories
+  # You can delete these if unpurchased
+  def self.custom_fee_categories
     ['Admin']
   end
 

@@ -10,7 +10,7 @@
         This action will remove this user's membership and
         delete any unpurchased fee payment fees and orders.
 
-      = f.check_box :current_action, label: 'Yes, remove membership'
+      = f.check_box :current_action, label: 'Yes, remove this member'
 
       = f.show_if :current_action, true do
         = f.submit 'Remove', border: false, center: true,
