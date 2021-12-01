@@ -1,5 +1,6 @@
 = render 'layout' do
   %h1= @page_title
+  = render 'effective/applicants/content', resource: resource
 
   - raise('expected user to respond to billing_address') unless resource.user.respond_to?(:billing_address)
 

@@ -21,6 +21,11 @@ module EffectiveMembershipsCategory
     # rich_text_body - Used by the select step
     has_many_rich_texts
 
+    # rich_text_applicant_all_steps_content
+    # rich_text_applicant_start_content
+    # rich_text_applicant_select_content
+    # rich_text_applicant_select_content
+
     has_many :memberships, class_name: 'Effective::Membership', as: :category
 
     effective_resource do
@@ -148,15 +153,15 @@ module EffectiveMembershipsCategory
   end
 
   def applicant_wizard_steps
-    Array(self[:applicant_wizard_steps]).map(&:to_sym) - [nil, '']
+    (Array(self[:applicant_wizard_steps]) - [nil, '']).map(&:to_sym)
   end
 
   def fee_payment_wizard_steps
-    Array(self[:fee_payment_wizard_steps]).map(&:to_sym) - [nil, '']
+    (Array(self[:fee_payment_wizard_steps]) - [nil, '']).map(&:to_sym)
   end
 
   def applicant_review_wizard_steps
-    Array(self[:applicant_review_wizard_steps]).map(&:to_sym) - [nil, '']
+    (Array(self[:applicant_review_wizard_steps]) - [nil, '']).map(&:to_sym)
   end
 
   def applicant_wizard_steps_collection

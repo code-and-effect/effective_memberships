@@ -61,7 +61,7 @@ module Effective
     after_commit(on: :create, if: -> { applicant.submitted? }) { notify! }
 
     def to_s
-      name.presence || 'reference'
+      'reference'
     end
 
     def notify!

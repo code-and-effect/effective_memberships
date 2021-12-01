@@ -23,5 +23,6 @@
     - datatable = EffectiveApplicantExperiencesDatatable.new(applicant_id: applicant.id)
     .mb-4= render_simple_datatable(datatable)
 
-    %h6 Additional Experiences Details
-    = simple_format(applicant.applicant_experiences_details.presence || 'none')
+    - if applicant.applicant_experiences_details.present?
+      %h6 Additional Experiences Details
+      = simple_format(applicant.applicant_experiences_details)

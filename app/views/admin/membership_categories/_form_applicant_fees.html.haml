@@ -1,0 +1,29 @@
+= effective_form_with(model: [:admin, membership_category], engine: true) do |f|
+  %h3 Fees
+
+  %p Charged to submit an application to join this membership category:
+
+  .row
+    .col-lg-3= f.price_field :applicant_fee
+
+  %p Charged to join, based on the month of approval:
+
+  .row
+    .col-lg-3
+      = f.price_field :prorated_jan, label: "January"
+      = f.price_field :prorated_feb, label: "February"
+      = f.price_field :prorated_mar, label: "March"
+    .col-lg-3
+      = f.price_field :prorated_apr, label: "April"
+      = f.price_field :prorated_may, label: "May"
+      = f.price_field :prorated_jun, label: "June"
+    .col-lg-3
+      = f.price_field :prorated_jul, label: "July"
+      = f.price_field :prorated_aug, label: "August"
+      = f.price_field :prorated_sep, label: "September"
+    .col-lg-3
+      = f.price_field :prorated_oct, label: "October"
+      = f.price_field :prorated_nov, label: "November"
+      = f.price_field :prorated_dec, label: "December"
+
+  = f.submit

@@ -1,0 +1,13 @@
+= effective_form_with(model: [:admin, membership_category], engine: true) do |f|
+  %h3 Eligibility
+  %p Please configure who may apply for this membership category.
+
+  = f.check_box :can_apply_new, label: 'Yes, new users may apply to join'
+  = f.check_box :can_apply_existing, label: 'Yes, existing members of any category may apply to join'
+  = f.check_box :can_apply_restricted, label: 'Only existing members of the following categories may apply to join'
+
+  = f.show_if(:can_apply_restricted, true) do
+    - categories = f.object.class.where.not(id: f.object)
+    = f.select :can_apply_restricted_ids, categories, label: 'Existing member categories'
+
+  = f.submit

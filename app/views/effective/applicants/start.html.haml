@@ -1,7 +1,8 @@
 = render 'layout' do
   %h1= @page_title
-
   %p Welcome #{current_user}!
+
+  = render 'effective/applicants/content', resource: resource
 
   - fees = resource.user.outstanding_fee_payment_fees
 

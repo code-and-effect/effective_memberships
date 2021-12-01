@@ -1,5 +1,6 @@
 = render 'layout' do
   %h1= @page_title
+  = render 'effective/applicants/content', resource: resource
 
   %p Please provide your work experience.
 
@@ -48,6 +49,6 @@
 
     = f.error :applicant_experiences_months
 
-    = f.text_area :applicant_experiences_details, label: 'Additional Experiences Details'
+    /= f.text_area :applicant_experiences_details, label: 'Additional Experiences Details'
 
     = f.save 'Save and Continue'

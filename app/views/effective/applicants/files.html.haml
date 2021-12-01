@@ -1,7 +1,8 @@
 = render 'layout' do
   %h1= @page_title
+  = render 'effective/applicants/content', resource: resource
 
-  %p Please provide one or more documents relating to your application.
+  %p Please provide your supporting documents.
 
   - if resource.min_applicant_files > 0
     %p You must include #{resource.min_applicant_files} or more files.

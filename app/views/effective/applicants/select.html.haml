@@ -1,5 +1,6 @@
 = render 'layout' do
   %h1= @page_title
+  = render 'effective/applicants/content', resource: resource
 
   - membership_categories = resource.can_apply_membership_categories_collection()
 
