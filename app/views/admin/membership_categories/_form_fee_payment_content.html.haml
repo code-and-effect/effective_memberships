@@ -1,0 +1,19 @@
+%p Each of the following content areas will be displayed on the fee payment wizard.
+
+= effective_form_with(model: [:admin, membership_category], engine: true) do |f|
+  = card("All Steps") do
+    = f.rich_text_area "rich_text_fee_payment_all_steps_content", label: false,
+      hint: "displayed on all steps"
+
+  %hr
+
+  - enabled = f.object.fee_payment_wizard_steps
+
+  - EffectiveMemberships.FeePayment::WIZARD_STEPS.each do |step, title|
+    - next unless enabled.include?(step)
+
+    = card("#{title}") do
+      = f.rich_text_area "rich_text_fee_payment_#{step}_content", label: false,
+        hint: "displayed on the fee payment #{step} wizard step only"
+
+  = f.submit

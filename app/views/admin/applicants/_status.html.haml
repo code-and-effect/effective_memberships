@@ -49,8 +49,15 @@
             = applicant.applicant_references.count(&:completed?)
             = '/'
             = applicant.min_applicant_references
-            References Responded
+            Required References Responded
         - else
+          - if applicant.applicant_references.count(&:submitted?) > 0
+            %p
+              = applicant.applicant_references.count(&:submitted?)
+              = '/'
+              = applicant.applicant_references.count
+              References Responded
+
           %p
             = icon('check', class: 'small-1')
             References Not Required

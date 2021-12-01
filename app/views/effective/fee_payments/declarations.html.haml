@@ -1,7 +1,6 @@
 = render 'layout' do
   %h1= @page_title
-
-  %p Please review and declare the following:
+  = render 'effective/fee_payment/content', resource: resource
 
   - completed = resource.has_completed_step?(:declarations)
 

@@ -506,7 +506,7 @@ module EffectiveMembershipsApplicant
   # Submitted -> Completed requirements
 
   def applicant_references_required?
-    (min_applicant_references > 0 || applicant_references.present?)
+    min_applicant_references > 0
   end
 
   # When an application is submitted, these must be done to go to completed

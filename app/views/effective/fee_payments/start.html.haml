@@ -3,6 +3,8 @@
 
   %p Welcome #{current_user}!
 
+  = render 'effective/fee_payment/content', resource: resource
+
   - if resource.outstanding_fees.blank?
     %p You have no fees due at this time.
     = link_to 'Home', root_path, class: 'btn btn-primary'

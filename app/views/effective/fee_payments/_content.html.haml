@@ -1,0 +1,8 @@
+- all_steps_content = resource.membership_category&.rich_text_fee_payment_all_steps_content
+- step_content = resource.membership_category&.send("rich_text_fee_payment_#{step}_content")
+
+- if all_steps_content.present?
+  .mb-2= all_steps_content
+
+- if step_content.present?
+  .mb-2= step_content

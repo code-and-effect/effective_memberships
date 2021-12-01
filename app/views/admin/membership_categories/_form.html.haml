@@ -7,10 +7,7 @@
       = render 'admin/membership_categories/form_applicant', membership_category: membership_category
 
     = tab 'Fee Payments' do
-      = render 'admin/membership_categories/form_fee_payments', membership_category: membership_category
-
-    = tab 'Renewals' do
-      = render 'admin/membership_categories/form_renewals', membership_category: membership_category
+      = render 'admin/membership_categories/form_fee_payment', membership_category: membership_category
 
     - if membership_category.respond_to?(:log_changes_datatable)
       = tab 'Logs' do
