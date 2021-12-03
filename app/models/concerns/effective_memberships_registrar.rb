@@ -179,7 +179,8 @@ module EffectiveMembershipsRegistrar
   # Returns a date of Jan 1, Year
   def period(date:)
     cutoff = renewal_fee_date(date: date) # period_end_on
-    (date < cutoff) ? date.beginning_of_year : date.advance(years: 1).beginning_of_year
+    period = (date < cutoff) ? date.beginning_of_year : date.advance(years: 1).beginning_of_year
+    period.to_date
   end
 
   # This is intended to be run once per day in a rake task

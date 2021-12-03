@@ -66,7 +66,11 @@ module Effective
     end
 
     def self.max_number
-      maximum("CAST(REGEXP_REPLACE(COALESCE(number,'0'), '[^0-9]+', '', 'g') AS INTEGER)") || 0
+      if connection.class.to_s.include?('PostgreSQLAdapter')
+        maximum("CAST(REGEXP_REPLACE(COALESCE(number,'0'), '[^0-9]+', '', 'g') AS INTEGER)")
+      else
+        maximum("CAST(number AS integer)")
+      end || 0
     end
 
     def to_s
