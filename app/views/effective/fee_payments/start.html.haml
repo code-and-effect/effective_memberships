@@ -3,7 +3,7 @@
 
   %p Welcome #{current_user}!
 
-  = render 'effective/fee_payment/content', resource: resource
+  = render 'effective/fee_payments/content', resource: resource
 
   - if resource.outstanding_fees.blank?
     %p You have no fees due at this time.

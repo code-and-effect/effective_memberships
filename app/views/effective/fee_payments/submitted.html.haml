@@ -1,6 +1,6 @@
 = render 'layout' do
   %h1= @page_title
-  = render 'effective/fee_payment/content', resource: resource
+  = render 'effective/fee_payments/content', resource: resource
 
   - raise('expected a submitted applicant') unless resource.was_submitted?
   - raise('expected a purchased applicant submit_order') unless resource.submit_order&.purchased?
