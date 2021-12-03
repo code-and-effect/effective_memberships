@@ -22,6 +22,11 @@ module EffectiveMembershipsApplicantReview
     def required_wizard_steps
       [:start, :recommendation, :submitted]
     end
+
+    def recommendations
+      ['Accept', 'Reject']
+    end
+
   end
 
   included do
@@ -49,7 +54,6 @@ module EffectiveMembershipsApplicantReview
       submitted: 'Submitted'
     )
 
-    RECOMMENDATIONS = ['Accept', 'Reject']
 
     belongs_to :applicant
     belongs_to :user, polymorphic: true       # The reviewer

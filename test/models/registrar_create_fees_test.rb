@@ -65,15 +65,15 @@ class RegistrarCreateFeesTest < ActiveSupport::TestCase
     assert_equal 0, Effective::Fee.where(category: 'Late').count
 
     # Update The Renewal Fees so they're all late
-    Effective::Fee.where(category: 'Renewal').update_all(late_on: Time.zone.now - 1.minute)
+    Effective::Fee.where(category: 'Renewal').update_all(late_on: Time.zone.now - 1.day)
 
     # Create Late Fees
-    EffectiveMemberships.Registrar.create_fees!
+    EffectiveMemberships.Registrar.create_fees!(late_on: Time.zone.now - 1.day)
     assert_equal 3, Effective::Fee.where(category: 'Renewal').count
     assert_equal 3, Effective::Fee.where(category: 'Late').count
 
     # Running it a second time makes no changes
-    EffectiveMemberships.Registrar.create_fees!
+    EffectiveMemberships.Registrar.create_fees!(late_on: Time.zone.now - 1.day)
     assert_equal 3, Effective::Fee.where(category: 'Renewal').count
     assert_equal 3, Effective::Fee.where(category: 'Late').count
   end
@@ -100,7 +100,7 @@ class RegistrarCreateFeesTest < ActiveSupport::TestCase
     assert_equal 0, Effective::Membership.where(bad_standing: true).count
 
     # Create Fees Should mark them in bad standing
-    EffectiveMemberships.Registrar.create_fees!
+    EffectiveMemberships.Registrar.create_fees!(bad_standing_on: Time.zone.now - 1.minute)
     assert_equal 3, Effective::Membership.where(bad_standing: true).count
 
     # Running it a second time makes no changes
