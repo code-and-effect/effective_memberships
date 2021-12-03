@@ -66,7 +66,7 @@ module Effective
     end
 
     def self.max_number
-      maximum("CAST(number AS integer)") || 0
+      maximum("CAST(REGEXP_REPLACE(COALESCE(number,'0'), '[^0-9]+', '', 'g') AS INTEGER)") || 0
     end
 
     def to_s
