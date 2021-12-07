@@ -4,6 +4,7 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
     # Membership Categories
     create_table :membership_categories do |t|
       t.string :title
+      t.string :category
       t.integer :position
 
       # Applicants
@@ -46,6 +47,9 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
 
       t.boolean :create_late_fees, default: false
       t.integer :late_fee
+
+      t.string :qb_item_name
+      t.boolean :tax_exempt, default: false
 
       t.datetime :updated_at
       t.datetime :created_at

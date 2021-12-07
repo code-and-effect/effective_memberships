@@ -13,6 +13,10 @@ module EffectiveMembershipsCategory
 
   module ClassMethods
     def effective_memberships_category?; true; end
+
+    def categories
+      []
+    end
   end
 
   included do
@@ -30,6 +34,7 @@ module EffectiveMembershipsCategory
 
     effective_resource do
       title                 :string
+      category              :string
       position              :integer
 
       # Applicants
@@ -76,6 +81,10 @@ module EffectiveMembershipsCategory
       late_fee              :integer
 
       create_bad_standing  :boolean
+
+      # Pricing
+      qb_item_name          :string
+      tax_exempt            :boolean
 
       timestamps
     end
