@@ -1,25 +1,14 @@
 = render 'layout' do
-  %h1= @page_title
   = render 'effective/fee_payments/content', resource: resource
 
   - raise('expected a submitted applicant') unless resource.was_submitted?
   - raise('expected a purchased applicant submit_order') unless resource.submit_order&.purchased?
 
-  .text-center
-    .row
-      .col-2
-      .col-8
-        .alert.alert-success Fee Payment Submitted!
+  .alert.alert-success.mb-4
+    Fee successfully paid on
+    = resource.submit_order.purchased_at.strftime('%F')
 
-    %p
-      The following fee payment was successfully purchased at
-      = succeed('.') do
-        = resource.submit_order.purchased_at.strftime('%F')
+  = render 'effective/applicants/applicant', applicant: resource
+  = render 'effective/applicants/orders', applicant: resource
 
-  .mb-4
-    = collapse('Show application...', card_class: 'my-2') do
-      = render 'effective/applicants/applicant', applicant: resource
-
-  .mb-4
-    = collapse('Show order receipt...', card_class: 'my-2') do
-      = render 'effective/applicants/orders', applicant: resource
+  = link_to "Return to Dashboard", root_path, class: 'btn btn-lg btn-primary btn-block'

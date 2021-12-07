@@ -1,25 +1,27 @@
 = render 'layout' do
-  %h1= @page_title
   = render 'effective/applicants/content', resource: resource
 
   - membership_categories = resource.can_apply_membership_categories_collection()
 
-  - if membership_categories.blank?
-    %p There are no membership categories available right now. Try again later!
+  .card
+    .card-body
+      - if membership_categories.blank?
+        %p
+          There are no categories available for you to apply for.
+          Please contact us if you believe this is in error.
 
-  - if membership_categories.present?
-    %p Please select a category to continue.
+      - if membership_categories.present?
+        %p Please select a category to continue.
 
-    = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
-      = f.hidden_field :id
+        = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+          = f.hidden_field :id
 
-      = f.select :membership_category_id, membership_categories, required: true
+          = f.select :membership_category_id, membership_categories, required: true
 
-      - membership_categories.each do |mc|
-        = f.show_if(:membership_category_id, mc.id) do
-          .card.mb-4
-            .card-body
-              %h5.card-title= mc.to_s
-              = mc.rich_text_body
+          - membership_categories.each do |mc|
+            = f.show_if(:membership_category_id, mc.id) do
+              .my-4
+                %h3= mc.to_s
+                = mc.rich_text_body
 
-      = f.save 'Save and Continue'
+          = f.save 'Save and Continue'

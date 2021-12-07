@@ -1,29 +1,27 @@
 = render 'layout' do
-  %h1= @page_title
   = render 'effective/applicants/content', resource: resource
 
-  %p Please provide your post secondary and other education.
+  .card
+    .card-body
+      - if resource.min_applicant_educations > 0
+        .alert.alert-danger You must include #{resource.min_applicant_educations} or more post-secondary educations.
 
-  - if resource.min_applicant_educations > 0
-    %p You must include #{resource.min_applicant_educations} or more items.
+      = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+        = f.hidden_field :id
 
-  = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
-    = f.hidden_field :id
+        = f.has_many(:applicant_educations, cards: true) do |aef|
+          %h4 Post-Secondary Education
 
-    = f.has_many(:applicant_educations, cards: true) do |aef|
-      %h4 Post-Secondary Education
-      %p You've earned the following degree or diploma.
+          .row
+            .col= aef.text_field :institution
+            .col= aef.text_field :location
 
-      .row
-        .col= aef.date_field :start_on, label: 'Start Date'
-        .col= aef.text_field :institution
+          .row
+            .col= aef.date_field :start_on, label: 'Start Date'
+            .col= aef.date_field :end_on, label: 'End Date'
 
-      .row
-        .col= aef.date_field :end_on, label: 'End Date'
-        .col= aef.text_field :location
+          = aef.text_field :degree_obtained, label: 'Degree or diploma obtained'
 
-      = aef.text_field :degree_obtained, label: 'Degree or diploma obtained'
+        /= f.text_area :applicant_educations_details, label: 'Additional Education Details'
 
-    /= f.text_area :applicant_educations_details, label: 'Additional Education Details'
-
-    = f.save 'Save and Continue'
+        = f.save 'Save and Continue'

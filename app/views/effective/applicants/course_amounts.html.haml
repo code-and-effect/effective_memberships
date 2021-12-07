@@ -1,49 +1,50 @@
 = render 'layout' do
-  %h1= @page_title
   = render 'effective/applicants/content', resource: resource
 
-  %p Please provide the number of courses you have completed.
+  .card
+    .card-body
+      - if resource.min_applicant_courses > 0
+        .alert.alert-danger You must include #{resource.min_applicant_courses} or more courses.
 
-  - if resource.min_applicant_courses > 0
-    %p You must include #{resource.min_applicant_courses} or more courses.
+      = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+        = f.hidden_field :id
 
-  = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
-    = f.hidden_field :id
-
-    .applicant-courses-sum
-      Total Courses:
-      %span{'data-applicant-courses-sum': true}= f.object.applicant_courses_sum
-
-    - f.object.applicant_course_areas_collection.each do |area|
-      .applicant-course-area.my-2
-        %h2= area
-        .mb-4= area.body
-
-        %table.table
-          %tbody
-            - area.applicant_course_names.each do |applicant_course_name|
-              - applicant_course = f.object.applicant_course(applicant_course_name: applicant_course_name)
-
-              = f.fields_for(:applicant_courses, applicant_course) do |acf|
-                %tr
-                  %th= applicant_course_name
-                  %td
-                    = acf.number_field :amount, label: false, required: false, 'data-applicant-courses-amount': true
-                    = acf.hidden_field :applicant_course_name_id, value: applicant_course_name.id
-
-          %tfoot
-            %tr
-              %th Total #{area}
-              %td
-                %span{'data-applicant-course-area-sum': true}= f.object.applicant_course_area_sum(applicant_course_area: area)
-
-    .applicant-courses-sum.my-2
-      %h3 Total Courses
-      .row
-        .col
-          %p Total Courses:
+        .applicant-courses-sum
+          Total Courses:
           %span{'data-applicant-courses-sum': true}= f.object.applicant_courses_sum
-        .col
-          = f.static_field :min_applicant_courses, label: 'Required Courses'
 
-    = f.save 'Save and Continue'
+        - f.object.applicant_course_areas_collection.each do |area|
+          .applicant-course-area.my-4
+            %h2= area
+
+            - if area.body.present?
+              %p= area.body
+
+            %table.table.table-sm.table-borderless.table-courses
+              %tbody
+                - area.applicant_course_names.each do |applicant_course_name|
+                  - applicant_course = f.object.applicant_course(applicant_course_name: applicant_course_name)
+
+                  = f.fields_for(:applicant_courses, applicant_course) do |acf|
+                    %tr
+                      %th.table-courses-course-name= applicant_course_name
+                      %td
+                        = acf.number_field :amount, label: false, required: false, 'data-applicant-courses-amount': true, class: 'col-3'
+                        = acf.hidden_field :applicant_course_name_id, value: applicant_course_name.id
+
+              %tfoot
+                %tr
+                  %th.table-courses-course-name Total #{area}
+                  %td
+                    %span{'data-applicant-course-area-sum': true}= f.object.applicant_course_area_sum(applicant_course_area: area)
+
+        .applicant-courses-sum.my-2
+          %h2 Total
+          .row
+            .col
+              %p Total Courses:
+              %span{'data-applicant-courses-sum': true}= f.object.applicant_courses_sum
+            .col
+              = f.static_field :min_applicant_courses, label: 'Required Courses'
+
+        = f.save 'Save and Continue'
