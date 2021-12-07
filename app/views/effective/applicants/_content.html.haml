@@ -2,7 +2,9 @@
 - step_content = resource.membership_category&.send("rich_text_applicant_#{step}_content")
 
 - if all_steps_content.present?
-  .mb-2= all_steps_content
+  .card
+    .card-body= all_steps_content
 
 - if step_content.present?
-  .mb-2= step_content
+  .card
+    .card-body= step_content

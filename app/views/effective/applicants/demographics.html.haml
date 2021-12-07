@@ -1,8 +1,6 @@
 = render 'layout' do
-  %h1= @page_title
-  = render 'effective/applicants/content', resource: resource
 
-  %p Please help us keep your demographic information up to date.
+  = render 'effective/applicants/content', resource: resource
 
   = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
     = f.hidden_field :id

@@ -1,7 +1,6 @@
 = render 'layout' do
-  %h1= @page_title
   = render 'effective/applicants/content', resource: resource
 
-  %p Please checkout with a credit card or indicate that your payment will be submitted by cheque or phone.
-
-  = render_checkout_step2(resource.submit_order, purchased_url: wizard_path(:submitted), deferred_url: wizard_path(:checkout), declined_url: wizard_path(:checkout))
+  .card
+    .card-body
+      = render_checkout_step2(resource.submit_order, purchased_url: wizard_path(:submitted), deferred_url: wizard_path(:checkout), declined_url: wizard_path(:checkout))
