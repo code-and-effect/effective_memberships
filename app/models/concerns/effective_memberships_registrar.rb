@@ -53,6 +53,7 @@ module EffectiveMembershipsRegistrar
 
     # Assign Number
     membership.number = number
+    membership.number_as_integer = (Integer(number) rescue nil)
 
     # Assign fees paid through period
     membership.fees_paid_through_period = period if skip_fees

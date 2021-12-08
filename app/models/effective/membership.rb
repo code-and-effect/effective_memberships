@@ -8,6 +8,8 @@ module Effective
     effective_resource do
       # Membership Info
       number                    :string   # A unique value
+      number_as_integer         :integer  # A unique integer
+
       joined_on                 :date     # When they first receive a membership category
       registration_on           :date     # When the membership category last changed. Applied or reclassified.
 
@@ -51,7 +53,10 @@ module Effective
         .where(category_id: EffectiveMemberships.MembershipCategory.create_bad_standing)
     }
 
-    before_validation { self.registration_on ||= joined_on }
+    before_validation do
+      self.registration_on ||= joined_on
+      self.number_as_integer ||= (Integer(number) rescue nil)
+    end
 
     validates :number, presence: true, uniqueness: true
     validates :joined_on, presence: true
@@ -66,11 +71,7 @@ module Effective
     end
 
     def self.max_number
-      if connection.class.to_s.include?('PostgreSQLAdapter')
-        maximum("CAST(REGEXP_REPLACE(COALESCE(number,'0'), '[^0-9]+', '', 'g') AS INTEGER)")
-      else
-        maximum("CAST(number AS integer)")
-      end || 0
+      maximum('number_as_integer') || 0
     end
 
     def to_s
