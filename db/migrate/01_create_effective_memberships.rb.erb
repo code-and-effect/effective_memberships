@@ -97,14 +97,13 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.integer :membership_category_id
       t.string :membership_category_type
 
-      t.date :period
-
       t.date :start_on
       t.date :end_on
 
       t.string :number
 
-      t.boolean :in_bad_standing
+      t.boolean :bad_standing
+      t.boolean :removed, default: false
 
       t.text :notes
 
@@ -127,6 +126,8 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
 
       t.integer :from_membership_category_id
       t.string :from_membership_category_type
+
+      t.string :category
 
       # Acts as Statused
       t.string :status
@@ -317,7 +318,8 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.string :parent_type
 
       t.date :period
-      t.datetime :due_at
+      t.date :late_on
+      t.date :bad_standing_on
 
       t.string :title
       t.integer :price
