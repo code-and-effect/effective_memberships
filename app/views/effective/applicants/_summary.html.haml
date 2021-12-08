@@ -1,41 +1,40 @@
-.card
-  .card-body
-    .row
-      .col-sm
-        %h5.card-title= applicant.category
+%table.table.table-sm
+  %tbody
+    %tr
+      %th.border-0 Applicant
+      %td.border-0
+        = applicant.user.to_s
+        %br
+        = mail_to(applicant.user.email)
 
-    %table.table
-      %tbody
-        %tr
-          %th Applicant
-          %td= render 'effective/applicants/user', applicant: applicant, user: applicant.user
+    - if request.path.start_with?('/admin')
+      %tr
+        %th User
+        %td
+          - url = (edit_admin_user_path(applicant.user) rescue "/admin/users/#{applicant.user.to_param}/edit")
+          = link_to(applicant.user, url)
 
-        - if request.path.start_with?('/admin')
-          %tr
-            %th User
-            %td
-              - url = (edit_admin_user_path(applicant.user) rescue "/admin/users/#{applicant.user.to_param}/edit")
-              = link_to(applicant.user, url)
+    - if applicant.from_membership_category.present?
+      %tr
+        %th From Category
+        %td= applicant.from_membership_category
 
-        - if applicant.from_membership_category.present?
-          %tr
-            %th From Membership Category
-            %td= applicant.from_membership_category
+    %tr
+      %th Category
+      %td
+        = applicant.category
+        %br
+        = applicant.membership_category
 
-        %tr
-          %th Membership Category
-          %td= applicant.membership_category
+    - if applicant.orders.present?
+      %tr
+        %th Orders
+        %td
+          - applicant.orders.each do |order|
+            = link_to(order, effective_orders.order_path(order))
 
-        - if applicant.orders.present?
-          %tr
-            %th Orders
-            %td
-              - applicant.orders.each do |order|
-                = link_to(order, effective_orders.order_path(order))
-
-        %tr
-          %th Status
-          %td
-            %p
-              %span.badge.badge-secondary= applicant.status
-            %p= applicant.summary
+    %tr
+      %th Status
+      %td
+        %span.badge.badge-secondary= applicant.status
+        = applicant.summary

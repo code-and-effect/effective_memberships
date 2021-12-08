@@ -53,7 +53,7 @@ module EffectiveMembershipsApplicant
       files: 'Attach Files',
       declarations: 'Declarations',
       summary: 'Review',
-      billing: 'Billing',
+      billing: 'Billing Address',
       checkout: 'Checkout',
       submitted: 'Submitted'
     )

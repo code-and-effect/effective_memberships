@@ -1,19 +1,18 @@
 = render 'layout' do
-  %h1= @page_title
-  %p Welcome #{current_user}!
-
   = render 'effective/applicants/content', resource: resource
 
-  - fees = resource.user.outstanding_fee_payment_fees
+  .card
+    .card-body
+      - fees = resource.user.outstanding_fee_payment_fees
 
-  - if fees.present?
-    %p You have #{pluralize(fees.length , 'outstanding fee')}.
-    %p
-      Please
-      = link_to 'Make a fee payment', effective_memberships.new_fee_payment_path
-      before continuing with any applications
+      - if fees.present?
+        %p You have #{pluralize(fees.length , 'outstanding fee')}.
+        %p
+          Please
+          = link_to 'Make a fee payment', effective_memberships.new_fee_payment_path
+          before continuing with any applications
 
-  - if fees.blank?
-    = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
-      = f.hidden_field :id
-      = f.save 'Save and Continue'
+      - if fees.blank?
+        = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+          = f.hidden_field :id
+          = f.save 'Save and Continue'

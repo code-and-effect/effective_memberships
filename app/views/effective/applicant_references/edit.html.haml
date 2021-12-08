@@ -1,8 +1,8 @@
-%h1= @page_title
+.card
+  .card-body
+    %p
+      Please provide a reference for the applicant
+      = succeed('.') do
+        %strong= @applicant_reference.applicant.user
 
-%p
-  Please provide a reference for the applicant
-  = succeed('.') do
-    %strong= @applicant_reference.applicant.user
-
-= render('form_declaration', applicant_reference: @applicant_reference)
+    = render('form_declaration', applicant_reference: @applicant_reference)

@@ -37,7 +37,7 @@ module EffectiveMembershipsFeePayment
       demographics: 'Demographics',
       declarations: 'Declarations',
       summary: 'Review',
-      billing: 'Billing',
+      billing: 'Billing Address',
       checkout: 'Checkout',
       submitted: 'Submitted'
     )

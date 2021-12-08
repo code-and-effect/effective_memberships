@@ -1,48 +1,44 @@
 = render 'layout' do
-  %h1= @page_title
   = render 'effective/applicants/content', resource: resource
 
   - raise('expected a submitted applicant') unless resource.was_submitted?
   - raise('expected a purchased applicant submit_order') unless resource.submit_order&.purchased?
 
-  .text-center
-    .row
-      .col-2
-      .col-8
-        .alert.alert-success Application Submitted!
+  .alert.alert-success.mb-4
+    This application was submitted on
+    = resource.submit_order.purchased_at.strftime('%F')
 
-    %p
-      The following application was successfully purchased at
-      = succeed('.') do
-        = resource.submit_order.purchased_at.strftime('%F')
+  - unless resource.approved?
+    .card
+      .card-body
+        %p
+          Your application must still be approved.
+          We will send
+          %strong= resource.user.email
+          an email notifying you of the application's approval status.
 
-    - unless resource.approved?
-      %p
-        Your application must still be approved.
-        We will send
-        %strong= resource.user.email
-        an email notifying you of the application's approval status.
-
-  .mb-4= render 'effective/applicants/summary', applicant: resource
+  .card
+    .card-body= render 'effective/applicants/summary', applicant: resource
 
   - if resource.min_applicant_references.to_i > 0 || resource.applicant_references.present?
-    .card.mb-4
+    .card
       .card-body
-        %h5.card-title Confidential References
-        %p Click 'New' to add an additional reference.
+        %h3 Confidential References
+        %p
+          References are automatically sent a reference request.
+          Click 'New' to add an additional reference, or click 'Notify' to resend the reference request.
+
         = render_datatable(EffectiveApplicantReferencesDatatable.new(applicant_id: resource.id), inline: true, simple: true)
 
   .mb-4
     = collapse('Show application...', card_class: 'my-2') do
       = render 'effective/applicants/applicant', applicant: resource
 
-  .mb-4
-    = collapse('Show order receipt...', card_class: 'my-2') do
-      = render 'effective/applicants/orders', applicant: resource
-
-  %br
+  = render 'effective/applicants/orders', applicant: resource
 
   -# - if resource.can_visit_step?(next_step)
   -#   = effective_form_with(model: resource, url: wizard_path(step)) do |f|
   -#     = f.hidden_field :current_step
   -#     = f.submit 'Save and Continue', class: 'btn btn-primary'
+
+  = link_to "Return to Dashboard", root_path, class: 'btn btn-lg btn-primary btn-block'

@@ -3,4 +3,4 @@
   - steps = applicant.required_steps - blacklist
 
   - steps.select { |step| applicant.has_completed_step?(step) }.each do |partial|
-    .mb-4= render "effective/applicants/#{partial}", applicant: applicant, step: partial
+    = render "effective/applicants/#{partial}", applicant: applicant, step: partial

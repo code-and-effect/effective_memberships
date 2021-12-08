@@ -1,11 +1,8 @@
 = render 'layout' do
-  %h1= @page_title
   = render 'effective/fee_payments/content', resource: resource
 
-  %p Please review your fee payment and get ready to checkout.
-
-  .mb-4= render('effective/fee_payments/fee_payment', fee_payment: resource)
+  = render('effective/fee_payments/fee_payment', fee_payment: resource)
 
   = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
     = f.hidden_field :id
-    = f.submit 'Submit Fee Payment', class: 'btn btn-primary'
+    = f.submit 'Save and Continue', class: 'btn btn-primary'

@@ -1,13 +1,12 @@
 = render 'layout' do
-  %h1= @page_title
   = render 'effective/fee_payments/content', resource: resource
 
-  %p Please help us keep your demographic information up to date.
+  .card
+    .card-body
+      = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+        = f.hidden_field :id
 
-  = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
-    = f.hidden_field :id
+        = f.fields_for(:user, f.object.user) do |fu|
+          = render 'effective/fee_payments/demographics_fields', f: fu
 
-    = f.fields_for(:user, f.object.user) do |fu|
-      = render 'effective/fee_payments/demographics_fields', f: fu
-
-    = f.save 'Save and Continue'
+        = f.save 'Save and Continue'
