@@ -32,6 +32,7 @@ class RegistrarTest < ActiveSupport::TestCase
     assert_equal next_number, user.membership.number
 
     assert_equal 0, user.fees.length
+    assert user.membership.fees_paid_period.present?
     assert user.membership.fees_paid_through_period.present?
   end
 
@@ -83,12 +84,14 @@ class RegistrarTest < ActiveSupport::TestCase
 
     assert_equal 1, user.outstanding_fee_payment_fees.length
     assert user.membership.present?
+    assert user.membership.fees_paid_period.blank?
     assert user.membership.fees_paid_through_period.blank?
 
     assert EffectiveMemberships.Registrar.fees_paid!(user)
 
     assert_equal 0, user.outstanding_fee_payment_fees.length
-    assert_equal period, user.membership.fees_paid_through_period
+    assert_equal period, user.membership.fees_paid_period
+    assert_equal period.end_of_year, user.membership.fees_paid_through_period
   end
 
   test 'remove' do

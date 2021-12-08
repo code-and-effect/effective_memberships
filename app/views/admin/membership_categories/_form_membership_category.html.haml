@@ -1,6 +1,9 @@
 = effective_form_with(model: [:admin, membership_category], engine: true) do |f|
   = f.text_field :title
 
+  - if f.object.class.categories.present?
+    = f.select :category, f.object.class.categories
+
   = f.rich_text_area :rich_text_body, label: 'Body',
     hint: 'A quick description of this category. It is displayed on the Application Select Category step.'
 

@@ -4,6 +4,8 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
     # Membership Categories
     create_table :membership_categories do |t|
       t.string :title
+      t.string :category
+
       t.integer :position
 
       # Applicants
@@ -49,6 +51,9 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
 
       t.boolean :create_bad_standing, default: false
 
+      t.string :qb_item_name
+      t.boolean :tax_exempt, default: false
+
       t.datetime :updated_at
       t.datetime :created_at
     end
@@ -65,8 +70,11 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.string :category_type
 
       t.string :number
+      t.integer :number_as_integer
+
       t.date :joined_on
       t.date :registration_on
+      t.date :fees_paid_period
       t.date :fees_paid_through_period
 
       t.boolean :bad_standing, default: false

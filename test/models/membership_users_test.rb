@@ -23,9 +23,13 @@ class MembershipUsersTest < ActiveSupport::TestCase
     fee = user.fees.find { |fee| fee.category == 'Prorated' && fee.purchased? }
     assert fee.present?, 'expected a purchased prorated fee'
 
+    assert user.membership.fees_paid_period.present?
+    assert_equal user.membership.fees_paid_period, fee.period
+    assert_equal user.membership.fees_paid_period, current_period
+
     assert user.membership.fees_paid_through_period.present?
-    assert_equal user.membership.fees_paid_through_period, fee.period
-    assert_equal user.membership.fees_paid_through_period, current_period
+    assert_equal user.membership.fees_paid_through_period, fee.period.end_of_year
+    assert_equal user.membership.fees_paid_through_period, current_period.end_of_year
   end
 
 end

@@ -4,6 +4,8 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
     # Membership Categories
     create_table :membership_categories do |t|
       t.string :title
+      t.string :category
+
       t.integer :position
 
       # Applicants
@@ -47,6 +49,11 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.boolean :create_late_fees, default: false
       t.integer :late_fee
 
+      t.boolean :create_bad_standing, default: false
+
+      t.string :qb_item_name
+      t.boolean :tax_exempt, default: false
+
       t.datetime :updated_at
       t.datetime :created_at
     end
@@ -63,13 +70,16 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.string :category_type
 
       t.string :number
+      t.integer :number_as_integer
+
       t.date :joined_on
       t.date :registration_on
+      t.date :fees_paid_period
       t.date :fees_paid_through_period
 
-      t.boolean :in_bad_standing, default: false
-      t.boolean :in_bad_standing_admin, default: false
-      t.text :in_bad_standing_reason
+      t.boolean :bad_standing, default: false
+      t.boolean :bad_standing_admin, default: false
+      t.text :bad_standing_reason
 
       t.datetime :updated_at
       t.datetime :created_at
@@ -87,14 +97,13 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.integer :membership_category_id
       t.string :membership_category_type
 
-      t.date :period
-
       t.date :start_on
       t.date :end_on
 
       t.string :number
 
-      t.boolean :in_bad_standing
+      t.boolean :bad_standing, default: false
+      t.boolean :removed, default: false
 
       t.text :notes
 
@@ -117,6 +126,8 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
 
       t.integer :from_membership_category_id
       t.string :from_membership_category_type
+
+      t.string :category
 
       # Acts as Statused
       t.string :status
@@ -141,6 +152,9 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       # Applicant Experiences
       t.integer :applicant_experiences_months
       t.text :applicant_experiences_details
+
+      # Additional Information
+      t.text :additional_information
 
       t.datetime :updated_at
       t.datetime :created_at
@@ -307,7 +321,8 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.string :parent_type
 
       t.date :period
-      t.datetime :due_at
+      t.date :late_on
+      t.date :bad_standing_on
 
       t.string :title
       t.integer :price
