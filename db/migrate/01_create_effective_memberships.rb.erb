@@ -77,9 +77,9 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.date :fees_paid_period
       t.date :fees_paid_through_period
 
-      t.boolean :in_bad_standing, default: false
-      t.boolean :in_bad_standing_admin, default: false
-      t.text :in_bad_standing_reason
+      t.boolean :bad_standing, default: false
+      t.boolean :bad_standing_admin, default: false
+      t.text :bad_standing_reason
 
       t.datetime :updated_at
       t.datetime :created_at
@@ -102,7 +102,7 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
 
       t.string :number
 
-      t.boolean :bad_standing
+      t.boolean :bad_standing, default: false
       t.boolean :removed, default: false
 
       t.text :notes
@@ -152,6 +152,9 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       # Applicant Experiences
       t.integer :applicant_experiences_months
       t.text :applicant_experiences_details
+
+      # Additional Information
+      t.text :additional_information
 
       t.datetime :updated_at
       t.datetime :created_at
