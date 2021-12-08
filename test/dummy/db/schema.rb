@@ -287,6 +287,7 @@ ActiveRecord::Schema.define(version: 7) do
 
   create_table "membership_categories", force: :cascade do |t|
     t.string "title"
+    t.string "category"
     t.integer "position"
     t.boolean "can_apply_new", default: false
     t.boolean "can_apply_existing", default: false
@@ -319,6 +320,8 @@ ActiveRecord::Schema.define(version: 7) do
     t.boolean "create_late_fees", default: false
     t.integer "late_fee"
     t.boolean "create_bad_standing", default: false
+    t.string "qb_item_name"
+    t.boolean "tax_exempt", default: false
     t.datetime "updated_at"
     t.datetime "created_at"
     t.index ["position"], name: "index_membership_categories_on_position"
@@ -348,8 +351,10 @@ ActiveRecord::Schema.define(version: 7) do
     t.integer "category_id"
     t.string "category_type"
     t.string "number"
+    t.integer "number_as_integer"
     t.date "joined_on"
     t.date "registration_on"
+    t.date "fees_paid_period"
     t.date "fees_paid_through_period"
     t.boolean "bad_standing", default: false
     t.boolean "bad_standing_admin", default: false

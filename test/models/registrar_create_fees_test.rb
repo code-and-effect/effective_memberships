@@ -8,7 +8,7 @@ class RegistrarCreateFeesTest < ActiveSupport::TestCase
 
     assert_equal 3, User.members.count
     assert_equal 3, Effective::Membership.count
-    assert_equal 3, Effective::Membership.where(fees_paid_through_period: period).count
+    assert_equal 3, Effective::Membership.where(fees_paid_period: period).count
 
     assert_equal 0, Effective::Membership.create_renewal_fees.count
     assert_equal 0, Effective::Membership.create_renewal_fees(period).count
@@ -26,7 +26,7 @@ class RegistrarCreateFeesTest < ActiveSupport::TestCase
     refute_equal period, last_period
 
     # Now everyone is a outstanding member.
-    Effective::Membership.update_all(fees_paid_through_period: last_period)
+    Effective::Membership.update_all(fees_paid_period: last_period)
     Effective::Fee.update_all(period: last_period)
 
     # Create Fees for this period scopes
@@ -51,7 +51,7 @@ class RegistrarCreateFeesTest < ActiveSupport::TestCase
     last_period = EffectiveMemberships.Registrar.period(date: Time.zone.now - 1.year)
 
     # Now everyone is a outstanding member.
-    Effective::Membership.update_all(fees_paid_through_period: last_period)
+    Effective::Membership.update_all(fees_paid_period: last_period)
     Effective::Fee.update_all(period: last_period)
 
     # Create Renewal Fees
@@ -84,7 +84,7 @@ class RegistrarCreateFeesTest < ActiveSupport::TestCase
 
     # Now everyone is a outstanding member.
     # No one is in bad standing
-    Effective::Membership.update_all(fees_paid_through_period: last_period)
+    Effective::Membership.update_all(fees_paid_period: last_period)
     Effective::Fee.update_all(period: last_period)
     assert_equal 0, Effective::Membership.where(bad_standing: true).count
 

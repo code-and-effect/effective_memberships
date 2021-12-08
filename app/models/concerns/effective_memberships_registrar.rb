@@ -38,8 +38,9 @@ module EffectiveMembershipsRegistrar
 
     # Default Date and next number
     date ||= Time.zone.now
-    period = period(date: date)
     number = next_membership_number(user, to: to) if number.blank?
+    period = period(date: date)
+    period_end_on = period_end_on(date: date)
 
     # Build a membership
     membership = user.build_membership
@@ -56,7 +57,10 @@ module EffectiveMembershipsRegistrar
     membership.number_as_integer = (Integer(number) rescue nil)
 
     # Assign fees paid through period
-    membership.fees_paid_through_period = period if skip_fees
+    if skip_fees
+      membership.fees_paid_period = period
+      membership.fees_paid_through_period = period_end_on
+    end
 
     # Or, Build Fees
     unless skip_fees
@@ -151,7 +155,9 @@ module EffectiveMembershipsRegistrar
 
     # Date
     date ||= Time.zone.now
+
     period = period(date: date)
+    period_end_on = period_end_on(date: date)
 
     if user.outstanding_fee_payment_fees.present?
       fp = EffectiveMemberships.FeePayment.new(user: user)
@@ -159,7 +165,7 @@ module EffectiveMembershipsRegistrar
       fp.submit_order.purchase!(skip_buyer_validations: true, email: false)
     end
 
-    user.membership.update!(fees_paid_through_period: period)
+    user.membership.update!(fees_paid_period: period, fees_paid_through_period: period_end_on)
   end
 
   def next_membership_number(user, to:)
@@ -182,6 +188,10 @@ module EffectiveMembershipsRegistrar
     cutoff = renewal_fee_date(date: date) # period_end_on
     period = (date < cutoff) ? date.beginning_of_year : date.advance(years: 1).beginning_of_year
     period.to_date
+  end
+
+  def period_end_on(date:)
+    period(date: date).end_of_year
   end
 
   # This is intended to be run once per day in a rake task

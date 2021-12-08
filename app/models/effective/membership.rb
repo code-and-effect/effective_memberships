@@ -14,7 +14,8 @@ module Effective
       registration_on           :date     # When the membership category last changed. Applied or reclassified.
 
       # Membership Status
-      fees_paid_through_period  :date     # The period they have paid upto.
+      fees_paid_period          :date     # The most recent period they have paid in. Start date of period.
+      fees_paid_through_period  :date     # The most recent period they have paid in. End date of period. Kind of an expires.
 
       bad_standing              :boolean   # Calculated value. Is this user in bad standing? (fees due)
       bad_standing_admin        :boolean   # Admin set this
@@ -27,29 +28,29 @@ module Effective
     scope :sorted, -> { order(:id) }
 
     scope :with_paid_fees_through, -> (period = nil) {
-      where(arel_table[:fees_paid_through_period].gteq(period || EffectiveMemberships.Registrar.current_period))
+      where(arel_table[:fees_paid_period].gteq(period || EffectiveMemberships.Registrar.current_period))
     }
 
     scope :with_unpaid_fees_through, -> (period = nil) {
-      where(arel_table[:fees_paid_through_period].lt(period || EffectiveMemberships.Registrar.current_period))
-      .or(where(fees_paid_through_period: nil))
+      where(arel_table[:fees_paid_period].lt(period || EffectiveMemberships.Registrar.current_period))
+      .or(where(fees_paid_period: nil))
     }
 
     scope :create_renewal_fees, -> (period = nil) {
       deep.with_unpaid_fees_through(period)
-        .where.not(fees_paid_through_period: nil) # Must have purchased a Prorated or Renewal Fee before
+        .where.not(fees_paid_period: nil) # Must have purchased a Prorated or Renewal Fee before
         .where(category_id: EffectiveMemberships.MembershipCategory.create_renewal_fees)
     }
 
     scope :create_late_fees, -> (period = nil) {
       deep.with_unpaid_fees_through(period)
-        .where.not(fees_paid_through_period: nil) # Must have purchased a Prorated or Renewal Fee before
+        .where.not(fees_paid_period: nil) # Must have purchased a Prorated or Renewal Fee before
         .where(category_id: EffectiveMemberships.MembershipCategory.create_late_fees)
     }
 
     scope :create_bad_standing, -> (period = nil) {
       deep.with_unpaid_fees_through(period)
-        .where.not(fees_paid_through_period: nil) # Must have purchased a Prorated or Renewal Fee before
+        .where.not(fees_paid_period: nil) # Must have purchased a Prorated or Renewal Fee before
         .where(category_id: EffectiveMemberships.MembershipCategory.create_bad_standing)
     }
 

@@ -52,8 +52,13 @@ module EffectiveMembershipsUser
     fees.select { |fee| fee.bad_standing? }
   end
 
-  def max_fees_paid_through_period
+  def max_fees_paid_period
     fees.select { |fee| fee.membership_period_fee? && fee.purchased? }.map(&:period).max
+  end
+
+  def max_fees_paid_through_period
+    return nil if max_fees_paid_period.blank?
+    EffectiveMemberships.Registrar.period_end_on(date: max_fees_paid_period)
   end
 
   def membership_removed?
@@ -160,6 +165,7 @@ module EffectiveMembershipsUser
     raise('expected membership to be present') unless membership.present?
 
     # Assign fees paid through period
+    membership.fees_paid_period = max_fees_paid_period()
     membership.fees_paid_through_period = max_fees_paid_through_period()
 
     # Assign in bad standing

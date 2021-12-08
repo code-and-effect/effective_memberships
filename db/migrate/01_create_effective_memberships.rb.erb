@@ -49,6 +49,8 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.boolean :create_late_fees, default: false
       t.integer :late_fee
 
+      t.boolean :create_bad_standing, default: false
+
       t.string :qb_item_name
       t.boolean :tax_exempt, default: false
 
@@ -72,6 +74,7 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
 
       t.date :joined_on
       t.date :registration_on
+      t.date :fees_paid_period
       t.date :fees_paid_through_period
 
       t.boolean :in_bad_standing, default: false
