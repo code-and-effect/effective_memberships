@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # EffectiveMembershipsRegistrar
 #
 # This is different cause its not an ActiveRecord one

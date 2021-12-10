@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # EffectiveMembershipsApplicantReview
 #
 # Mark your category model with effective_memberships_applicant_review to get all the includes

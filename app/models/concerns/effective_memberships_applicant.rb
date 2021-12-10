@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # EffectiveMembershipsUser
 #
 # Mark your user model with effective_memberships_user to get all the includes

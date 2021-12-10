@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # EffectiveMembershipsCategory
 #
 # Mark your category model with effective_memberships_category to get all the includes

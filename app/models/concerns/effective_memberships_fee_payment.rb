@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # EffectiveMembershipsFeePayment
 #
 # Mark your model with effective_memberships_fee_payment to get all the includes
