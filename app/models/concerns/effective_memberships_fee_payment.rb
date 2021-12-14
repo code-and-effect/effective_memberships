@@ -51,8 +51,8 @@ module EffectiveMembershipsFeePayment
     attr_accessor :declare_truth
 
     # Application Namespace
-    belongs_to :user, polymorphic: true
-    accepts_nested_attributes_for :user
+    belongs_to :owner, polymorphic: true
+    accepts_nested_attributes_for :owner
 
     belongs_to :membership_category, polymorphic: true, optional: true
 
@@ -77,18 +77,18 @@ module EffectiveMembershipsFeePayment
       timestamps
     end
 
-    scope :deep, -> { includes(:user, :membership_category, :orders) }
+    scope :deep, -> { includes(:owner, :membership_category, :orders) }
     scope :sorted, -> { order(:id) }
 
     scope :in_progress, -> { where.not(status: [:submitted]) }
     scope :done, -> { where(status: [:submitted]) }
 
-    before_validation(if: -> { current_step == :start && user && user.membership }) do
-      self.membership_category ||= user.membership.category
+    before_validation(if: -> { current_step == :start && owner && owner.membership }) do
+      self.membership_category ||= owner.membership.category
     end
 
     # All Steps validations
-    validates :user, presence: true
+    validates :owner, presence: true
 
     # Declarations Step
     with_options(if: -> { current_step == :declarations }) do
@@ -117,7 +117,7 @@ module EffectiveMembershipsFeePayment
 
     after_purchase do |_order|
       raise('expected submit_order to be purchased') unless submit_order&.purchased?
-      EffectiveMemberships.Registrar.fee_payment_purchased!(user)
+      EffectiveMemberships.Registrar.fee_payment_purchased!(owner)
       submit_purchased!
     end
   end
@@ -140,7 +140,7 @@ module EffectiveMembershipsFeePayment
   end
 
   def outstanding_fees
-    user&.outstanding_fee_payment_fees
+    owner&.outstanding_fee_payment_fees
   end
 
   # All Fees and Orders
@@ -152,20 +152,20 @@ module EffectiveMembershipsFeePayment
     orders.first
   end
 
-  # We take over the user's outstanding fees.
+  # We take over the owner's outstanding fees.
   def find_or_build_submit_fees
     Array(outstanding_fees).each { |fee| fees << fee }
     submit_fees
   end
 
   def find_or_build_submit_order
-    order = submit_order || orders.build(user: user)
+    order = submit_order || orders.build(user: owner)
 
     submit_fees.each do |fee|
       order.add(fee) unless order.purchasables.include?(fee)
     end
 
-    order.billing_address = user.billing_address if user.billing_address.present?
+    order.billing_address = owner.billing_address if owner.billing_address.present?
 
     order
   end
@@ -183,7 +183,7 @@ module EffectiveMembershipsFeePayment
     true
   end
 
-  # User clicks on the Billing Submit. Next step is Checkout
+  # Owner clicks on the Billing Submit. Next step is Checkout
   def billing!
     ready!
   end

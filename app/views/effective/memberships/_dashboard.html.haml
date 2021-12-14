@@ -17,7 +17,7 @@
     - if membership.bad_standing?
       %p
         = succeed('.') do
-          Your membership is in bad standing with the following reason: #{membership._reason}
+          Your membership is in bad standing with the following reason: #{membership.bad_standing_reason}
 
 - elsif current_user.membership_removed?
   %p Your membership was removed on #{current_user.membership_removed_on.strftime('%F')}.

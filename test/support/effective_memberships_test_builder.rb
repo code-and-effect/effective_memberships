@@ -2,36 +2,36 @@ module EffectiveMembershipsTestBuilder
 
   def build_member(membership_category: nil)
     membership_category ||= Effective::MembershipCategory.where(title: 'Full Member').first!
-    user = build_user_with_address()
+    owner = build_user_with_address()
 
-    EffectiveMemberships.Registrar.register!(user, to: membership_category)
+    EffectiveMemberships.Registrar.register!(owner, to: membership_category)
 
-    fp = EffectiveMemberships.FeePayment.new(user: user)
+    fp = EffectiveMemberships.FeePayment.new(owner: owner)
     fp.ready!
     fp.submit_order.purchase!
-    user.reload
+    owner.reload
 
-    user
+    owner
   end
 
   def create_effective_applicant!
     build_effective_applicant.tap(&:save!)
   end
 
-  def build_applicant(user: nil, category: nil, membership_category: nil)
+  def build_applicant(owner: nil, category: nil, membership_category: nil)
     membership_category ||= Effective::MembershipCategory.where(title: 'Full Member').first!
-    user ||= build_user_with_address()
+    owner ||= build_user_with_address()
 
-    category ||= 'Apply to Join' if user.membership.blank?
-    category ||= 'Apply to Reclassify' if user.membership.present?
+    category ||= 'Apply to Join' if owner.membership.blank?
+    category ||= 'Apply to Reclassify' if owner.membership.present?
 
-    applicant = Effective::Applicant.new(user: user, membership_category: membership_category)
+    applicant = Effective::Applicant.new(owner: owner, membership_category: membership_category)
     applicant.save!
     applicant
   end
 
-  def build_submitted_applicant(user: nil, membership_category: nil)
-    applicant = build_applicant(user: user, membership_category: membership_category)
+  def build_submitted_applicant(owner: nil, membership_category: nil)
+    applicant = build_applicant(owner: owner, membership_category: membership_category)
     applicant.ready!
     applicant.submit_order.purchase!
     applicant.reload
@@ -41,27 +41,27 @@ module EffectiveMembershipsTestBuilder
   # Note, I'm skipping over review! and just setting reviewed!
   # Because I don't wanna do all the completed requirements
   # Use build_reviewable_applicant() if you want to test the applicant reviews on a reviewable submitted applicant
-  def build_reviewed_applicant(user: nil, membership_category: nil)
-    applicant = build_submitted_applicant(user: user, membership_category: membership_category)
+  def build_reviewed_applicant(owner: nil, membership_category: nil)
+    applicant = build_submitted_applicant(owner: owner, membership_category: membership_category)
     applicant.reviewed!
     applicant
   end
 
-  def build_declined_applicant(user: nil, membership_category: nil)
-    applicant = build_reviewed_applicant(user: user, membership_category: membership_category)
+  def build_declined_applicant(owner: nil, membership_category: nil)
+    applicant = build_reviewed_applicant(owner: owner, membership_category: membership_category)
     applicant.declined_reason = 'Declined'
     applicant.decline!
     applicant
   end
 
-  def build_approved_applicant(user: nil, membership_category: nil)
-    applicant = build_reviewed_applicant(user: user, membership_category: membership_category)
+  def build_approved_applicant(owner: nil, membership_category: nil)
+    applicant = build_reviewed_applicant(owner: owner, membership_category: membership_category)
     applicant.approve!
     applicant
   end
 
-  def build_reviewable_applicant(user: nil, membership_category: nil)
-    applicant = build_submitted_applicant(user: user, membership_category: membership_category)
+  def build_reviewable_applicant(owner: nil, membership_category: nil)
+    applicant = build_submitted_applicant(owner: owner, membership_category: membership_category)
 
     # Build References
     applicant.min_applicant_references.times do |x|
@@ -102,11 +102,11 @@ module EffectiveMembershipsTestBuilder
     )
   end
 
-  def build_applicant_review(applicant: nil, user: nil)
+  def build_applicant_review(applicant: nil, owner: nil)
     applicant ||= build_applicant()
-    user ||= build_user()
+    reviewer ||= build_user()
 
-    applicant.applicant_reviews.build(user: user)
+    applicant.applicant_reviews.build(reviewer: reviewer)
   end
 
   def build_membership_category

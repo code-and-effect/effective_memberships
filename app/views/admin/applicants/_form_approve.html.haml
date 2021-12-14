@@ -9,10 +9,10 @@
 
   %h3 Number
   %p
-    - if applicant.user.membership&.number_was.present?
-      The member will keep their existing membership number: #{applicant.user.membership.number}.
+    - if applicant.owner.membership&.number_was.present?
+      The member will keep their existing membership number: #{applicant.owner.membership.number}.
     - else
-      - number = EffectiveMemberships.Registrar.next_membership_number(applicant.user, to: applicant.membership_category)
+      - number = EffectiveMemberships.Registrar.next_membership_number(applicant.owner, to: applicant.membership_category)
       = f.text_field :approved_membership_number, hint: "leave blank to assign the next number: #{number}."
 
   %h3 Fees
@@ -31,4 +31,4 @@
   %p The following email will be sent:
   = email_form_fields(f, :applicant_approved)
 
-  = f.submit 'Approve Applicant', border: false, center: true, 'data-confirm': "Approve #{f.object.user}?"
+  = f.submit 'Approve Applicant', border: false, center: true, 'data-confirm': "Approve #{f.object.owner}?"

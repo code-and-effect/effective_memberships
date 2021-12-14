@@ -2,10 +2,10 @@ module Effective
   class Fee < ActiveRecord::Base
     acts_as_purchasable
 
-    log_changes(to: :user) if respond_to?(:log_changes)
+    log_changes(to: :owner) if respond_to?(:log_changes)
 
-    # Every fee is charged to a user
-    belongs_to :user, polymorphic: true
+    # Every fee is charged to a owner
+    belongs_to :owner, polymorphic: true
 
     # This fee may belong to an application or other parent model
     belongs_to :parent, polymorphic: true, optional: true
@@ -31,16 +31,16 @@ module Effective
     end
 
     scope :sorted, -> { order(:id) }
-    scope :deep, -> { includes(:user, :parent, :membership_category) }
+    scope :deep, -> { includes(:owner, :parent, :membership_category) }
 
-    before_validation(if: -> { user.present? }) do
-      additional = user.additional_fee_attributes(self)
+    before_validation(if: -> { owner.present? }) do
+      additional = owner.additional_fee_attributes(self)
       raise('expected a Hash of attributes') unless additional.kind_of?(Hash)
       assign_attributes(additional)
     end
 
-    before_validation(if: -> { user.present? }) do
-      self.membership_category ||= user.membership&.category
+    before_validation(if: -> { owner.present? }) do
+      self.membership_category ||= owner.membership&.category
     end
 
     before_validation do

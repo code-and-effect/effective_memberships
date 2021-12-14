@@ -4,7 +4,7 @@ module Effective
 
     include Effective::WizardController
 
-    resource_scope -> { EffectiveMemberships.FeePayment.deep.where(user: current_user) }
+    resource_scope -> { EffectiveMemberships.FeePayment.deep.where(owner: current_user) }
 
     # Allow only 1 in-progress fee payment at a time
     before_action(only: [:new, :show], unless: -> { resource&.done? }) do

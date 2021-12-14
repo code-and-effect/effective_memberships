@@ -3,16 +3,16 @@
     %tr
       %th.border-0 Applicant
       %td.border-0
-        = applicant.user.to_s
+        = applicant.owner.to_s
         %br
-        = mail_to(applicant.user.email)
+        = mail_to(applicant.owner.email)
 
     - if request.path.start_with?('/admin')
       %tr
-        %th User
+        %th Owner
         %td
-          - url = (edit_admin_user_path(applicant.user) rescue "/admin/users/#{applicant.user.to_param}/edit")
-          = link_to(applicant.user, url)
+          - url = (polymorphic_admin_path(applicant.owner) rescue "/admin/users/#{applicant.owner.to_param}/edit")
+          = link_to(applicant.owner, url)
 
     - if applicant.from_membership_category.present?
       %tr

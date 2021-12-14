@@ -3,10 +3,10 @@
     %h5.card-title Reclassification
 
     = effective_form_with(model: [:admin, registrar_action], url: effective_memberships.admin_registrar_actions_path) do |f|
-      = f.hidden_field :user_id
-      = f.hidden_field :user_type
+      = f.hidden_field :owner_id
+      = f.hidden_field :owner_type
 
-      - membership = f.object.user.membership
+      - membership = f.object.owner.membership
 
       - period = EffectiveMemberships.Registrar.current_period
       - date = EffectiveMemberships.Registrar.bad_standing_date(period: period)
@@ -40,4 +40,4 @@
         = f.show_if :skip_fees, true do
           %p No fees will be created
 
-        = f.submit 'Reclassify', border: false, center: true, 'data-confirm': "Really reclassify #{f.object.user}?"
+        = f.submit 'Reclassify', border: false, center: true, 'data-confirm': "Really reclassify #{f.object.owner}?"

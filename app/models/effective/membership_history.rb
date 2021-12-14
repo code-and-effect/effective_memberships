@@ -1,6 +1,6 @@
 module Effective
   class MembershipHistory < ActiveRecord::Base
-    belongs_to :user, polymorphic: true
+    belongs_to :owner, polymorphic: true
     belongs_to :membership_category, polymorphic: true, optional: true
 
     effective_resource do
@@ -19,10 +19,10 @@ module Effective
 
     serialize :extra, Hash
 
-    scope :deep, -> { includes(:user, :membership_category) }
+    scope :deep, -> { includes(:owner, :membership_category) }
     scope :sorted, -> { order(:start_on) }
 
-    validates :user, presence: true
+    validates :owner, presence: true
     validates :membership_category, presence: true, unless: -> { removed? }
 
     validates :start_on, presence: true

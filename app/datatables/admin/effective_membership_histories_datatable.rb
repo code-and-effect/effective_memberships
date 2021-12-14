@@ -10,7 +10,7 @@ module Admin
       col :start_on
       col :end_on
 
-      col :user
+      col :owner
       col :membership_category
 
       col :number
@@ -23,7 +23,9 @@ module Admin
 
     collection do
       scope = Effective::MembershipHistory.deep.all
-      scope = scope.where(user_id: attributes[:user_id]) if attributes[:user_id]
+      scope = scope.where(owner_id: attributes[:owner_id]) if attributes[:owner_id]
+      scope = scope.where(owner_id: attributes[:user_id]) if attributes[:user_id]
+      scope = scope.where(owner_id: attributes[:organization_id]) if attributes[:organization_id]
       scope
     end
 

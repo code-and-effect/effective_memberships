@@ -20,9 +20,7 @@ module Admin
       col :reviewed_at, label: 'Reviewed', visible: false, as: :date
       col :approved_at, label: 'Approved', visible: false, as: :date
 
-      col(:user).search do |collection, term|
-        collection.where(user_id: User.search_col(term))
-      end
+      col :owner
 
       col :category
       col :membership_category, search: { collection: EffectiveMemberships.MembershipCategory.all, polymorphic: false }

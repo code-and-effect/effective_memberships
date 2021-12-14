@@ -1,38 +1,38 @@
 # frozen_string_literal: true
 
-# EffectiveMembershipsUser
+# EffectiveMembershipsOwner
 #
-# Mark your user model with effective_memberships_user to get all the includes
+# Mark your owner model with effective_memberships_owner to get all the includes
 
-module EffectiveMembershipsUser
+module EffectiveMembershipsOwner
   extend ActiveSupport::Concern
 
   module Base
-    def effective_memberships_user
-      include ::EffectiveMembershipsUser
+    def effective_memberships_owner
+      include ::EffectiveMembershipsOwner
     end
   end
 
   module ClassMethods
-    def effective_memberships_user?; true; end
+    def effective_memberships_owner?; true; end
   end
 
   included do
     # App scoped
-    has_many :applicants
-    has_many :fee_payments
+    has_many :applicants, as: :owner
+    has_many :fee_payments, as: :owner
 
     # Effective scoped
-    has_many :fees, -> { order(:id) }, inverse_of: :user, class_name: 'Effective::Fee', dependent: :nullify
+    has_many :fees, -> { order(:id) }, inverse_of: :owner, as: :owner, class_name: 'Effective::Fee', dependent: :nullify
     accepts_nested_attributes_for :fees, reject_if: :all_blank, allow_destroy: true
 
-    has_many :orders, -> { order(:id) }, inverse_of: :user, class_name: 'Effective::Order', dependent: :nullify
+    has_many :orders, -> { order(:id) }, inverse_of: :user, as: :user, class_name: 'Effective::Order', dependent: :nullify
     accepts_nested_attributes_for :orders, reject_if: :all_blank, allow_destroy: true
 
-    has_one :membership, inverse_of: :user, class_name: 'Effective::Membership'
+    has_one :membership, inverse_of: :owner, as: :owner, class_name: 'Effective::Membership'
     accepts_nested_attributes_for :membership
 
-    has_many :membership_histories, -> { Effective::MembershipHistory.sorted }, inverse_of: :user, class_name: 'Effective::MembershipHistory'
+    has_many :membership_histories, -> { Effective::MembershipHistory.sorted }, inverse_of: :owner, as: :owner, class_name: 'Effective::MembershipHistory'
     accepts_nested_attributes_for :membership_histories
 
     effective_resource do

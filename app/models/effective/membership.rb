@@ -1,9 +1,9 @@
 module Effective
   class Membership < ActiveRecord::Base
-    belongs_to :user, polymorphic: true
+    belongs_to :owner, polymorphic: true
     belongs_to :category, polymorphic: true
 
-    log_changes(to: :user) if respond_to?(:log_changes)
+    log_changes(to: :owner) if respond_to?(:log_changes)
 
     effective_resource do
       # Membership Info
@@ -17,14 +17,14 @@ module Effective
       fees_paid_period          :date     # The most recent period they have paid in. Start date of period.
       fees_paid_through_period  :date     # The most recent period they have paid in. End date of period. Kind of an expires.
 
-      bad_standing              :boolean   # Calculated value. Is this user in bad standing? (fees due)
+      bad_standing              :boolean   # Calculated value. Is this owner in bad standing? (fees due)
       bad_standing_admin        :boolean   # Admin set this
       bad_standing_reason       :text      # Reason for bad standing
 
       timestamps
     end
 
-    scope :deep, -> { includes(:category, user: [:fees, :membership]) }
+    scope :deep, -> { includes(:category, owner: [:fees, :membership]) }
     scope :sorted, -> { order(:id) }
 
     scope :with_paid_fees_through, -> (period = nil) {
@@ -67,8 +67,8 @@ module Effective
       self.errors.add(:category_id, 'must be a memberships category') unless category.class.effective_memberships_category?
     end
 
-    validate(if: -> { user.present? }) do
-      self.errors.add(:user_id, 'must be a memberships user') unless user.class.effective_memberships_user?
+    validate(if: -> { owner.present? }) do
+      self.errors.add(:user_id, 'must be a memberships owner') unless owner.class.effective_memberships_owner?
     end
 
     def self.max_number

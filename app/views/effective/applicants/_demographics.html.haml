@@ -6,4 +6,4 @@
       .col-sm-auto.text-right
         = link_to('Edit', wizard_path(:demographics)) if edit_effective_applicants_wizard?
 
-    = render 'effective/applicants/demographics_user', applicant: applicant, user: applicant.user
+    = render 'effective/applicants/demographics_owner', applicant: applicant, owner: applicant.owner

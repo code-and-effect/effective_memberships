@@ -29,7 +29,7 @@ class EffectiveApplicantsDatatable < Effective::Datatable
   end
 
   collection do
-    EffectiveMemberships.Applicant.deep.where(user: current_user)
+    EffectiveMemberships.Applicant.deep.where(owner: current_user)
   end
 
 end

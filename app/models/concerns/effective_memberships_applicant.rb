@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-# EffectiveMembershipsUser
+# EffectiveMembershipsApplicant
 #
-# Mark your user model with effective_memberships_user to get all the includes
+# Mark your owner model with effective_memberships_applicant to get all the includes
 
 module EffectiveMembershipsApplicant
   extend ActiveSupport::Concern
@@ -73,8 +73,8 @@ module EffectiveMembershipsApplicant
     attr_accessor :approved_membership_date
 
     # Application Namespace
-    belongs_to :user, polymorphic: true
-    accepts_nested_attributes_for :user
+    belongs_to :owner, polymorphic: true
+    accepts_nested_attributes_for :owner
 
     belongs_to :membership_category, polymorphic: true, optional: true
     belongs_to :from_membership_category, polymorphic: true, optional: true
@@ -134,16 +134,16 @@ module EffectiveMembershipsApplicant
       timestamps
     end
 
-    scope :deep, -> { includes(:user, :membership_category, :from_membership_category, :orders) }
+    scope :deep, -> { includes(:owner, :membership_category, :from_membership_category, :orders) }
     scope :sorted, -> { order(:id) }
 
     scope :in_progress, -> { where.not(status: [:approved, :declined]) }
     scope :done, -> { where(status: [:approved, :declined]) }
 
     # Set Apply to Join or Reclassification
-    before_validation(if: -> { new_record? && user.present? }) do
-      self.category ||= (user.membership.blank? ? 'Apply to Join' : 'Apply to Reclassify')
-      self.from_membership_category ||= user.membership&.category
+    before_validation(if: -> { new_record? && owner.present? }) do
+      self.category ||= (owner.membership.blank? ? 'Apply to Join' : 'Apply to Reclassify')
+      self.from_membership_category ||= owner.membership&.category
     end
 
     before_validation(if: -> { current_step == :select && membership_category_id.present? }) do
@@ -155,7 +155,7 @@ module EffectiveMembershipsApplicant
     end
 
     # All Steps validations
-    validates :user, presence: true
+    validates :owner, presence: true
     validates :from_membership_category, presence: true, if: -> { reclassification? }
 
     validate(if: -> { reclassification? }) do
@@ -163,9 +163,9 @@ module EffectiveMembershipsApplicant
     end
 
     # Start Step
-    with_options(if: -> { current_step == :start && user.present? }) do
+    with_options(if: -> { current_step == :start && owner.present? }) do
       validate do
-        errors.add(:base, 'may not have outstanding fees') if user.outstanding_fee_payment_fees.present?
+        errors.add(:base, 'may not have outstanding fees') if owner.outstanding_fee_payment_fees.present?
       end
     end
 
@@ -292,7 +292,7 @@ module EffectiveMembershipsApplicant
   def to_s
     if category.present? && membership_category.present?
       [
-        user.to_s,
+        owner.to_s,
         '-',
         category,
         'for',
@@ -353,13 +353,13 @@ module EffectiveMembershipsApplicant
   def can_apply_membership_categories_collection
     categories = EffectiveMemberships.MembershipCategory.sorted.can_apply
 
-    if user.blank? || user.membership.blank?
+    if owner.blank? || owner.membership.blank?
       return categories.where(can_apply_new: true)
     end
 
     categories.select do |cat|
       cat.can_apply_existing? ||
-      (cat.can_apply_restricted? && cat.can_apply_restricted_ids.include?(user.membership.category_id))
+      (cat.can_apply_restricted? && cat.can_apply_restricted_ids.include?(owner.membership.category_id))
     end
   end
 
@@ -436,7 +436,7 @@ module EffectiveMembershipsApplicant
     return submit_fees if submit_fees.present?
 
     fees.build(
-      user: user,
+      owner: owner,
       category: 'Applicant',
       membership_category: membership_category,
       price: membership_category.applicant_fee
@@ -446,7 +446,7 @@ module EffectiveMembershipsApplicant
   end
 
   def find_or_build_submit_order
-    order = submit_order || orders.build(user: user)
+    order = submit_order || orders.build(user: owner)
 
     # Adds fees, but does not overwrite any existing price.
     submit_fees.each do |fee|
@@ -454,7 +454,7 @@ module EffectiveMembershipsApplicant
     end
 
     # From Billing Step
-    order.billing_address = user.billing_address if user.billing_address.present?
+    order.billing_address = owner.billing_address if owner.billing_address.present?
 
     order
   end
@@ -472,7 +472,7 @@ module EffectiveMembershipsApplicant
     true
   end
 
-  # User clicks on the Billing step. Next step is Checkout
+  # Owner clicks on the Billing step. Next step is Checkout
   def billing!
     ready!
   end
@@ -546,7 +546,7 @@ module EffectiveMembershipsApplicant
     reviewed!
   end
 
-  # Admin approves an applicant. Registers the user. Sends an email.
+  # Admin approves an applicant. Registers the owner. Sends an email.
   def approve!
     raise('already approved') if was_approved?
     raise('applicant must have been submitted to approve!') unless was_submitted?
@@ -558,13 +558,13 @@ module EffectiveMembershipsApplicant
 
     if apply_to_join?
       EffectiveMemberships.Registrar.register!(
-        user,
+        owner,
         to: membership_category,
         date: approved_membership_date.presence,       # Set by the Admin Process form, or nil
         number: approved_membership_number.presence    # Set by the Admin Process form, or nil
       )
     elsif reclassification?
-      EffectiveMemberships.Registrar.reclassify!(user, to: membership_category)
+      EffectiveMemberships.Registrar.reclassify!(owner, to: membership_category)
     else
       raise('unsupported applicant approval category')
     end
@@ -574,7 +574,7 @@ module EffectiveMembershipsApplicant
     save!
   end
 
-  # Admin approves an applicant. Registers the user. Sends an email.
+  # Admin approves an applicant. Registers the owner. Sends an email.
   def decline!
     raise('already declined') if was_declined?
     raise('previously approved') if was_approved?

@@ -7,32 +7,32 @@ module Admin
     resource_scope -> { Effective::RegistrarAction }
 
     submit :register, 'Register',
-      success: -> { "#{resource.user} is now a #{resource.user.membership.category} member" },
-      redirect: -> { admin_users_path(resource) }
+      success: -> { "#{resource.owner} is now a #{resource.owner.membership.category} member" },
+      redirect: -> { admin_owners_path(resource) }
 
     submit :reclassify, 'Reclassify',
-      success: -> { "#{resource.user} has been reclassified to #{resource.user.membership.category}" },
-      redirect: -> { admin_users_path(resource) }
+      success: -> { "#{resource.owner} has been reclassified to #{resource.owner.membership.category}" },
+      redirect: -> { admin_owners_path(resource) }
 
     submit :remove, 'Remove',
-      success: -> { "#{resource.user} has been removed" },
-      redirect: -> { admin_users_path(resource) }
+      success: -> { "#{resource.owner} has been removed" },
+      redirect: -> { admin_owners_path(resource) }
 
     submit :bad_standing, 'Set In Bad Standing',
-      success: -> { "#{resource.user} is now In Bad Standing" },
-      redirect: -> { admin_users_path(resource) }
+      success: -> { "#{resource.owner} is now In Bad Standing" },
+      redirect: -> { admin_owners_path(resource) }
 
     submit :good_standing, 'Remove In Bad Standing',
-      success: -> { "#{resource.user} is now In Good Standing" },
-      redirect: -> { admin_users_path(resource) }
+      success: -> { "#{resource.owner} is now In Good Standing" },
+      redirect: -> { admin_owners_path(resource) }
 
     submit :fees_paid, 'Mark Fees Paid',
-      success: -> { "#{resource.user} has now paid their fees through #{resource.user.membership.fees_paid_through_period&.strftime('%F')}" },
-      redirect: -> { admin_users_path(resource) }
+      success: -> { "#{resource.owner} has now paid their fees through #{resource.owner.membership.fees_paid_through_period&.strftime('%F')}" },
+      redirect: -> { admin_owners_path(resource) }
 
     after_error do
       flash.keep
-      redirect_to admin_users_path(resource)
+      redirect_to admin_owners_path(resource)
     end
 
     private
@@ -41,8 +41,8 @@ module Admin
       params.require(:effective_registrar_action).permit!
     end
 
-    def admin_users_path(resource)
-      "/admin/users/#{resource.user.to_param}/edit"
+    def admin_owners_path(resource)
+      Effective::Resource.new(resource.owner, namespace: :admin).action_path(:edit)
     end
 
   end

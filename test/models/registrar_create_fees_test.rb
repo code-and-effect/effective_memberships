@@ -38,12 +38,12 @@ class RegistrarCreateFeesTest < ActiveSupport::TestCase
 
     EffectiveMemberships.Registrar.create_fees!
     assert_equal 3, Effective::Fee.where(category: 'Renewal').count
-    assert_equal 3, Effective::Fee.pluck(:user_id).uniq.length
+    assert_equal 3, Effective::Fee.pluck(:owner_id).uniq.length
 
     # Running it a second time makes no changes
     EffectiveMemberships.Registrar.create_fees!
     assert_equal 3, Effective::Fee.where(category: 'Renewal').count
-    assert_equal 3, Effective::Fee.pluck(:user_id).uniq.length
+    assert_equal 3, Effective::Fee.pluck(:owner_id).uniq.length
   end
 
   test 'create fees for late members' do

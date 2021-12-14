@@ -3,23 +3,23 @@ require 'test_helper'
 class MembershipHistoriesTest < ActiveSupport::TestCase
 
   test 'membership histories are created and set previous end dates' do
-    user = build_member()
-    first_category = user.membership.category
+    owner = build_member()
+    first_category = owner.membership.category
 
-    assert_equal 1, user.membership_histories.length
+    assert_equal 1, owner.membership_histories.length
 
-    user.membership.category = EffectiveMemberships.MembershipCategory.where(title: 'Student').first!
-    user.build_membership_history
-    user.save!
+    owner.membership.category = EffectiveMemberships.MembershipCategory.where(title: 'Student').first!
+    owner.build_membership_history
+    owner.save!
 
-    assert_equal 2, user.membership_histories.length
+    assert_equal 2, owner.membership_histories.length
 
-    first = user.membership_histories.first
-    last = user.membership_histories.last
+    first = owner.membership_histories.first
+    last = owner.membership_histories.last
 
     assert_equal Time.zone.now.to_date, last.start_on
-    assert_equal user.membership.number, last.number
-    assert_equal user.membership.category, last.membership_category
+    assert_equal owner.membership.number, last.number
+    assert_equal owner.membership.category, last.membership_category
     assert (last.bad_standing == false)
     assert last.end_on.nil?
 

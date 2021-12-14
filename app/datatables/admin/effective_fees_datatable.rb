@@ -13,8 +13,8 @@ module Admin
       col :created_at, visible: false
       col :id, visible: false
 
-      unless attributes[:user_id] || attributes[:applicant_id] || attributes[:fee_payment_id]
-        col :user
+      unless attributes[:user_id] || attributes[:owner_id] || attributes[:organization_id] || attributes[:applicant_id] || attributes[:fee_payment_id]
+        col :owner
       end
 
       unless attributes[:applicant_id] || attributes[:fee_payment_id]
@@ -40,7 +40,15 @@ module Admin
       scope = Effective::Fee.deep.all
 
       if attributes[:user_id]
-        scope = scope.where(user_id: attributes[:user_id])
+        scope = scope.where(owner_id: attributes[:user_id])
+      end
+
+      if attributes[:organization_id]
+        scope = scope.where(owner_id: attributes[:organization_id])
+      end
+
+      if attributes[:owner_id]
+        scope = scope.where(owner_id: attributes[:owner_id])
       end
 
       if attributes[:applicant_id]

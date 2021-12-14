@@ -3,18 +3,18 @@
     %h5.card-title Register
 
     = effective_form_with(model: [:admin, registrar_action], url: effective_memberships.admin_registrar_actions_path) do |f|
-      = f.hidden_field :user_id
-      = f.hidden_field :user_type
+      = f.hidden_field :owner_id
+      = f.hidden_field :owner_type
 
       - period = EffectiveMemberships.Registrar.current_period
 
       %p.text-muted
-        Register a user to a new category and optionally create fees.
+        Register into a new category and optionally create fees.
 
       = f.static_field :current_action, label: 'Current Membership' do
         None
 
-      = f.check_box :current_action, label: 'Yes, register this user'
+      = f.check_box :current_action, label: 'Yes, register to a membership'
 
       = f.show_if :current_action, true do
         - categories = EffectiveMemberships.MembershipCategory.all
@@ -41,4 +41,4 @@
             The member's fees paid through will be set to the current period.
             They will not be required to purchase a renewal fee until next period.
 
-        = f.submit 'Register', border: false, center: true, 'data-confirm': "Really register #{f.object.user}?"
+        = f.submit 'Register', border: false, center: true, 'data-confirm': "Really register #{f.object.owner}?"

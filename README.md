@@ -46,7 +46,7 @@ rake db:migrate
 Please add the following to your User model:
 
 ```
-effective_memberships_user
+effective_memberships_owner
 
 Use the following datatables to display to your user their applicants dues:
 
