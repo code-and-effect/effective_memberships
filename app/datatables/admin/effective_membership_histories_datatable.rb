@@ -22,10 +22,10 @@ module Admin
     end
 
     collection do
+      raise('expected an owner_id, not user_id') if attributes[:user_id].present?
+
       scope = Effective::MembershipHistory.deep.all
       scope = scope.where(owner_id: attributes[:owner_id]) if attributes[:owner_id]
-      scope = scope.where(owner_id: attributes[:user_id]) if attributes[:user_id]
-      scope = scope.where(owner_id: attributes[:organization_id]) if attributes[:organization_id]
       scope
     end
 

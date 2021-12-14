@@ -20,7 +20,7 @@ module Effective
 
     def permitted_params
       params.require(:fee_payment).permit!.except(
-        :user_id, :status, :status_steps, :wizard_steps,
+        :owner_id, :owner_type, :status, :status_steps, :wizard_steps,
         :submitted_at
       )
     end

@@ -34,12 +34,14 @@ module Admin
     collection do
       applicants = EffectiveMemberships.Applicant.deep.all
 
-      if scope == :in_progress && attributes[:user_id].blank?
+      raise('expected an owner_id, not user_id') if attributes[:user_id].present?
+
+      if scope == :in_progress && attributes[:owner_id].blank?
         applicants = applicants.where.not(status: :draft)
       end
 
-      if attributes[:user_id].present?
-        applicants = applicants.where(user_id: attributes[:user_id])
+      if attributes[:owner_id].present?
+        applicants = applicants.where(owner_id: attributes[:owner_id])
       end
 
       if attributes[:except_id].present?

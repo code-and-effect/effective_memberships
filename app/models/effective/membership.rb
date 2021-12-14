@@ -68,7 +68,7 @@ module Effective
     end
 
     validate(if: -> { owner.present? }) do
-      self.errors.add(:user_id, 'must be a memberships owner') unless owner.class.effective_memberships_owner?
+      self.errors.add(:owner_id, 'must be a memberships owner') unless owner.class.effective_memberships_owner?
     end
 
     def self.max_number
