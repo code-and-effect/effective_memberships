@@ -23,9 +23,9 @@ module Effective
       late_on           :date
       bad_standing_on   :date
 
-      price         :integer
-      qb_item_name  :string
-      tax_exempt    :boolean
+      price             :integer
+      qb_item_name      :string
+      tax_exempt        :boolean
 
       timestamps
     end
