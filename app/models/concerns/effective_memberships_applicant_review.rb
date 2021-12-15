@@ -20,7 +20,7 @@ module EffectiveMembershipsApplicantReview
       const_get(:WIZARD_STEPS).keys
     end
 
-    # For effective_membership_category_applicant_wizard_steps_collection
+    # For effective_category_applicant_wizard_steps_collection
     def required_wizard_steps
       [:start, :recommendation, :submitted]
     end

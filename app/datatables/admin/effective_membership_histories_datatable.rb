@@ -11,7 +11,7 @@ module Admin
       col :end_on
 
       col :owner
-      col :membership_category
+      col :category
 
       col :number
 

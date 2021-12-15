@@ -22,8 +22,8 @@
       = f.show_if :current_action, true do
         %p The member will keep their existing membership number: #{membership.number}.
 
-        - categories = EffectiveMemberships.MembershipCategory.all.where.not(id: membership.category_id)
-        = f.select :membership_category_id, categories, label: 'Reclassify to', required: true
+        - categories = EffectiveMemberships.Category.all.where.not(id: membership.category_id)
+        = f.select :category_id, categories, label: 'Reclassify to', required: true
 
         = f.check_box :skip_fees, label: 'Yes, skip creating fees and just set the category'
 

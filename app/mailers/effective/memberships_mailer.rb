@@ -44,8 +44,8 @@ module Effective
       values = {
         date: (applicant.submitted_at || Time.zone.now).strftime('%F'),
 
-        to_category: applicant.membership_category.to_s,
-        from_category: applicant.from_membership_category.to_s,
+        to_category: applicant.category.to_s,
+        from_category: applicant.from_category.to_s,
 
         url: effective_memberships.applicant_url(applicant),
         admin_url: effective_memberships.edit_admin_applicant_url(applicant),

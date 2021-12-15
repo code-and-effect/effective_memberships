@@ -1,7 +1,21 @@
 module Effective
   class Membership < ActiveRecord::Base
     belongs_to :owner, polymorphic: true
-    belongs_to :category, polymorphic: true
+    #belongs_to :category, polymorphic: true
+
+    has_many :membership_categories, inverse_of: :membership
+    accepts_nested_attributes_for :membership_categories
+
+
+    has_many :categories, through: :membership_categories
+
+    # def categories
+    #   membership_catgories.map(&:category)
+    # end
+
+    def category
+      categories.first
+    end
 
     log_changes(to: :owner) if respond_to?(:log_changes)
 
@@ -39,19 +53,19 @@ module Effective
     scope :create_renewal_fees, -> (period = nil) {
       deep.with_unpaid_fees_through(period)
         .where.not(fees_paid_period: nil) # Must have purchased a Prorated or Renewal Fee before
-        .where(category_id: EffectiveMemberships.MembershipCategory.create_renewal_fees)
+        #.where(category_id: EffectiveMemberships.Category.create_renewal_fees)
     }
 
     scope :create_late_fees, -> (period = nil) {
       deep.with_unpaid_fees_through(period)
         .where.not(fees_paid_period: nil) # Must have purchased a Prorated or Renewal Fee before
-        .where(category_id: EffectiveMemberships.MembershipCategory.create_late_fees)
+        #.where(category_id: EffectiveMemberships.Category.create_late_fees)
     }
 
     scope :create_bad_standing, -> (period = nil) {
       deep.with_unpaid_fees_through(period)
         .where.not(fees_paid_period: nil) # Must have purchased a Prorated or Renewal Fee before
-        .where(category_id: EffectiveMemberships.MembershipCategory.create_bad_standing)
+        #.where(category_id: EffectiveMemberships.Category.create_bad_standing)
     }
 
     before_validation do
@@ -63,9 +77,9 @@ module Effective
     validates :joined_on, presence: true
     validates :registration_on, presence: true
 
-    validate(if: -> { category.present? }) do
-      self.errors.add(:category_id, 'must be a memberships category') unless category.class.effective_memberships_category?
-    end
+    # validate(if: -> { category.present? }) do
+    #   self.errors.add(:category_id, 'must be a memberships category') unless category.class.effective_memberships_category?
+    # end
 
     validate(if: -> { owner.present? }) do
       self.errors.add(:owner_id, 'must be a memberships owner') unless owner.class.effective_memberships_owner?
@@ -77,6 +91,14 @@ module Effective
 
     def to_s
       'membership'
+    end
+
+    # find or build
+    def build_membership_category(category:)
+      raise('expected a category') unless category.class.respond_to?(:effective_memberships_category?)
+
+      membership_categories.find { |mc| mc.category_id == category.id && mc.category_type == category.class.name } ||
+      membership_categories.build(category: category)
     end
 
     def good_standing?

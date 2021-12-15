@@ -1,10 +1,10 @@
 module EffectiveMembershipsTestBuilder
 
-  def build_member(membership_category: nil)
-    membership_category ||= Effective::MembershipCategory.where(title: 'Full Member').first!
+  def build_member(category: nil)
+    category ||= Effective::Category.where(title: 'Full Member').first!
     owner = build_user_with_address()
 
-    EffectiveMemberships.Registrar.register!(owner, to: membership_category)
+    EffectiveMemberships.Registrar.register!(owner, to: category)
 
     fp = EffectiveMemberships.FeePayment.new(owner: owner)
     fp.ready!
@@ -18,20 +18,20 @@ module EffectiveMembershipsTestBuilder
     build_effective_applicant.tap(&:save!)
   end
 
-  def build_applicant(owner: nil, category: nil, membership_category: nil)
-    membership_category ||= Effective::MembershipCategory.where(title: 'Full Member').first!
+  def build_applicant(owner: nil, category: nil, category: nil)
+    category ||= Effective::Category.where(title: 'Full Member').first!
     owner ||= build_user_with_address()
 
     category ||= 'Apply to Join' if owner.membership.blank?
     category ||= 'Apply to Reclassify' if owner.membership.present?
 
-    applicant = Effective::Applicant.new(owner: owner, membership_category: membership_category)
+    applicant = Effective::Applicant.new(owner: owner, category: category)
     applicant.save!
     applicant
   end
 
-  def build_submitted_applicant(owner: nil, membership_category: nil)
-    applicant = build_applicant(owner: owner, membership_category: membership_category)
+  def build_submitted_applicant(owner: nil, category: nil)
+    applicant = build_applicant(owner: owner, category: category)
     applicant.ready!
     applicant.submit_order.purchase!
     applicant.reload
@@ -41,27 +41,27 @@ module EffectiveMembershipsTestBuilder
   # Note, I'm skipping over review! and just setting reviewed!
   # Because I don't wanna do all the completed requirements
   # Use build_reviewable_applicant() if you want to test the applicant reviews on a reviewable submitted applicant
-  def build_reviewed_applicant(owner: nil, membership_category: nil)
-    applicant = build_submitted_applicant(owner: owner, membership_category: membership_category)
+  def build_reviewed_applicant(owner: nil, category: nil)
+    applicant = build_submitted_applicant(owner: owner, category: category)
     applicant.reviewed!
     applicant
   end
 
-  def build_declined_applicant(owner: nil, membership_category: nil)
-    applicant = build_reviewed_applicant(owner: owner, membership_category: membership_category)
+  def build_declined_applicant(owner: nil, category: nil)
+    applicant = build_reviewed_applicant(owner: owner, category: category)
     applicant.declined_reason = 'Declined'
     applicant.decline!
     applicant
   end
 
-  def build_approved_applicant(owner: nil, membership_category: nil)
-    applicant = build_reviewed_applicant(owner: owner, membership_category: membership_category)
+  def build_approved_applicant(owner: nil, category: nil)
+    applicant = build_reviewed_applicant(owner: owner, category: category)
     applicant.approve!
     applicant
   end
 
-  def build_reviewable_applicant(owner: nil, membership_category: nil)
-    applicant = build_submitted_applicant(owner: owner, membership_category: membership_category)
+  def build_reviewable_applicant(owner: nil, category: nil)
+    applicant = build_submitted_applicant(owner: owner, category: category)
 
     # Build References
     applicant.min_applicant_references.times do |x|
@@ -109,8 +109,8 @@ module EffectiveMembershipsTestBuilder
     applicant.applicant_reviews.build(reviewer: reviewer)
   end
 
-  def build_membership_category
-    Effective::MembershipCategory.new(
+  def build_category
+    Effective::Category.new(
       title: 'Category A',
       can_apply_new: true,
       can_apply_existing: true,

@@ -54,7 +54,8 @@ module EffectiveMembershipsFeePayment
     belongs_to :owner, polymorphic: true
     accepts_nested_attributes_for :owner
 
-    belongs_to :membership_category, polymorphic: true, optional: true
+    # Like maybe optionally it makes sense.
+    belongs_to :category, polymorphic: true, optional: true
 
     has_many :fees, -> { order(:id) }, as: :parent, class_name: 'Effective::Fee', dependent: :nullify
     accepts_nested_attributes_for :fees, reject_if: :all_blank, allow_destroy: true
@@ -77,14 +78,14 @@ module EffectiveMembershipsFeePayment
       timestamps
     end
 
-    scope :deep, -> { includes(:owner, :membership_category, :orders) }
+    scope :deep, -> { includes(:owner, :category, :orders) }
     scope :sorted, -> { order(:id) }
 
     scope :in_progress, -> { where.not(status: [:submitted]) }
     scope :done, -> { where(status: [:submitted]) }
 
     before_validation(if: -> { current_step == :start && owner && owner.membership }) do
-      self.membership_category ||= owner.membership.category
+      self.category ||= owner.membership.categories.first if owner.membership.categories.length == 1
     end
 
     # All Steps validations
@@ -107,10 +108,10 @@ module EffectiveMembershipsFeePayment
         wizard_steps = self.class.all_wizard_steps
         required_steps = self.class.required_wizard_steps
 
-        fee_payment_steps = Array(membership_category&.fee_payment_wizard_steps)
+        fee_payment_steps = Array(category&.fee_payment_wizard_steps)
 
         wizard_steps.select do |step|
-          required_steps.include?(step) || membership_category.blank? || fee_payment_steps.include?(step)
+          required_steps.include?(step) || category.blank? || fee_payment_steps.include?(step)
         end
       end
     end

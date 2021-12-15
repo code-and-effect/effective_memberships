@@ -6,7 +6,7 @@ class FeesTest < ActiveSupport::TestCase
     now = Time.zone.now
     period = EffectiveMemberships.Registrar.current_period
 
-    category = EffectiveMemberships.MembershipCategory.first
+    category = EffectiveMemberships.Category.first
     category.update!("prorated_#{now.strftime('%b').downcase}" => 123_00)
 
     owner = build_user()
@@ -20,7 +20,7 @@ class FeesTest < ActiveSupport::TestCase
 
     assert_equal 'Prorated', fee.category
     assert_equal 123_00, fee.price
-    assert_equal category, fee.membership_category
+    assert_equal category, fee.category
     assert_equal period, fee.period
     assert fee.late_on.blank?
     assert fee.bad_standing_on.blank?
@@ -50,7 +50,7 @@ class FeesTest < ActiveSupport::TestCase
 
     assert_equal 'Renewal', fee.category
     assert_equal category.renewal_fee, fee.price
-    assert_equal category, fee.membership_category
+    assert_equal category, fee.category
     assert_equal period, fee.period
     assert_equal late_on, fee.late_on
     assert_equal bad_standing_on, fee.bad_standing_on
@@ -89,7 +89,7 @@ class FeesTest < ActiveSupport::TestCase
 
     assert_equal 'Late', fee.category
     assert_equal category.late_fee, fee.price
-    assert_equal category, fee.membership_category
+    assert_equal category, fee.category
     assert_equal period, fee.period
     assert fee.late_on.blank?
     assert fee.bad_standing_on.blank?
@@ -112,7 +112,7 @@ class FeesTest < ActiveSupport::TestCase
     period = EffectiveMemberships.Registrar.current_period
 
     to = owner.membership.category
-    from = EffectiveMemberships.MembershipCategory.where.not(id: owner.membership.category_id).first!
+    from = EffectiveMemberships.Category.where.not(id: owner.membership.category_id).first!
 
     to.update!("prorated_#{now.strftime('%b').downcase}" => 100_00)
     from.update!("prorated_#{now.strftime('%b').downcase}" => 75_00)
@@ -122,7 +122,7 @@ class FeesTest < ActiveSupport::TestCase
 
     assert_equal 'Discount', fee.category
     assert_equal -75_00, fee.price
-    assert_equal to, fee.membership_category
+    assert_equal to, fee.category
     assert_equal period, fee.period
 
     assert fee.save!

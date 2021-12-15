@@ -25,7 +25,7 @@ module Admin
       col :price, as: :price
       col :purchased?, as: :boolean
 
-      col :membership_category, search: { collection: EffectiveMemberships.MembershipCategory.all, polymorphic: false }
+      col :category, search: { collection: EffectiveMemberships.Category.all, polymorphic: false }
 
       aggregate :total
 

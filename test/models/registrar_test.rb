@@ -3,7 +3,7 @@ require 'test_helper'
 class RegistrarTest < ActiveSupport::TestCase
   test 'register' do
     owner = build_user()
-    category = EffectiveMemberships.MembershipCategory.first
+    category = EffectiveMemberships.Category.first
 
     refute owner.membership.present?
     assert_equal 0, owner.fees.length
@@ -20,7 +20,7 @@ class RegistrarTest < ActiveSupport::TestCase
 
   test 'register with skip_fees' do
     owner = build_user()
-    category = EffectiveMemberships.MembershipCategory.first
+    category = EffectiveMemberships.Category.first
 
     refute owner.membership.present?
     assert_equal 0, owner.fees.length
@@ -41,7 +41,7 @@ class RegistrarTest < ActiveSupport::TestCase
     owner.fees.delete_all
 
     from = owner.membership.category
-    to = EffectiveMemberships.MembershipCategory.where.not(id: from.id).first!
+    to = EffectiveMemberships.Category.where.not(id: from.id).first!
 
     assert EffectiveMemberships.Registrar.reclassify!(owner, to: to)
 
@@ -77,10 +77,10 @@ class RegistrarTest < ActiveSupport::TestCase
 
   test 'fees paid' do
     owner = build_user()
-    membership_category ||= Effective::MembershipCategory.where(title: 'Full Member').first!
+    category ||= Effective::Category.where(title: 'Full Member').first!
     period = EffectiveMemberships.Registrar.current_period
 
-    EffectiveMemberships.Registrar.register!(owner, to: membership_category)
+    EffectiveMemberships.Registrar.register!(owner, to: category)
 
     assert_equal 1, owner.outstanding_fee_payment_fees.length
     assert owner.membership.present?
@@ -127,7 +127,7 @@ class RegistrarTest < ActiveSupport::TestCase
     history = owner.membership_histories.last
 
     assert history.removed?
-    assert history.membership_category.blank?
+    assert history.category.blank?
     assert history.number.blank?
 
     assert owner.membership_removed?

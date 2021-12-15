@@ -48,7 +48,7 @@ module EffectiveMembershipsRegistrar
     membership = owner.build_membership
 
     # Assign Category
-    membership.category = to
+    membership.build_membership_category(category: to)
 
     # Assign Dates
     membership.joined_on ||= date  # Only if not already present
@@ -78,11 +78,14 @@ module EffectiveMembershipsRegistrar
     raise('expecting a memberships owner') unless owner.class.respond_to?(:effective_memberships_owner?)
     raise('owner must have an existing membership. use register! instead') if owner.membership.blank?
 
+    # Todo. I dunno this was owner.membership.category
     from = owner.membership.category
 
     raise('expecting a to memberships category') unless to.class.respond_to?(:effective_memberships_category?)
     raise('expecting a from memberships category') unless from.class.respond_to?(:effective_memberships_category?)
     raise('expected to and from to be different') if from == to
+
+    raise('todo')
 
     date ||= Time.zone.now
 

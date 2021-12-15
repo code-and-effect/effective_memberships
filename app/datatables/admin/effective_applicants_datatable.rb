@@ -23,8 +23,8 @@ module Admin
       col :owner
 
       col :category
-      col :membership_category, search: { collection: EffectiveMemberships.MembershipCategory.all, polymorphic: false }
-      col :from_membership_category, search: { collection: EffectiveMemberships.MembershipCategory.all, polymorphic: false }, visible: false
+      col :category, search: { collection: EffectiveMemberships.Category.all, polymorphic: false }
+      col :from_category, search: { collection: EffectiveMemberships.Category.all, polymorphic: false }, visible: false
 
       col :orders, visible: false
 

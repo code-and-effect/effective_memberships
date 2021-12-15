@@ -3,10 +3,10 @@ require 'test_helper'
 class FeePaymentsTest < ActiveSupport::TestCase
 
   test 'fee payments are valid' do
-    membership_category ||= Effective::MembershipCategory.where(title: 'Full Member').first!
+    category ||= Effective::Category.where(title: 'Full Member').first!
     owner = build_user_with_address()
 
-    EffectiveMemberships.Registrar.register!(owner, to: membership_category)
+    EffectiveMemberships.Registrar.register!(owner, to: category)
 
     assert_equal 1, owner.fees.length
     assert owner.fees.all? { |fee| !fee.purchased? }
@@ -30,10 +30,10 @@ class FeePaymentsTest < ActiveSupport::TestCase
   end
 
   test 'fee payments update users status' do
-    membership_category ||= Effective::MembershipCategory.where(title: 'Full Member').first!
+    category ||= Effective::Category.where(title: 'Full Member').first!
     owner = build_user_with_address()
 
-    EffectiveMemberships.Registrar.register!(owner, to: membership_category)
+    EffectiveMemberships.Registrar.register!(owner, to: category)
 
     assert owner.membership.fees_paid_period.blank?
     assert owner.membership.fees_paid_through_period.blank?

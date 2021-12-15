@@ -5,7 +5,7 @@ class ApplicantsTest < ActiveSupport::TestCase
   test 'build_applicant is valid' do
     applicant = build_applicant()
     assert applicant.valid?
-    assert_equal 'Full Member', applicant.membership_category.to_s
+    assert_equal 'Full Member', applicant.category.to_s
   end
 
   # test 'build_submitted_applicant is valid' do
@@ -33,12 +33,12 @@ class ApplicantsTest < ActiveSupport::TestCase
   #   assert_equal all_steps, applicant.required_steps
 
   #   # When membership category only wants demographics
-  #   applicant.membership_category.update!(applicant_wizard_steps: [:demographics])
+  #   applicant.category.update!(applicant_wizard_steps: [:demographics])
   #   applicant.save!
   #   assert_equal [:start, :select, :demographics, :summary, :billing, :checkout, :submitted], applicant.required_steps
 
   #   # When no membership category
-  #   applicant.update!(membership_category: nil)
+  #   applicant.update!(category: nil)
   #   assert_equal all_steps, applicant.required_steps
   # end
 
@@ -154,7 +154,7 @@ class ApplicantsTest < ActiveSupport::TestCase
   #   assert applicant.owner.membership.number.present?
   #   assert applicant.owner.membership.joined_on.present?
 
-  #   assert_equal applicant.membership_category, applicant.owner.membership.category
+  #   assert_equal applicant.category, applicant.owner.membership.category
   # end
 
   # test 'approving creates prorated fees' do
@@ -168,10 +168,10 @@ class ApplicantsTest < ActiveSupport::TestCase
   #   assert_equal 2, applicant.owner.fees.length
 
   #   applicant_fee = applicant.owner.fees.find { |fee| fee.category == 'Applicant' }
-  #   assert_equal applicant_fee.price, applicant.membership_category.applicant_fee
+  #   assert_equal applicant_fee.price, applicant.category.applicant_fee
 
   #   prorated_fee = applicant.owner.fees.find { |fee| fee.category == 'Prorated' }
-  #   assert_equal prorated_fee.price, applicant.membership_category.send("prorated_#{Time.zone.now.strftime('%b').downcase}").to_i
+  #   assert_equal prorated_fee.price, applicant.category.send("prorated_#{Time.zone.now.strftime('%b').downcase}").to_i
   # end
 
 end

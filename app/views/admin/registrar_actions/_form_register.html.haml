@@ -17,8 +17,8 @@
       = f.check_box :current_action, label: 'Yes, register to a membership'
 
       = f.show_if :current_action, true do
-        - categories = EffectiveMemberships.MembershipCategory.all
-        = f.select :membership_category_id, categories, label: 'Register to'
+        - categories = EffectiveMemberships.Category.all
+        = f.select :category_id, categories, label: 'Register to'
 
         = f.text_field :membership_number, hint: "leave blank to assign the next number"
 

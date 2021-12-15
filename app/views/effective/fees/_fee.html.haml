@@ -4,14 +4,14 @@
       %th Category
       %td= fee.category
 
-    - if fee.membership_category.present?
+    - if fee.category.present?
       %tr
         %th Membership Category
         %td
           - if request.path.start_with?('/admin')
-            = link_to(fee.membership_category, effective_memberships.edit_admin_membership_category_path(fee.membership_category))
+            = link_to(fee.category, effective_memberships.edit_admin_category_path(fee.category))
           - else
-            = fee.membership_category
+            = fee.category
 
     - if request.path.start_with?('/admin')
       %tr

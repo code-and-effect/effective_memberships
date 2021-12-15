@@ -86,12 +86,12 @@ module EffectiveMembershipsOwner
     period = EffectiveMemberships.Registrar.period(date: date)
     category = membership.category
 
-    fee = fees.find { |fee| fee.category == 'Prorated' && fee.period == period && fee.membership_category == category } || fees.build()
+    fee = fees.find { |fee| fee.fee_type == 'Prorated' && fee.period == period && fee.category == category } || fees.build()
     return fee if fee.purchased?
 
     fee.assign_attributes(
-      category: 'Prorated',
-      membership_category: category,
+      fee_type: 'Prorated',
+      category: category,
       price: price,
       period: period
     )
@@ -108,12 +108,12 @@ module EffectiveMembershipsOwner
     period = EffectiveMemberships.Registrar.period(date: date)
     category = membership.category
 
-    fee = fees.find { |fee| fee.category == 'Discount' && fee.period == period && fee.membership_category == category } || fees.build()
+    fee = fees.find { |fee| fee.fee_type == 'Discount' && fee.period == period && fee.category == category } || fees.build()
     return fee if fee.purchased?
 
     fee.assign_attributes(
-      category: 'Discount',
-      membership_category: category,
+      fee_type: 'Discount',
+      category: category,
       price: price,
       period: period
     )
@@ -124,12 +124,12 @@ module EffectiveMembershipsOwner
   def build_renewal_fee(period:, late_on:, bad_standing_on:)
     raise('must have an existing membership') unless membership.present?
 
-    fee = fees.find { |fee| fee.category == 'Renewal' && fee.period == period } || fees.build()
+    fee = fees.find { |fee| fee.fee_type == 'Renewal' && fee.period == period } || fees.build()
     return fee if fee.purchased?
 
     fee.assign_attributes(
-      category: 'Renewal',
-      membership_category: membership.category,
+      fee_type: 'Renewal',
+      category: membership.category,
       price: membership.category.renewal_fee.to_i,
       period: period,
       late_on: late_on,
@@ -143,19 +143,19 @@ module EffectiveMembershipsOwner
     raise('must have an existing membership') unless membership.present?
 
     # Return existing but do not build yet
-    fee = fees.find { |fee| fee.category == 'Late' && fee.period == period }
+    fee = fees.find { |fee| fee.fee_type == 'Late' && fee.period == period }
     return fee if fee&.purchased?
 
     # Only continue if there is a late renewal fee for the same period
-    renewal_fee = fees.find { |fee| fee.category == 'Renewal' && fee.period == period }
+    renewal_fee = fees.find { |fee| fee.fee_type == 'Renewal' && fee.period == period }
     return unless fee.present? || renewal_fee&.late?
 
     # Build the late fee
     fee ||= fees.build()
 
     fee.assign_attributes(
-      category: 'Late',
-      membership_category: membership.category,
+      fee_type: 'Late',
+      category: membership.category,
       price: membership.category.late_fee.to_i,
       period: period,
     )
@@ -205,7 +205,8 @@ module EffectiveMembershipsOwner
       end_on: nil,
       removed: removed,
       bad_standing: membership.bad_standing?,
-      membership_category: (membership.category unless removed),
+      categories: (membership.categories.map(&:to_s) unless removed),
+      category_ids: (membership.categories.map(&:id) unless removed),
       number: (membership.number unless removed)
     )
   end

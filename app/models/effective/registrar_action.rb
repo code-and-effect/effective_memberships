@@ -13,7 +13,7 @@ module Effective
     attr_accessor :bad_standing_reason
 
     # Reclassify & Register
-    attr_accessor :membership_category_id
+    attr_accessor :category_id
     attr_accessor :membership_number
     attr_accessor :skip_fees
 
@@ -26,7 +26,7 @@ module Effective
     validates :bad_standing_reason, presence: true, if: -> { current_action == :bad_standing }
 
     # Reclassification & Register
-    validates :membership_category_id, presence: true,
+    validates :category_id, presence: true,
       if: -> { current_action == :reclassify || current_action == :register }
 
     def to_s
@@ -45,7 +45,7 @@ module Effective
 
     def reclassify!
       update!(current_action: :reclassify)
-      EffectiveMemberships.Registrar.reclassify!(owner, to: membership_category, skip_fees: skip_fees?)
+      EffectiveMemberships.Registrar.reclassify!(owner, to: category, skip_fees: skip_fees?)
     end
 
     def fees_paid!
@@ -60,7 +60,7 @@ module Effective
 
     def register!
       update!(current_action: :register)
-      EffectiveMemberships.Registrar.register!(owner, to: membership_category, number: membership_number.presence, skip_fees: skip_fees?)
+      EffectiveMemberships.Registrar.register!(owner, to: category, number: membership_number.presence, skip_fees: skip_fees?)
     end
 
     def update!(atts)
@@ -85,8 +85,8 @@ module Effective
 
     private
 
-    def membership_category
-      EffectiveMemberships.MembershipCategory.find(@membership_category_id) if @membership_category_id
+    def category
+      EffectiveMemberships.Category.find(@category_id) if @category_id
     end
 
     def skip_fees?

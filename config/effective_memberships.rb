@@ -1,5 +1,5 @@
 EffectiveMemberships.setup do |config|
-  config.membership_categories_table_name = :membership_categories
+  config.categories_table_name = :categories
   config.applicants_table_name = :applicants
   config.applicant_reviews_table_name = :applicant_reviews
   config.fee_payments_table_name = :fee_payments
@@ -10,9 +10,9 @@ EffectiveMemberships.setup do |config|
 
   # Membership Categories Settings
   # Configure the class responsible for the membership categories.
-  # This should extend from Effective::MembershipCategory
+  # This should extend from Effective::Category
   # And handle all the business logic for your membership categories.
-  # config.membership_category_class_name = 'Effective::MembershipCategory'
+  # config.category_class_name = 'Effective::Category'
   # config.applicant_class_name = 'Effective::Applicant'
   # config.applicant_review_class_name = 'Effective::ApplicantReview'
   # config.registrar_class_name = 'Effective::Registrar'

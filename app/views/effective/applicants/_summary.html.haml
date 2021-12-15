@@ -14,17 +14,17 @@
           - url = (polymorphic_admin_path(applicant.owner) rescue "/admin/users/#{applicant.owner.to_param}/edit")
           = link_to(applicant.owner, url)
 
-    - if applicant.from_membership_category.present?
+    - if applicant.from_category.present?
       %tr
         %th From Category
-        %td= applicant.from_membership_category
+        %td= applicant.from_category
 
     %tr
       %th Category
       %td
         = applicant.category
         %br
-        = applicant.membership_category
+        = applicant.category
 
     - if applicant.orders.present?
       %tr

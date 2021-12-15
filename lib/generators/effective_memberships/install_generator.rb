@@ -20,7 +20,7 @@ module EffectiveMemberships
       end
 
       def create_migration_file
-        @membership_categories_table_name  = ':' + EffectiveMemberships.membership_categories_table_name.to_s
+        @categories_table_name  = ':' + EffectiveMemberships.categories_table_name.to_s
 
         migration_template ('../' * 3) + 'db/migrate/01_create_effective_memberships.rb.erb', 'db/migrate/create_effective_memberships.rb'
       end

@@ -2,17 +2,17 @@
   %p The #{applicant} will be <strong>approved</strong> to the following membership category.
 
   %h3 Category
-  = f.static_field :membership_category, label: 'Applied for'
+  = f.static_field :category, label: 'Applied for'
 
-  - categories = EffectiveMemberships.MembershipCategory.all
-  = f.select :membership_category_id, categories, label: 'Approve to'
+  - categories = EffectiveMemberships.Category.all
+  = f.select :category_id, categories, label: 'Approve to'
 
   %h3 Number
   %p
     - if applicant.owner.membership&.number_was.present?
       The member will keep their existing membership number: #{applicant.owner.membership.number}.
     - else
-      - number = EffectiveMemberships.Registrar.next_membership_number(applicant.owner, to: applicant.membership_category)
+      - number = EffectiveMemberships.Registrar.next_membership_number(applicant.owner, to: applicant.category)
       = f.text_field :approved_membership_number, hint: "leave blank to assign the next number: #{number}."
 
   %h3 Fees
