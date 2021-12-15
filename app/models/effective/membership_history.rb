@@ -1,7 +1,6 @@
 module Effective
   class MembershipHistory < ActiveRecord::Base
-    belongs_to :user, polymorphic: true
-    belongs_to :membership_category, polymorphic: true, optional: true
+    belongs_to :owner, polymorphic: true
 
     effective_resource do
       start_on       :date
@@ -12,18 +11,24 @@ module Effective
       bad_standing   :boolean
       removed        :boolean
 
+      categories      :text
+      category_ids    :text
+
       notes          :text
 
       timestamps
     end
 
-    serialize :extra, Hash
+    serialize :categories, Array
+    serialize :category_ids, Array
 
-    scope :deep, -> { includes(:user, :membership_category) }
+    scope :deep, -> { includes(:owner) }
     scope :sorted, -> { order(:start_on) }
 
-    validates :user, presence: true
-    validates :membership_category, presence: true, unless: -> { removed? }
+    validates :owner, presence: true
+
+    validates :categories, presence: true, unless: -> { removed? }
+    validates :category_ids, presence: true, unless: -> { removed? }
 
     validates :start_on, presence: true
 

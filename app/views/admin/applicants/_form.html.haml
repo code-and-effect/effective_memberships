@@ -27,11 +27,11 @@
 
   - if applicant.orders.present?
     = tab 'Orders' do
-      .mb-4= render_datatable(Admin::EffectiveOrdersDatatable.new(parent_id: applicant.id, parent_type: EffectiveMemberships.Applicant.name, user_id: applicant.user_id))
+      .mb-4= render_datatable(Admin::EffectiveOrdersDatatable.new(parent_id: applicant.id, parent_type: EffectiveMemberships.Applicant.name, owner_id: applicant.owner_id, user_type: applicant.owner_type))
 
-  - if applicant.user.applicants.any? { |other| other.was_submitted? && other.id != applicant.id }
+  - if applicant.owner.applicants.any? { |other| other.was_submitted? && other.id != applicant.id }
     = tab 'Other Applications' do
-      = render_datatable(Admin::EffectiveApplicantsDatatable.new(user_id: applicant.user_id, except_id: applicant.id))
+      = render_datatable(Admin::EffectiveApplicantsDatatable.new(owner_id: applicant.owner_id, except_id: applicant.id))
 
   - if applicant.persisted? && applicant.respond_to?(:log_changes_datatable)
     = tab 'Logs' do

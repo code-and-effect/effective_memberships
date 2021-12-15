@@ -4,7 +4,7 @@ module Effective
 
     log_changes(to: :applicant) if respond_to?(:log_changes)
 
-    CATEGORIES = ['Full Time', 'Part Time', 'Volunteer']
+    LEVELS = ['Full Time', 'Part Time', 'Volunteer']
     ONE_HUNDRED_PERCENT = 100_000
 
     effective_resource do
@@ -17,7 +17,7 @@ module Effective
       percent_worked    :integer  # 3 digits of precision. 50_000 == 50%
       still_work_here   :boolean
 
-      category          :string
+      level             :string
       tasks_performed   :text
 
       months            :integer
@@ -35,7 +35,7 @@ module Effective
     validates :employer, presence: true
     validates :start_on, presence: true
     validates :end_on, presence: true
-    validates :category, presence: true, inclusion: { in: CATEGORIES }
+    validates :level, presence: true, inclusion: { in: LEVELS }
     validates :months, presence: true
 
     validates :percent_worked, presence: true,
@@ -65,15 +65,15 @@ module Effective
     end
 
     def full_time?
-      category == 'Full Time'
+      level == 'Full Time'
     end
 
     def part_time?
-      category == 'Part Time'
+      level == 'Part Time'
     end
 
     def volunteer?
-      category == 'Volunteer'
+      level == 'Volunteer'
     end
   end
 end

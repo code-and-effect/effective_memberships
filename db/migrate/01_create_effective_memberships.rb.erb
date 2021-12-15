@@ -1,8 +1,8 @@
 class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
   def change
 
-    # Membership Categories
-    create_table :membership_categories do |t|
+    # Categories
+    create_table :categories do |t|
       t.string :title
       t.string :category
 
@@ -58,16 +58,13 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.datetime :created_at
     end
 
-    add_index :membership_categories, :title
-    add_index :membership_categories, :position
+    add_index :categories, :title
+    add_index :categories, :position
 
     # Memberships
     create_table :memberships do |t|
-      t.integer :user_id
-      t.string :user_type
-
-      t.integer :category_id
-      t.string :category_type
+      t.integer :owner_id
+      t.string :owner_type
 
       t.string :number
       t.integer :number_as_integer
@@ -85,17 +82,25 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.datetime :created_at
     end
 
-    add_index :memberships, [:category_id, :category_type]
-    add_index :memberships, [:user_id, :user_type], unique: true
+    add_index :memberships, [:owner_id, :owner_type], unique: true
     add_index :memberships, :number
+
+    # Membership Categories Join table
+    create_table :membership_categories do |t|
+      t.integer :category_id
+      t.string :category_type
+
+      t.integer :membership_id
+      t.string :membership_type
+    end
 
     # Membership Histories
     create_table :membership_histories do |t|
-      t.integer :user_id
-      t.string :user_type
+      t.integer :owner_id
+      t.string :owner_type
 
-      t.integer :membership_category_id
-      t.string :membership_category_type
+      t.text :categories
+      t.text :category_ids
 
       t.date :start_on
       t.date :end_on
@@ -111,23 +116,23 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.datetime :created_at
     end
 
-    add_index :membership_histories, [:user_id, :user_type]
+    add_index :membership_histories, [:owner_id, :owner_type]
     add_index :membership_histories, :start_on
 
     # Applicants
     create_table :applicants do |t|
       t.string :token
 
-      t.integer :user_id
-      t.string :user_type
+      t.integer :owner_id
+      t.string :owner_type
 
-      t.integer :membership_category_id
-      t.string :membership_category_type
+      t.integer :category_id
+      t.string :category_type
 
-      t.integer :from_membership_category_id
-      t.string :from_membership_category_type
+      t.integer :from_category_id
+      t.string :from_category_type
 
-      t.string :category
+      t.string :applicant_type
 
       # Acts as Statused
       t.string :status
@@ -160,7 +165,7 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.datetime :created_at
     end
 
-    add_index :applicants, [:user_id, :user_type]
+    add_index :applicants, [:owner_id, :owner_type]
     add_index :applicants, :status
     add_index :applicants, :token
 
@@ -187,7 +192,7 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
     create_table :applicant_experiences do |t|
       t.integer :applicant_id
 
-      t.string :category
+      t.string :level
       t.integer :months
 
       t.date :start_on
@@ -276,8 +281,8 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.string :token
       t.integer :applicant_id
 
-      t.integer :user_id
-      t.string :user_type
+      t.integer :reviewer_id
+      t.string :reviewer_type
 
       # Acts as Statused
       t.string :status
@@ -307,15 +312,15 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
 
     # Fees
     create_table :fees do |t|
-      t.string :category
+      t.integer :category_id
+      t.string :category_type
+
+      t.string :fee_type
 
       t.integer :purchased_order_id
 
-      t.integer :membership_category_id
-      t.string :membership_category_type
-
-      t.integer :user_id
-      t.string :user_type
+      t.integer :owner_id
+      t.string :owner_type
 
       t.integer :parent_id
       t.string :parent_type
@@ -334,22 +339,22 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.datetime :updated_at
     end
 
-    add_index :fees, :category
+    add_index :fees, :fee_type
     add_index :fees, :purchased_order_id
-    add_index :fees, :membership_category_id
+    add_index :fees, :category_id
 
-    add_index :fees, [:user_id, :user_type]
+    add_index :fees, [:owner_id, :owner_type]
     add_index :fees, [:parent_id, :parent_type]
 
     # Fee Payments
     create_table :fee_payments do |t|
       t.string :token
 
-      t.integer :user_id
-      t.string :user_type
+      t.integer :owner_id
+      t.string :owner_type
 
-      t.integer :membership_category_id
-      t.string :membership_category_type
+      t.integer :category_id
+      t.string :category_type
 
       # Acts as Statused
       t.string :status
@@ -365,7 +370,7 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.datetime :created_at
     end
 
-    add_index :fee_payments, [:user_id, :user_type]
+    add_index :fee_payments, [:owner_id, :owner_type]
     add_index :fee_payments, :status
     add_index :fee_payments, :token
 

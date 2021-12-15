@@ -1,25 +1,25 @@
 = render 'layout' do
   = render 'effective/applicants/content', resource: resource
 
-  - membership_categories = resource.can_apply_membership_categories_collection()
+  - categories = resource.can_apply_categories_collection()
 
   .card
     .card-body
-      - if membership_categories.blank?
+      - if categories.blank?
         %p
           There are no categories available for you to apply for.
           Please contact us if you believe this is in error.
 
-      - if membership_categories.present?
+      - if categories.present?
         %p Please select a category to continue.
 
         = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
           = f.hidden_field :id
 
-          = f.select :membership_category_id, membership_categories, required: true
+          = f.select :category_id, categories, required: true
 
-          - membership_categories.each do |mc|
-            = f.show_if(:membership_category_id, mc.id) do
+          - categories.each do |mc|
+            = f.show_if(:category_id, mc.id) do
               .my-4
                 %h3= mc.to_s
                 = mc.rich_text_body

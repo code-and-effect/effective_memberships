@@ -3,13 +3,13 @@ puts "Running effective_memberships seeds"
 now = Time.zone.now
 
 if Rails.env.test?
-  ActionText::RichText.where(record_type: ['Effective::MembershipCategory']).delete_all
-  Effective::MembershipCategory.delete_all
+  ActionText::RichText.where(record_type: ['Effective::Category']).delete_all
+  Effective::Category.delete_all
   Effective::ApplicantCourseArea.delete_all
   Effective::ApplicantCourseName.delete_all
 end
 
-member = Effective::MembershipCategory.create!(
+member = Effective::Category.create!(
   title: "Full Member",
   can_apply_new: true,
   can_apply_existing: true,
@@ -24,7 +24,7 @@ member = Effective::MembershipCategory.create!(
   prorated_jul: 60_00, prorated_aug: 50_00, prorated_sep: 40_00, prorated_oct: 30_00, prorated_nov: 20_00, prorated_dec: 10_00
 )
 
-student = Effective::MembershipCategory.create!(
+student = Effective::Category.create!(
   title: "Student",
   can_apply_new: true,
   create_renewal_fees: true,
@@ -38,7 +38,7 @@ student = Effective::MembershipCategory.create!(
   prorated_jul: 60_00, prorated_aug: 50_00, prorated_sep: 40_00, prorated_oct: 30_00, prorated_nov: 20_00, prorated_dec: 10_00
 )
 
-retired = Effective::MembershipCategory.create!(
+retired = Effective::Category.create!(
   title: "Retired",
   can_apply_new: false,
   can_apply_existing: false,

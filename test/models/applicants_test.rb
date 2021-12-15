@@ -5,7 +5,7 @@ class ApplicantsTest < ActiveSupport::TestCase
   test 'build_applicant is valid' do
     applicant = build_applicant()
     assert applicant.valid?
-    assert_equal 'Full Member', applicant.membership_category.to_s
+    assert_equal 'Full Member', applicant.category.to_s
   end
 
   test 'build_submitted_applicant is valid' do
@@ -17,7 +17,7 @@ class ApplicantsTest < ActiveSupport::TestCase
     assert applicant.submit_order.purchased?
 
     assert applicant.submit_fees.first.purchased?
-    assert applicant.user.fees.all?(&:purchased?)
+    assert applicant.owner.fees.all?(&:purchased?)
 
     # Submitted
     assert applicant.has_completed_step?(:checkout)
@@ -33,12 +33,12 @@ class ApplicantsTest < ActiveSupport::TestCase
     assert_equal all_steps, applicant.required_steps
 
     # When membership category only wants demographics
-    applicant.membership_category.update!(applicant_wizard_steps: [:demographics])
+    applicant.category.update!(applicant_wizard_steps: [:demographics])
     applicant.save!
     assert_equal [:start, :select, :demographics, :summary, :billing, :checkout, :submitted], applicant.required_steps
 
     # When no membership category
-    applicant.update!(membership_category: nil)
+    applicant.update!(category: nil)
     assert_equal all_steps, applicant.required_steps
   end
 
@@ -62,7 +62,7 @@ class ApplicantsTest < ActiveSupport::TestCase
       applicant_reference.addresses.build(
         addressable: applicant_reference,
         category: 'reference',
-        full_name: 'Test User',
+        full_name: 'Test Owner',
         address1: '1234 Fake Street',
         city: 'Victoria',
         state_code: 'BC',
@@ -143,35 +143,35 @@ class ApplicantsTest < ActiveSupport::TestCase
     assert applicant.approved?
   end
 
-  test 'approving assigns the user membership' do
+  test 'approving assigns the owner membership' do
     applicant = build_submitted_applicant()
 
-    assert applicant.user.membership.blank?
+    assert applicant.owner.membership.blank?
     EffectiveResources.transaction { applicant.approve! }
 
-    assert applicant.user.membership.present?
-    assert applicant.user.membership.category.present?
-    assert applicant.user.membership.number.present?
-    assert applicant.user.membership.joined_on.present?
+    assert applicant.owner.membership.present?
+    assert applicant.owner.membership.category.present?
+    assert applicant.owner.membership.number.present?
+    assert applicant.owner.membership.joined_on.present?
 
-    assert_equal applicant.membership_category, applicant.user.membership.category
+    assert_equal applicant.category, applicant.owner.membership.category
   end
 
   test 'approving creates prorated fees' do
-    user = build_user_with_address()
-    assert user.fees.blank?
+    owner = build_user_with_address()
+    assert owner.fees.blank?
 
-    applicant = build_submitted_applicant(user: user)
+    applicant = build_submitted_applicant(owner: owner)
     EffectiveResources.transaction { applicant.approve! }
 
-    assert applicant.user.fees.present?
-    assert_equal 2, applicant.user.fees.length
+    assert applicant.owner.fees.present?
+    assert_equal 2, applicant.owner.fees.length
 
-    applicant_fee = applicant.user.fees.find { |fee| fee.category == 'Applicant' }
-    assert_equal applicant_fee.price, applicant.membership_category.applicant_fee
+    applicant_fee = applicant.owner.fees.find { |fee| fee.fee_type == 'Applicant' }
+    assert_equal applicant_fee.price, applicant.category.applicant_fee
 
-    prorated_fee = applicant.user.fees.find { |fee| fee.category == 'Prorated' }
-    assert_equal prorated_fee.price, applicant.membership_category.send("prorated_#{Time.zone.now.strftime('%b').downcase}").to_i
+    prorated_fee = applicant.owner.fees.find { |fee| fee.fee_type == 'Prorated' }
+    assert_equal prorated_fee.price, applicant.category.send("prorated_#{Time.zone.now.strftime('%b').downcase}").to_i
   end
 
 end

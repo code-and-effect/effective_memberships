@@ -3,15 +3,15 @@
     %h5.card-title Mark Fees Paid
 
     = effective_form_with(model: [:admin, registrar_action], url: effective_memberships.admin_registrar_actions_path) do |f|
-      = f.hidden_field :user_id
-      = f.hidden_field :user_type
+      = f.hidden_field :owner_id
+      = f.hidden_field :owner_type
 
       %p.text-muted
         This action will create and purchase an order containing all outstanding fee payment fees.
         The member's fees paid through year will be updated to the current period.
         No order receipts or other emails will be sent.
 
-      - fees = f.object.user.outstanding_fee_payment_fees
+      - fees = f.object.owner.outstanding_fee_payment_fees
 
       .row
         .col
@@ -20,11 +20,11 @@
 
         .col
           = f.static_field :current_action, label: 'Current Fees Paid Through' do
-            = f.object.user.membership&.fees_paid_through_period&.strftime('%F') || 'None'
+            = f.object.owner.membership&.fees_paid_through_period&.strftime('%F') || 'None'
 
       = f.check_box :current_action, label: 'Yes, mark this members fees paid in full'
 
       = f.show_if :current_action, true do
 
         = f.submit 'Mark Fees Paid', border: false, center: true,
-          'data-confirm': "Really mark #{f.object.user} fees paid?"
+          'data-confirm': "Really mark #{f.object.owner} fees paid?"

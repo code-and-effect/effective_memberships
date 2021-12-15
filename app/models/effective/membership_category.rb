@@ -1,7 +1,11 @@
 module Effective
   class MembershipCategory < ActiveRecord::Base
-    self.table_name = EffectiveMemberships.membership_categories_table_name.to_s
+    belongs_to :category, polymorphic: true
+    belongs_to :membership, polymorphic: true
 
-    effective_memberships_category
+    def to_s
+      'membership category'
+    end
+
   end
 end

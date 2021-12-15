@@ -28,11 +28,11 @@ module Effective
 
     def assigns_for(resource)
       if resource.class.respond_to?(:effective_memberships_applicant?)
-        return applicant_assigns(resource).merge(user_assigns(resource.user))
+        return applicant_assigns(resource).merge(user_assigns(resource.owner))
       end
 
       if resource.kind_of?(Effective::ApplicantReference)
-        return reference_assigns(resource).merge(user_assigns(resource.applicant.user))
+        return reference_assigns(resource).merge(user_assigns(resource.applicant.owner))
       end
 
       raise('unexpected resource')
@@ -44,8 +44,8 @@ module Effective
       values = {
         date: (applicant.submitted_at || Time.zone.now).strftime('%F'),
 
-        to_category: applicant.membership_category.to_s,
-        from_category: applicant.from_membership_category.to_s,
+        to_category: applicant.category.to_s,
+        from_category: applicant.from_category.to_s,
 
         url: effective_memberships.applicant_url(applicant),
         admin_url: effective_memberships.edit_admin_applicant_url(applicant),
@@ -69,12 +69,12 @@ module Effective
       { reference: values }
     end
 
-    def user_assigns(user)
-      raise('expected a user') unless user.class.respond_to?(:effective_memberships_user?)
+    def user_assigns(owner)
+      raise('expected a owner') unless owner.class.respond_to?(:effective_memberships_owner?)
 
       values = {
-        name: user.to_s,
-        email: user.email
+        name: owner.to_s,
+        email: owner.email
       }
 
       { user: values }

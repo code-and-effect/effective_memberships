@@ -26,10 +26,10 @@
 
           .row
             .col
-              = aef.radios :category, aef.object.class.const_get(:CATEGORIES), inline: true,
+              = aef.radios :level, aef.object.class.const_get(:LEVELS), inline: true,
                 label: 'Employment', 'data-applicant-experiences-month': true
 
-              = aef.show_if :category, 'Part Time' do
+              = aef.show_if :level, 'Part Time' do
                 = aef.percent_field :percent_worked, label: 'Percent time worked',
                   hint: 'required when part time', 'data-applicant-experiences-month': true
 

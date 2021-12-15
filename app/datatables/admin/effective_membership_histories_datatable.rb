@@ -10,10 +10,12 @@ module Admin
       col :start_on
       col :end_on
 
-      col :user
-      col :membership_category
+      col :owner
 
       col :number
+
+      col :categories, label: 'Category'
+      col :category_ids, visible: false
 
       col :bad_standing
       col :removed
@@ -22,8 +24,10 @@ module Admin
     end
 
     collection do
+      raise('expected an owner_id, not user_id') if attributes[:user_id].present?
+
       scope = Effective::MembershipHistory.deep.all
-      scope = scope.where(user_id: attributes[:user_id]) if attributes[:user_id]
+      scope = scope.where(owner_id: attributes[:owner_id]) if attributes[:owner_id]
       scope
     end
 

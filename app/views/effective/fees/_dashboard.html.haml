@@ -1,6 +1,6 @@
 %h2 Fees
-- fees = current_user.outstanding_fee_payment_fees
-- membership = current_user.membership
+- fees = current_user.effective_memberships_owner.outstanding_fee_payment_fees
+- membership = current_user.effective_memberships_owner.membership
 
 - if membership.present?
   - if membership.category.create_renewal_fees?

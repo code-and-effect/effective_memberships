@@ -6,21 +6,21 @@ class FeesTest < ActiveSupport::TestCase
     now = Time.zone.now
     period = EffectiveMemberships.Registrar.current_period
 
-    category = EffectiveMemberships.MembershipCategory.first
+    category = EffectiveMemberships.Category.first
     category.update!("prorated_#{now.strftime('%b').downcase}" => 123_00)
 
-    user = build_user()
-    membership = user.build_membership
-    membership.category = category
+    owner = build_user()
+    membership = owner.build_membership
+    membership.build_membership_category(category: category)
     membership.joined_on = now
     membership.number = 1
 
     # Build the fee
-    fee = user.build_prorated_fee(date: now)
+    fee = owner.build_prorated_fee(date: now)
 
-    assert_equal 'Prorated', fee.category
+    assert_equal 'Prorated', fee.fee_type
     assert_equal 123_00, fee.price
-    assert_equal category, fee.membership_category
+    assert_equal category, fee.category
     assert_equal period, fee.period
     assert fee.late_on.blank?
     assert fee.bad_standing_on.blank?
@@ -28,17 +28,17 @@ class FeesTest < ActiveSupport::TestCase
     assert fee.save!
 
     # Now see if it's indempotent
-    fee2 = user.build_prorated_fee(date: now)
+    fee2 = owner.build_prorated_fee(date: now)
     assert_equal fee, fee2
 
-    user.reload
-    fee3 = user.build_prorated_fee(date: now)
+    owner.reload
+    fee3 = owner.build_prorated_fee(date: now)
     assert_equal fee, fee3
   end
 
   test 'build renewal fee' do
-    user = build_member()
-    category = user.membership.category
+    owner = build_member()
+    category = owner.membership.category
 
     now = Time.zone.now
     period = EffectiveMemberships.Registrar.current_period
@@ -46,11 +46,11 @@ class FeesTest < ActiveSupport::TestCase
     bad_standing_on = EffectiveMemberships.Registrar.bad_standing_date(period: period)
 
     # Build the fee
-    fee = user.build_renewal_fee(period: period, late_on: late_on, bad_standing_on: bad_standing_on)
+    fee = owner.build_renewal_fee(category: category, period: period, late_on: late_on, bad_standing_on: bad_standing_on)
 
-    assert_equal 'Renewal', fee.category
+    assert_equal 'Renewal', fee.fee_type
     assert_equal category.renewal_fee, fee.price
-    assert_equal category, fee.membership_category
+    assert_equal category, fee.category
     assert_equal period, fee.period
     assert_equal late_on, fee.late_on
     assert_equal bad_standing_on, fee.bad_standing_on
@@ -58,17 +58,17 @@ class FeesTest < ActiveSupport::TestCase
     assert fee.save!
 
     # Now see if it's indempotent
-    fee2 = user.build_renewal_fee(period: period, late_on: late_on, bad_standing_on: bad_standing_on)
+    fee2 = owner.build_renewal_fee(category: category, period: period, late_on: late_on, bad_standing_on: bad_standing_on)
     assert_equal fee, fee2
 
-    user.reload
-    fee3 = user.build_renewal_fee(period: period, late_on: late_on, bad_standing_on: bad_standing_on)
+    owner.reload
+    fee3 = owner.build_renewal_fee(category: category, period: period, late_on: late_on, bad_standing_on: bad_standing_on)
     assert_equal fee, fee3
   end
 
   test 'build late fee' do
-    user = build_member()
-    category = user.membership.category
+    owner = build_member()
+    category = owner.membership.category
 
     now = Time.zone.now
     period = EffectiveMemberships.Registrar.current_period
@@ -76,20 +76,20 @@ class FeesTest < ActiveSupport::TestCase
     bad_standing_on = EffectiveMemberships.Registrar.bad_standing_date(period: period)
 
     # Try to build late fee
-    fee = user.build_late_fee(period: period)
+    fee = owner.build_late_fee(category: category, period: period)
     assert fee.blank? # No existing renewal fee
 
     # Create a renewal fee
-    fee = user.build_renewal_fee(period: period, late_on: now - 1.second, bad_standing_on: bad_standing_on)
+    fee = owner.build_renewal_fee(category: category, period: period, late_on: now - 1.second, bad_standing_on: bad_standing_on)
     assert fee.late?
 
     # Build late fee again
-    fee = user.build_late_fee(period: period)
+    fee = owner.build_late_fee(category: category, period: period)
     assert fee.present?
 
-    assert_equal 'Late', fee.category
+    assert_equal 'Late', fee.fee_type
     assert_equal category.late_fee, fee.price
-    assert_equal category, fee.membership_category
+    assert_equal category, fee.category
     assert_equal period, fee.period
     assert fee.late_on.blank?
     assert fee.bad_standing_on.blank?
@@ -97,42 +97,42 @@ class FeesTest < ActiveSupport::TestCase
     assert fee.save!
 
     # Now see if it's indempotent
-    fee2 = user.build_late_fee(period: period)
+    fee2 = owner.build_late_fee(category: category, period: period)
     assert_equal fee, fee2
 
-    user.reload
-    fee3 = user.build_late_fee(period: period)
+    owner.reload
+    fee3 = owner.build_late_fee(category: category, period: period)
     assert_equal fee, fee3
   end
 
   test 'build discount fee' do
-    user = build_member()
+    owner = build_member()
 
     now = Time.zone.now
     period = EffectiveMemberships.Registrar.current_period
 
-    to = user.membership.category
-    from = EffectiveMemberships.MembershipCategory.where.not(id: user.membership.category_id).first!
+    to = owner.membership.category
+    from = EffectiveMemberships.Category.where.not(id: owner.membership.category_id).first!
 
     to.update!("prorated_#{now.strftime('%b').downcase}" => 100_00)
     from.update!("prorated_#{now.strftime('%b').downcase}" => 75_00)
 
     # Build discount fee
-    fee = user.build_discount_fee(from: from)
+    fee = owner.build_discount_fee(from: from)
 
-    assert_equal 'Discount', fee.category
+    assert_equal 'Discount', fee.fee_type
     assert_equal -75_00, fee.price
-    assert_equal to, fee.membership_category
+    assert_equal to, fee.category
     assert_equal period, fee.period
 
     assert fee.save!
 
     # Now see if it's indempotent
-    fee2 = user.build_discount_fee(from: from)
+    fee2 = owner.build_discount_fee(from: from)
     assert_equal fee, fee2
 
-    user.reload
-    fee3 = user.build_discount_fee(from: from)
+    owner.reload
+    fee3 = owner.build_discount_fee(from: from)
     assert_equal fee, fee3
   end
 

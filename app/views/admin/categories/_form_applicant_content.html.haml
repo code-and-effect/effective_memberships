@@ -1,6 +1,6 @@
 %p Each of the following content areas will be displayed on the applicant wizard.
 
-= effective_form_with(model: [:admin, membership_category], engine: true) do |f|
+= effective_form_with(model: [:admin, category], engine: true) do |f|
   = card("All Steps") do
     = f.rich_text_area "rich_text_applicant_all_steps_content", label: false,
       hint: "displayed on all steps"

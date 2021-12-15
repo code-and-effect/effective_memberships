@@ -10,7 +10,7 @@ module EffectiveMemberships
     # Include acts_as_addressable concern and allow any ActiveRecord object to call it
     initializer 'effective_memberships.active_record' do |app|
       ActiveSupport.on_load :active_record do
-        ActiveRecord::Base.extend(EffectiveMembershipsUser::Base)
+        ActiveRecord::Base.extend(EffectiveMembershipsOwner::Base)
         ActiveRecord::Base.extend(EffectiveMembershipsCategory::Base)
 
         ActiveRecord::Base.extend(EffectiveMembershipsApplicant::Base)

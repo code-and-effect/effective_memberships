@@ -33,22 +33,22 @@ module EffectiveMembershipsRegistrar
     raise('to be implemented by app registrar')
   end
 
-  def register!(user, to:, date: nil, number: nil, skip_fees: false)
-    raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
+  def register!(owner, to:, date: nil, number: nil, skip_fees: false)
+    raise('expecting a memberships owner') unless owner.class.respond_to?(:effective_memberships_owner?)
     raise('expecting a memberships category') unless to.class.respond_to?(:effective_memberships_category?)
-    raise('user has existing membership. use reclassify! instead.') if user.membership.present?
+    raise('owner has existing membership. use reclassify! instead.') if owner.membership.present?
 
     # Default Date and next number
     date ||= Time.zone.now
-    number = next_membership_number(user, to: to) if number.blank?
+    number = next_membership_number(owner, to: to) if number.blank?
     period = period(date: date)
     period_end_on = period_end_on(date: date)
 
     # Build a membership
-    membership = user.build_membership
+    membership = owner.build_membership
 
     # Assign Category
-    membership.category = to
+    membership.build_membership_category(category: to)
 
     # Assign Dates
     membership.joined_on ||= date  # Only if not already present
@@ -66,19 +66,20 @@ module EffectiveMembershipsRegistrar
 
     # Or, Build Fees
     unless skip_fees
-      fee = user.build_prorated_fee(date: date)
+      fee = owner.build_prorated_fee(date: date)
       raise('already has purchased prorated fee') if fee.purchased?
     end
 
-    # Save user
-    save!(user, date: date)
+    # Save owner
+    save!(owner, date: date)
   end
 
-  def reclassify!(user, to:, date: nil, skip_fees: false)
-    raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
-    raise('user must have an existing membership. use register! instead') if user.membership.blank?
+  def reclassify!(owner, to:, date: nil, skip_fees: false)
+    raise('expecting a memberships owner') unless owner.class.respond_to?(:effective_memberships_owner?)
+    raise('owner must have an existing membership. use register! instead') if owner.membership.blank?
 
-    from = user.membership.category
+    # Todo. I dunno this was owner.membership.category
+    from = owner.membership.category
 
     raise('expecting a to memberships category') unless to.class.respond_to?(:effective_memberships_category?)
     raise('expecting a from memberships category') unless from.class.respond_to?(:effective_memberships_category?)
@@ -86,74 +87,77 @@ module EffectiveMembershipsRegistrar
 
     date ||= Time.zone.now
 
-    membership = user.membership
+    membership = owner.membership
 
-    membership.category = to
+    # Assign Category
     membership.registration_on = date
 
+    membership.build_membership_category(category: to)
+    membership.membership_category(category: from).mark_for_destruction
+
     unless skip_fees
-      fee = user.build_prorated_fee(date: date)
+      fee = owner.build_prorated_fee(date: date)
       raise('already has purchased prorated fee') if fee.purchased?
 
-      fee = user.build_discount_fee(date: date, from: from)
+      fee = owner.build_discount_fee(date: date, from: from)
       raise('already has purchased discount fee') if fee.purchased?
     end
 
-    save!(user, date: date)
+    save!(owner, date: date)
   end
 
-  def remove!(user, date: nil)
-    raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
-    raise('expected a member') unless user.membership.present?
+  def remove!(owner, date: nil)
+    raise('expecting a memberships owner') unless owner.class.respond_to?(:effective_memberships_owner?)
+    raise('expected a member') unless owner.membership.present?
 
     # Date
     date ||= Time.zone.now
 
     # Remove Membership
-    user.membership.mark_for_destruction
+    owner.membership.mark_for_destruction
 
     # Delete unpurchased fees and orders
-    user.outstanding_fee_payment_fees.each { |fee| fee.mark_for_destruction }
-    user.outstanding_fee_payment_orders.each { |order| order.mark_for_destruction }
+    owner.outstanding_fee_payment_fees.each { |fee| fee.mark_for_destruction }
+    owner.outstanding_fee_payment_orders.each { |order| order.mark_for_destruction }
 
-    save!(user, date: date)
+    save!(owner, date: date)
   end
 
-  def bad_standing!(user, reason:, date: nil)
-    raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
-    raise('expected a member') unless user.membership.present?
-    raise('expected user to be in good standing') if user.membership.bad_standing?
+  def bad_standing!(owner, reason:, date: nil)
+    raise('expecting a memberships owner') unless owner.class.respond_to?(:effective_memberships_owner?)
+    raise('expected a member') unless owner.membership.present?
+    raise('expected owner to be in good standing') if owner.membership.bad_standing?
 
     # Date
     date ||= Time.zone.now
-    membership = user.membership
+    membership = owner.membership
 
     membership.bad_standing = true
     membership.bad_standing_admin = true
     membership.bad_standing_reason = reason
 
-    save!(user, date: date)
+    save!(owner, date: date)
   end
 
-  def good_standing!(user, date: nil)
-    raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
-    raise('expected a member') unless user.membership.present?
-    raise('expected user to be in bad standing') unless user.membership.bad_standing?
+  def good_standing!(owner, date: nil)
+    raise('expecting a memberships owner') unless owner.class.respond_to?(:effective_memberships_owner?)
+    raise('expected a member') unless owner.membership.present?
+    raise('expected owner to be in bad standing') unless owner.membership.bad_standing?
 
     # Date
     date ||= Time.zone.now
-    membership = user.membership
+    membership = owner.membership
 
     membership.bad_standing = false
     membership.bad_standing_admin = false
     membership.bad_standing_reason = nil
 
-    save!(user, date: date)
+    save!(owner, date: date)
   end
 
-  def fees_paid!(user, date: nil)
-    raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
-    raise('expected a member') unless user.membership.present?
+  def fees_paid!(owner, date: nil)
+    raise('expecting a memberships owner') unless owner.class.respond_to?(:effective_memberships_owner?)
+    raise('expected a member') unless owner.membership.present?
 
     # Date
     date ||= Time.zone.now
@@ -161,17 +165,17 @@ module EffectiveMembershipsRegistrar
     period = period(date: date)
     period_end_on = period_end_on(date: date)
 
-    if user.outstanding_fee_payment_fees.present?
-      fp = EffectiveMemberships.FeePayment.new(user: user)
+    if owner.outstanding_fee_payment_fees.present?
+      fp = EffectiveMemberships.FeePayment.new(owner: owner)
       fp.ready!
       fp.submit_order.purchase!(skip_buyer_validations: true, email: false)
     end
 
-    user.membership.update!(fees_paid_period: period, fees_paid_through_period: period_end_on)
+    owner.membership.update!(fees_paid_period: period, fees_paid_through_period: period_end_on)
   end
 
-  def next_membership_number(user, to:)
-    raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
+  def next_membership_number(owner, to:)
+    raise('expecting a memberships owner') unless owner.class.respond_to?(:effective_memberships_owner?)
     raise('expecting a memberships category') unless to.class.respond_to?(:effective_memberships_category?)
 
     # Just a simple number right now
@@ -206,44 +210,48 @@ module EffectiveMembershipsRegistrar
 
     # Create Renewal Fees
     Effective::Membership.create_renewal_fees(period).find_each do |membership|
-      fee = membership.user.build_renewal_fee(period: period, late_on: late_on, bad_standing_on: bad_standing_on)
-      raise("expected build_renewal_fee to return a fee for period #{period}") unless fee.kind_of?(Effective::Fee)
-      next if fee.purchased?
+      membership.categories.select(&:create_renewal_fees?).map do |category|
+        fee = membership.owner.build_renewal_fee(category: category, period: period, late_on: late_on, bad_standing_on: bad_standing_on)
+        raise("expected build_renewal_fee to return a fee for period #{period}") unless fee.kind_of?(Effective::Fee)
+        next if fee.purchased?
 
-      fee.save!
+        fee.save!
+      end
     end
 
     GC.start
 
     # Create Late Fees
     Effective::Membership.create_late_fees(period).find_each do |membership|
-      fee = membership.user.build_late_fee(period: period)
-      next if fee.blank? || fee.purchased?
+      membership.categories.select(&:create_late_fees?).map do |category|
+        fee = membership.owner.build_late_fee(category: category, period: period)
+        next if fee.blank? || fee.purchased?
 
-      fee.save!
+        fee.save!
+      end
     end
 
     GC.start
 
     # Update Membership Status - Assign In Bad Standing
     Effective::Membership.deep.with_unpaid_fees_through(period).find_each do |membership|
-      membership.user.update_membership_status!
+      membership.owner.update_membership_status!
     end
 
     true
   end
 
   # Called in the after_purchase of fee payment
-  def fee_payment_purchased!(user)
-    raise('expecting a memberships user') unless user.class.respond_to?(:effective_memberships_user?)
-    user.update_membership_status!
+  def fee_payment_purchased!(owner)
+    raise('expecting a memberships owner') unless owner.class.respond_to?(:effective_memberships_owner?)
+    owner.update_membership_status!
   end
 
   protected
 
-  def save!(user, date: Time.zone.now)
-    user.build_membership_history(start_on: date)
-    user.save!
+  def save!(owner, date: Time.zone.now)
+    owner.build_membership_history(start_on: date)
+    owner.save!
   end
 
 end

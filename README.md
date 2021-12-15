@@ -46,7 +46,7 @@ rake db:migrate
 Please add the following to your User model:
 
 ```
-effective_memberships_user
+effective_memberships_owner
 
 Use the following datatables to display to your user their applicants dues:
 
@@ -62,8 +62,8 @@ Add a link to the admin menu:
 
 ```haml
 - if can? :admin, :effective_memberships
-  - if can? :index, Effective::MembershipCategory
-    = nav_link_to 'Membership Categories', effective_memberships.admin_membership_categories_path
+  - if can? :index, Effective::Category
+    = nav_link_to 'Membership Categories', effective_memberships.admin_categories_path
 
   - if can? :index, Effective::Applicants
     = nav_link_to 'Applicants', effective_memberships.admin_applicants_path
@@ -87,7 +87,7 @@ end
 
 if user.admin?
   can :admin, :effective_memberships
-  can :manage, Effective::MembershipCategory
+  can :manage, Effective::Category
   can :manage, Effective::Applicant
 end
 ```

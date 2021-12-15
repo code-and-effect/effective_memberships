@@ -21,7 +21,7 @@ EffectiveMemberships::Engine.routes.draw do
   namespace :admin do
     resources :applicants, except: [:new, :create, :show]
     resources :fees
-    resources :membership_categories, except: [:show]
+    resources :categories, except: [:show]
 
     resources :applicant_course_areas, except: [:show]
     resources :applicant_course_names, except: [:show]

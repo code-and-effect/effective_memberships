@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-# EffectiveMembershipsUser
+# EffectiveMembershipsApplicant
 #
-# Mark your user model with effective_memberships_user to get all the includes
+# Mark your owner model with effective_memberships_applicant to get all the includes
 
 module EffectiveMembershipsApplicant
   extend ActiveSupport::Concern
@@ -20,7 +20,7 @@ module EffectiveMembershipsApplicant
       const_get(:WIZARD_STEPS).keys
     end
 
-    # For effective_membership_category_applicant_wizard_steps_collection
+    # For effective_category_applicant_wizard_steps_collection
     def required_wizard_steps
       [:start, :select, :summary, :billing, :checkout, :submitted]
     end
@@ -73,11 +73,11 @@ module EffectiveMembershipsApplicant
     attr_accessor :approved_membership_date
 
     # Application Namespace
-    belongs_to :user, polymorphic: true
-    accepts_nested_attributes_for :user
+    belongs_to :owner, polymorphic: true
+    accepts_nested_attributes_for :owner
 
-    belongs_to :membership_category, polymorphic: true, optional: true
-    belongs_to :from_membership_category, polymorphic: true, optional: true
+    belongs_to :category, polymorphic: true, optional: true
+    belongs_to :from_category, polymorphic: true, optional: true
 
     has_many :applicant_reviews, -> { order(:id) }, inverse_of: :applicant, dependent: :destroy
     accepts_nested_attributes_for :applicant_reviews, reject_if: :all_blank, allow_destroy: true
@@ -102,7 +102,7 @@ module EffectiveMembershipsApplicant
     accepts_nested_attributes_for :orders
 
     effective_resource do
-      category               :string
+      applicant_type         :string
 
       # Acts as Statused
       status                 :string, permitted: false
@@ -134,20 +134,20 @@ module EffectiveMembershipsApplicant
       timestamps
     end
 
-    scope :deep, -> { includes(:user, :membership_category, :from_membership_category, :orders) }
+    scope :deep, -> { includes(:owner, :category, :from_category, :orders) }
     scope :sorted, -> { order(:id) }
 
     scope :in_progress, -> { where.not(status: [:approved, :declined]) }
     scope :done, -> { where(status: [:approved, :declined]) }
 
     # Set Apply to Join or Reclassification
-    before_validation(if: -> { new_record? && user.present? }) do
-      self.category ||= (user.membership.blank? ? 'Apply to Join' : 'Apply to Reclassify')
-      self.from_membership_category ||= user.membership&.category
+    before_validation(if: -> { new_record? && owner.present? }) do
+      self.applicant_type ||= (owner.membership.blank? ? 'Apply to Join' : 'Apply to Reclassify')
+      self.from_category ||= owner.membership&.category
     end
 
-    before_validation(if: -> { current_step == :select && membership_category_id.present? }) do
-      self.membership_category_type ||= EffectiveMemberships.MembershipCategory.name
+    before_validation(if: -> { current_step == :select && category_id.present? }) do
+      self.category_type ||= EffectiveMemberships.Category.name
     end
 
     before_validation(if: -> { current_step == :experience }) do
@@ -155,24 +155,24 @@ module EffectiveMembershipsApplicant
     end
 
     # All Steps validations
-    validates :user, presence: true
-    validates :from_membership_category, presence: true, if: -> { reclassification? }
+    validates :owner, presence: true
+    validates :from_category, presence: true, if: -> { reclassification? }
 
     validate(if: -> { reclassification? }) do
-      errors.add(:membership_category_id, "can't reclassify to existing category") if membership_category_id == from_membership_category_id
+      errors.add(:category_id, "can't reclassify to existing category") if category_id == from_category_id
     end
 
     # Start Step
-    with_options(if: -> { current_step == :start && user.present? }) do
+    with_options(if: -> { current_step == :start && owner.present? }) do
       validate do
-        errors.add(:base, 'may not have outstanding fees') if user.outstanding_fee_payment_fees.present?
+        errors.add(:base, 'may not have outstanding fees') if owner.outstanding_fee_payment_fees.present?
       end
     end
 
     # Select Step
     with_options(if: -> { current_step == :select || has_completed_step?(:select) }) do
+      validates :applicant_type, presence: true
       validates :category, presence: true
-      validates :membership_category, presence: true
     end
 
     # Applicant Educations Step
@@ -274,10 +274,10 @@ module EffectiveMembershipsApplicant
         wizard_steps = self.class.all_wizard_steps
         required_steps = self.class.required_wizard_steps
 
-        applicant_steps = Array(membership_category&.applicant_wizard_steps)
+        applicant_steps = Array(category&.applicant_wizard_steps)
 
         wizard_steps.select do |step|
-          required_steps.include?(step) || membership_category.blank? || applicant_steps.include?(step)
+          required_steps.include?(step) || category.blank? || applicant_steps.include?(step)
         end
       end
     end
@@ -290,14 +290,14 @@ module EffectiveMembershipsApplicant
 
   # Instance Methods
   def to_s
-    if category.present? && membership_category.present?
+    if category.present? && category.present?
       [
-        user.to_s,
+        owner.to_s,
         '-',
         category,
         'for',
-        membership_category,
-        ("from #{from_membership_category}" if reclassification?)
+        category,
+        ("from #{from_category}" if reclassification?)
       ].compact.join(' ')
     else
       'New Applicant'
@@ -305,11 +305,15 @@ module EffectiveMembershipsApplicant
   end
 
   def apply_to_join?
-    category == 'Apply to Join'
+    applicant_type == 'Apply to Join'
   end
 
   def reclassification?
-    category == 'Apply to Reclassify'
+    applicant_type == 'Apply to Reclassify'
+  end
+
+  def owner_label
+    owner_type.to_s.split('::').last
   end
 
   def in_progress?
@@ -350,16 +354,18 @@ module EffectiveMembershipsApplicant
   end
 
   # Used by the select step
-  def can_apply_membership_categories_collection
-    categories = EffectiveMemberships.MembershipCategory.sorted.can_apply
+  def can_apply_categories_collection
+    categories = EffectiveMemberships.Category.sorted.can_apply
 
-    if user.blank? || user.membership.blank?
+    if owner.blank? || owner.membership.blank?
       return categories.where(can_apply_new: true)
     end
 
+    category_ids = owner.membership.category_ids
+
     categories.select do |cat|
       cat.can_apply_existing? ||
-      (cat.can_apply_restricted? && cat.can_apply_restricted_ids.include?(user.membership.category_id))
+      (cat.can_apply_restricted? && (category_ids & cat.can_apply_restricted_ids).present?)
     end
   end
 
@@ -379,12 +385,12 @@ module EffectiveMembershipsApplicant
 
   # Educations Step
   def min_applicant_educations
-    membership_category&.min_applicant_educations.to_i
+    category&.min_applicant_educations.to_i
   end
 
   # Courses Amounts step
   def min_applicant_courses
-    membership_category&.min_applicant_courses.to_i
+    category&.min_applicant_courses.to_i
   end
 
   def applicant_course_areas_collection
@@ -410,17 +416,17 @@ module EffectiveMembershipsApplicant
 
   # Work Experiences Step
   def min_applicant_experiences_months
-    membership_category&.min_applicant_experiences_months.to_i
+    category&.min_applicant_experiences_months.to_i
   end
 
   # References Step
   def min_applicant_references
-    membership_category&.min_applicant_references.to_i
+    category&.min_applicant_references.to_i
   end
 
   # Files Step
   def min_applicant_files
-    membership_category&.min_applicant_files.to_i
+    category&.min_applicant_files.to_i
   end
 
   # All Fees and Orders
@@ -436,17 +442,17 @@ module EffectiveMembershipsApplicant
     return submit_fees if submit_fees.present?
 
     fees.build(
-      user: user,
-      category: 'Applicant',
-      membership_category: membership_category,
-      price: membership_category.applicant_fee
+      owner: owner,
+      fee_type: 'Applicant',
+      category: category,
+      price: category.applicant_fee
     )
 
     submit_fees
   end
 
   def find_or_build_submit_order
-    order = submit_order || orders.build(user: user)
+    order = submit_order || orders.build(user: owner)
 
     # Adds fees, but does not overwrite any existing price.
     submit_fees.each do |fee|
@@ -454,7 +460,7 @@ module EffectiveMembershipsApplicant
     end
 
     # From Billing Step
-    order.billing_address = user.billing_address if user.billing_address.present?
+    order.billing_address = owner.billing_address if owner.billing_address.present?
 
     order
   end
@@ -472,7 +478,7 @@ module EffectiveMembershipsApplicant
     true
   end
 
-  # User clicks on the Billing step. Next step is Checkout
+  # Owner clicks on the Billing step. Next step is Checkout
   def billing!
     ready!
   end
@@ -530,7 +536,7 @@ module EffectiveMembershipsApplicant
   end
 
   def min_applicant_reviews
-    membership_category&.min_applicant_reviews.to_i
+    category&.min_applicant_reviews.to_i
   end
 
   # When an application is completed, these must be done to go to reviewed
@@ -546,7 +552,7 @@ module EffectiveMembershipsApplicant
     reviewed!
   end
 
-  # Admin approves an applicant. Registers the user. Sends an email.
+  # Admin approves an applicant. Registers the owner. Sends an email.
   def approve!
     raise('already approved') if was_approved?
     raise('applicant must have been submitted to approve!') unless was_submitted?
@@ -558,15 +564,15 @@ module EffectiveMembershipsApplicant
 
     if apply_to_join?
       EffectiveMemberships.Registrar.register!(
-        user,
-        to: membership_category,
+        owner,
+        to: category,
         date: approved_membership_date.presence,       # Set by the Admin Process form, or nil
         number: approved_membership_number.presence    # Set by the Admin Process form, or nil
       )
     elsif reclassification?
-      EffectiveMemberships.Registrar.reclassify!(user, to: membership_category)
+      EffectiveMemberships.Registrar.reclassify!(owner, to: category)
     else
-      raise('unsupported applicant approval category')
+      raise('unsupported approval applicant_type')
     end
 
     after_commit { send_email(:applicant_approved) }
@@ -574,7 +580,7 @@ module EffectiveMembershipsApplicant
     save!
   end
 
-  # Admin approves an applicant. Registers the user. Sends an email.
+  # Admin approves an applicant. Registers the owner. Sends an email.
   def decline!
     raise('already declined') if was_declined?
     raise('previously approved') if was_approved?

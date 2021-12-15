@@ -1,38 +1,41 @@
 # frozen_string_literal: true
 
-# EffectiveMembershipsUser
+# EffectiveMembershipsOwner
 #
-# Mark your user model with effective_memberships_user to get all the includes
+# Mark your owner model with effective_memberships_owner to get all the includes
 
-module EffectiveMembershipsUser
+module EffectiveMembershipsOwner
   extend ActiveSupport::Concern
 
+  mattr_accessor :descendants
+
   module Base
-    def effective_memberships_user
-      include ::EffectiveMembershipsUser
+    def effective_memberships_owner
+      include ::EffectiveMembershipsOwner
+      (EffectiveMembershipsOwner.descendants ||= []) << self
     end
   end
 
   module ClassMethods
-    def effective_memberships_user?; true; end
+    def effective_memberships_owner?; true; end
   end
 
   included do
     # App scoped
-    has_many :applicants
-    has_many :fee_payments
+    has_many :applicants, as: :owner
+    has_many :fee_payments, as: :owner
 
     # Effective scoped
-    has_many :fees, -> { order(:id) }, inverse_of: :user, class_name: 'Effective::Fee', dependent: :nullify
+    has_many :fees, -> { order(:id) }, inverse_of: :owner, as: :owner, class_name: 'Effective::Fee', dependent: :nullify
     accepts_nested_attributes_for :fees, reject_if: :all_blank, allow_destroy: true
 
-    has_many :orders, -> { order(:id) }, inverse_of: :user, class_name: 'Effective::Order', dependent: :nullify
+    has_many :orders, -> { order(:id) }, inverse_of: :user, as: :user, class_name: 'Effective::Order', dependent: :nullify
     accepts_nested_attributes_for :orders, reject_if: :all_blank, allow_destroy: true
 
-    has_one :membership, inverse_of: :user, class_name: 'Effective::Membership'
+    has_one :membership, inverse_of: :owner, as: :owner, class_name: 'Effective::Membership'
     accepts_nested_attributes_for :membership
 
-    has_many :membership_histories, -> { Effective::MembershipHistory.sorted }, inverse_of: :user, class_name: 'Effective::MembershipHistory'
+    has_many :membership_histories, -> { Effective::MembershipHistory.sorted }, inverse_of: :owner, as: :owner, class_name: 'Effective::MembershipHistory'
     accepts_nested_attributes_for :membership_histories
 
     effective_resource do
@@ -40,6 +43,14 @@ module EffectiveMembershipsUser
     end
 
     scope :members, -> { joins(:membership) }
+  end
+
+  def effective_memberships_owner
+    self
+  end
+
+  def owner_label
+    self.class.name.split('::').last
   end
 
   def outstanding_fee_payment_fees
@@ -86,12 +97,12 @@ module EffectiveMembershipsUser
     period = EffectiveMemberships.Registrar.period(date: date)
     category = membership.category
 
-    fee = fees.find { |fee| fee.category == 'Prorated' && fee.period == period && fee.membership_category == category } || fees.build()
+    fee = fees.find { |fee| fee.fee_type == 'Prorated' && fee.period == period && fee.category == category } || fees.build()
     return fee if fee.purchased?
 
     fee.assign_attributes(
-      category: 'Prorated',
-      membership_category: category,
+      fee_type: 'Prorated',
+      category: category,
       price: price,
       period: period
     )
@@ -108,12 +119,12 @@ module EffectiveMembershipsUser
     period = EffectiveMemberships.Registrar.period(date: date)
     category = membership.category
 
-    fee = fees.find { |fee| fee.category == 'Discount' && fee.period == period && fee.membership_category == category } || fees.build()
+    fee = fees.find { |fee| fee.fee_type == 'Discount' && fee.period == period && fee.category == category } || fees.build()
     return fee if fee.purchased?
 
     fee.assign_attributes(
-      category: 'Discount',
-      membership_category: category,
+      fee_type: 'Discount',
+      category: category,
       price: price,
       period: period
     )
@@ -121,16 +132,19 @@ module EffectiveMembershipsUser
     fee
   end
 
-  def build_renewal_fee(period:, late_on:, bad_standing_on:)
+  def build_renewal_fee(category:, period:, late_on:, bad_standing_on:)
     raise('must have an existing membership') unless membership.present?
 
-    fee = fees.find { |fee| fee.category == 'Renewal' && fee.period == period } || fees.build()
-    return fee if fee.purchased?
+    fee = fees.find { |fee| fee.fee_type == 'Renewal' && fee.period == period && fee.category_id == category.id && fee.category_type == category.class.name }
+    return fee if fee&.purchased?
+
+    # Build the renewal fee
+    fee ||= fees.build()
 
     fee.assign_attributes(
-      category: 'Renewal',
-      membership_category: membership.category,
-      price: membership.category.renewal_fee.to_i,
+      fee_type: 'Renewal',
+      category: category,
+      price: category.renewal_fee.to_i,
       period: period,
       late_on: late_on,
       bad_standing_on: bad_standing_on
@@ -139,24 +153,24 @@ module EffectiveMembershipsUser
     fee
   end
 
-  def build_late_fee(period:)
+  def build_late_fee(category:, period:)
     raise('must have an existing membership') unless membership.present?
 
     # Return existing but do not build yet
-    fee = fees.find { |fee| fee.category == 'Late' && fee.period == period }
+    fee = fees.find { |fee| fee.fee_type == 'Late' && fee.period == period && fee.category_id == category.id && fee.category_type == category.class.name }
     return fee if fee&.purchased?
 
     # Only continue if there is a late renewal fee for the same period
-    renewal_fee = fees.find { |fee| fee.category == 'Renewal' && fee.period == period }
+    renewal_fee = fees.find { |fee| fee.fee_type == 'Renewal' && fee.period == period && fee.category_id == category.id && fee.category_type == category.class.name }
     return unless fee.present? || renewal_fee&.late?
 
     # Build the late fee
     fee ||= fees.build()
 
     fee.assign_attributes(
-      category: 'Late',
-      membership_category: membership.category,
-      price: membership.category.late_fee.to_i,
+      fee_type: 'Late',
+      category: category,
+      price: category.late_fee.to_i,
       period: period,
     )
 
@@ -205,7 +219,8 @@ module EffectiveMembershipsUser
       end_on: nil,
       removed: removed,
       bad_standing: membership.bad_standing?,
-      membership_category: (membership.category unless removed),
+      categories: (membership.categories.map(&:to_s) unless removed),
+      category_ids: (membership.categories.map(&:id) unless removed),
       number: (membership.number unless removed)
     )
   end

@@ -1,5 +1,5 @@
 module Admin
-  class EffectiveMembershipCategoriesDatatable < Effective::Datatable
+  class EffectiveCategoriesDatatable < Effective::Datatable
     datatable do
       reorder :position
 
@@ -17,7 +17,7 @@ module Admin
     end
 
     collection do
-      EffectiveMemberships.MembershipCategory.deep.all
+      EffectiveMemberships.Category.deep.all
     end
   end
 end

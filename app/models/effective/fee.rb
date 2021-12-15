@@ -2,19 +2,19 @@ module Effective
   class Fee < ActiveRecord::Base
     acts_as_purchasable
 
-    log_changes(to: :user) if respond_to?(:log_changes)
+    log_changes(to: :owner) if respond_to?(:log_changes)
 
-    # Every fee is charged to a user
-    belongs_to :user, polymorphic: true
+    # Every fee is charged to a owner
+    belongs_to :owner, polymorphic: true
 
     # This fee may belong to an application or other parent model
     belongs_to :parent, polymorphic: true, optional: true
 
-    # The membership category for this fee
-    belongs_to :membership_category, polymorphic: true, optional: true
+    # The membership category for this fee, if there's only 1 membership.categories
+    belongs_to :category, polymorphic: true, optional: true
 
     effective_resource do
-      category      :string
+      fee_type      :string
 
       title         :string
 
@@ -31,16 +31,16 @@ module Effective
     end
 
     scope :sorted, -> { order(:id) }
-    scope :deep, -> { includes(:user, :parent, :membership_category) }
+    scope :deep, -> { includes(:owner, :parent, :category) }
 
-    before_validation(if: -> { user.present? }) do
-      additional = user.additional_fee_attributes(self)
+    before_validation(if: -> { owner.present? }) do
+      additional = owner.additional_fee_attributes(self)
       raise('expected a Hash of attributes') unless additional.kind_of?(Hash)
       assign_attributes(additional)
     end
 
-    before_validation(if: -> { user.present? }) do
-      self.membership_category ||= user.membership&.category
+    before_validation(if: -> { owner && owner.membership }) do
+      self.category ||= owner.membership.categories.first if owner.membership.categories.length == 1
     end
 
     before_validation do
@@ -54,18 +54,18 @@ module Effective
       self.title ||= default_title()
     end
 
-    validates :category, presence: true
+    validates :fee_type, presence: true
     validates :price, presence: true
 
     validates :title, presence: true
     validates :period, presence: true
     validates :qb_item_name, presence: true
 
-    validate(if: -> { category.present? }) do
-      self.errors.add(:category, 'is not included') unless EffectiveMemberships.fee_categories.include?(category)
+    validate(if: -> { fee_type.present? }) do
+      self.errors.add(:fee_type, 'is not included') unless EffectiveMemberships.fee_types.include?(fee_type)
     end
 
-    with_options(if: -> { category == 'Renewal' }) do
+    with_options(if: -> { fee_type == 'Renewal' }) do
       validates :late_on, presence: true
       validates :bad_standing_on, presence: true
     end
@@ -90,20 +90,20 @@ module Effective
 
     # Used by applicant.applicant_submit_fees
     def applicant_submit_fee?
-      category == 'Applicant'
+      fee_type == 'Applicant'
     end
 
     def fee_payment_fee?
-      category != 'Applicant'
+      fee_type != 'Applicant'
     end
 
     # Will advance a membership.fees_paid_through_year value when purchased
     def membership_period_fee?
-      category == 'Prorated' || category == 'Renewal'
+      fee_type == 'Prorated' || fee_type == 'Renewal'
     end
 
     def custom_fee?
-      EffectiveMemberships.custom_fee_categories.include?(category)
+      EffectiveMemberships.custom_fee_types.include?(fee_type)
     end
 
     private
@@ -123,14 +123,14 @@ module Effective
     def default_title
       [
         period&.strftime('%Y').presence,
-        membership_category.to_s.presence,
-        category.presence,
+        category.to_s.presence,
+        fee_type.presence,
         'Fee'
       ].join(' ')
     end
 
     def default_qb_item_name
-      "#{category} Fee"
+      "#{fee_type} Fee"
     end
 
     def default_tax_exempt

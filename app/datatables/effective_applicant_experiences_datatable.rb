@@ -18,11 +18,11 @@ class EffectiveApplicantExperiencesDatatable < Effective::Datatable
 
     col :still_work_here, visible: false
 
-    col :category do |applicant_experience|
+    col :level, label: 'Employment' do |applicant_experience|
       if applicant_experience.part_time?
-        applicant_experience.category + ' ' + applicant_experience.percent_worked_to_s
+        applicant_experience.level + ' ' + applicant_experience.percent_worked_to_s
       else
-        applicant_experience.category
+        applicant_experience.level
       end
     end
 

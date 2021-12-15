@@ -9,12 +9,12 @@ function sumApplicantExperiences($form) {
     const start_on = $obj.find("input[name$='[start_on]']").val();
     const end_on = $obj.find("input[name$='[end_on]']").val();
 
-    const category = $obj.find("input[name$='[category]']:checked").val();
+    const level = $obj.find("input[name$='[level]']:checked").val();
     const percent = $obj.find("input[name$='[percent_worked]']").val() || 0;
 
     let diff = (moment(end_on).diff(moment(start_on), 'months') || 0);
 
-    if(category == 'Part Time') {
+    if(level == 'Part Time') {
       diff = Math.floor(diff * (percent / 100000.0)) // 100%
     }
 

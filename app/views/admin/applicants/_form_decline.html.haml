@@ -8,4 +8,4 @@
   %p The following email will be sent:
   = email_form_fields(f, :applicant_declined)
 
-  = f.submit 'Decline Applicant', border: false, center: true, 'data-confirm': "Decline #{f.object.user}?"
+  = f.submit 'Decline Applicant', border: false, center: true, 'data-confirm': "Decline #{f.object.owner}?"

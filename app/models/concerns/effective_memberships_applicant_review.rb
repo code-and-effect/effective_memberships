@@ -20,7 +20,7 @@ module EffectiveMembershipsApplicantReview
       const_get(:WIZARD_STEPS).keys
     end
 
-    # For effective_membership_category_applicant_wizard_steps_collection
+    # For effective_category_applicant_wizard_steps_collection
     def required_wizard_steps
       [:start, :recommendation, :submitted]
     end
@@ -56,9 +56,8 @@ module EffectiveMembershipsApplicantReview
       submitted: 'Submitted'
     )
 
-
     belongs_to :applicant
-    belongs_to :user, polymorphic: true       # The reviewer
+    belongs_to :reviewer, polymorphic: true
 
     effective_resource do
       submitted_at              :datetime
@@ -90,7 +89,7 @@ module EffectiveMembershipsApplicantReview
       timestamps
     end
 
-    scope :deep, -> { includes(:reviewer, applicant: :user) }
+    scope :deep, -> { includes(:reviewer, applicant: :owner) }
 
     with_options(if: -> { current_step == :conflict }) do
       validates :conflict_of_interest, inclusion: { in: [true, false] }

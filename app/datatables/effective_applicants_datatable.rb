@@ -5,7 +5,7 @@ class EffectiveApplicantsDatatable < Effective::Datatable
 
     col :id, visible: false
 
-    col :membership_category, label: 'Category'
+    col :category, label: 'Category'
     col :status
 
     col :created_at, label: 'Created', as: :date
@@ -16,7 +16,6 @@ class EffectiveApplicantsDatatable < Effective::Datatable
     col :approved_at, label: 'Approved', visible: false, as: :date
 
     col :orders
-
 
     actions_col(show: false) do |applicant|
       if applicant.draft?
@@ -29,7 +28,7 @@ class EffectiveApplicantsDatatable < Effective::Datatable
   end
 
   collection do
-    EffectiveMemberships.Applicant.deep.where(user: current_user)
+    EffectiveMemberships.Applicant.deep.where(owner: current_user.effective_memberships_owner)
   end
 
 end

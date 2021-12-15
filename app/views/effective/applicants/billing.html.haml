@@ -1,14 +1,14 @@
 = render 'layout' do
   = render 'effective/applicants/content', resource: resource
 
-  - raise('expected user to respond to billing_address') unless resource.user.respond_to?(:billing_address)
+  - raise('expected owner to respond to billing_address') unless resource.owner.respond_to?(:billing_address)
 
   .card
     .card-body
       = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
         = f.hidden_field :id
 
-        = f.fields_for(:user, f.object.user) do |fu|
+        = f.fields_for(:owner, f.object.owner) do |fu|
           = effective_address_fields(fu, :billing)
 
         = f.save 'Save and Continue'

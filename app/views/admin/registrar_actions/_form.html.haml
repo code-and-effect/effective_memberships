@@ -1,9 +1,9 @@
-- registrar_action = Effective::RegistrarAction.new(current_user: current_user, user: user)
+- registrar_action = Effective::RegistrarAction.new(current_user: current_user, owner: owner)
 
-- if user.membership.blank?
+- if owner.membership.blank?
   .mb-4= render 'admin/registrar_actions/form_register', registrar_action: registrar_action
 
-- if user.membership.present?
+- if owner.membership.present?
   .mb-4= render 'admin/registrar_actions/form_reclassify', registrar_action: registrar_action
   .mb-4= render 'admin/registrar_actions/form_bad_standing', registrar_action: registrar_action
   .mb-4= render 'admin/registrar_actions/form_fees_paid', registrar_action: registrar_action

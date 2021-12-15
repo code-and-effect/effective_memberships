@@ -20,13 +20,11 @@ module Admin
       col :reviewed_at, label: 'Reviewed', visible: false, as: :date
       col :approved_at, label: 'Approved', visible: false, as: :date
 
-      col(:user).search do |collection, term|
-        collection.where(user_id: User.search_col(term))
-      end
+      col :owner
 
-      col :category
-      col :membership_category, search: { collection: EffectiveMemberships.MembershipCategory.all, polymorphic: false }
-      col :from_membership_category, search: { collection: EffectiveMemberships.MembershipCategory.all, polymorphic: false }, visible: false
+      col :applicant_type
+      col :category, search: { collection: EffectiveMemberships.Category.all, polymorphic: false }
+      col :from_category, search: { collection: EffectiveMemberships.Category.all, polymorphic: false }, visible: false
 
       col :orders, visible: false
 
@@ -36,12 +34,14 @@ module Admin
     collection do
       applicants = EffectiveMemberships.Applicant.deep.all
 
-      if scope == :in_progress && attributes[:user_id].blank?
+      raise('expected an owner_id, not user_id') if attributes[:user_id].present?
+
+      if scope == :in_progress && attributes[:owner_id].blank?
         applicants = applicants.where.not(status: :draft)
       end
 
-      if attributes[:user_id].present?
-        applicants = applicants.where(user_id: attributes[:user_id])
+      if attributes[:owner_id].present?
+        applicants = applicants.where(owner_id: attributes[:owner_id])
       end
 
       if attributes[:except_id].present?

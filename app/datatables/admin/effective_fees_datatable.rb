@@ -13,19 +13,19 @@ module Admin
       col :created_at, visible: false
       col :id, visible: false
 
-      unless attributes[:user_id] || attributes[:applicant_id] || attributes[:fee_payment_id]
-        col :user
+      unless attributes[:owner_id] || attributes[:applicant_id] || attributes[:fee_payment_id]
+        col :owner
       end
 
       unless attributes[:applicant_id] || attributes[:fee_payment_id]
         col :parent, search: :string, visible: false
       end
 
-      col :category, search: EffectiveMemberships.fee_categories
+      col :fee_type, search: EffectiveMemberships.fee_types
       col :price, as: :price
       col :purchased?, as: :boolean
 
-      col :membership_category, search: { collection: EffectiveMemberships.MembershipCategory.all, polymorphic: false }
+      col :category, search: { collection: EffectiveMemberships.Category.all, polymorphic: false }
 
       aggregate :total
 
@@ -39,8 +39,10 @@ module Admin
     collection do
       scope = Effective::Fee.deep.all
 
-      if attributes[:user_id]
-        scope = scope.where(user_id: attributes[:user_id])
+      raise('expected an owner_id, not user_id') if attributes[:user_id].present?
+
+      if attributes[:owner_id]
+        scope = scope.where(owner_id: attributes[:owner_id])
       end
 
       if attributes[:applicant_id]

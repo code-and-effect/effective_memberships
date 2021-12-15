@@ -3,10 +3,10 @@
     %h5.card-title Not In Good Standing
 
     = effective_form_with(model: [:admin, registrar_action], url: effective_memberships.admin_registrar_actions_path) do |f|
-      = f.hidden_field :user_id
-      = f.hidden_field :user_type
+      = f.hidden_field :owner_id
+      = f.hidden_field :owner_type
 
-      - membership = f.object.user.membership
+      - membership = f.object.owner.membership
 
       - period = EffectiveMemberships.Registrar.current_period
       - date = EffectiveMemberships.Registrar.bad_standing_date(period: period)
@@ -33,11 +33,11 @@
           = f.text_area :bad_standing_reason, required: true
 
           = f.submit 'Set In Bad Standing', border: false, center: true,
-            'data-confirm': "Really set #{f.object.user} in bad standing?"
+            'data-confirm': "Really set #{f.object.owner} in bad standing?"
 
       - if membership.bad_standing_admin?
         = f.check_box :current_action, label: 'Yes, remove in bad standing status'
 
         = f.show_if :current_action, true do
           = f.submit 'Remove In Bad Standing', border: false, center: true,
-            'data-confirm': "Really remove #{f.object.user} bad standing?"
+            'data-confirm': "Really remove #{f.object.owner} bad standing?"

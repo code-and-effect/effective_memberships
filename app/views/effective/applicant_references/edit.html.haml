@@ -3,6 +3,6 @@
     %p
       Please provide a reference for the applicant
       = succeed('.') do
-        %strong= @applicant_reference.applicant.user
+        %strong= @applicant_reference.applicant.owner
 
     = render('form_declaration', applicant_reference: @applicant_reference)

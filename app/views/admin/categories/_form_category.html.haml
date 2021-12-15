@@ -1,4 +1,4 @@
-= effective_form_with(model: [:admin, membership_category], engine: true) do |f|
+= effective_form_with(model: [:admin, category], engine: true) do |f|
   = f.text_field :title
 
   - if f.object.class.categories.present?

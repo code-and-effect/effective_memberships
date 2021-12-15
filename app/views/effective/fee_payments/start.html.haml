@@ -2,7 +2,7 @@
 
   .card
     .card-body
-      %p Welcome #{current_user}!
+      %p Welcome #{current_user.effective_memberships_owner}!
 
       = render 'effective/fee_payments/content', resource: resource
 
