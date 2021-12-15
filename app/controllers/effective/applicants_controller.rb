@@ -4,7 +4,7 @@ module Effective
 
     include Effective::WizardController
 
-    resource_scope -> { EffectiveMemberships.Applicant.deep.where(owner: current_user) }
+    resource_scope -> { EffectiveMemberships.Applicant.deep.where(owner: current_user.effective_memberships_owner) }
 
     # Allow only 1 in-progress application at a time
     before_action(only: [:new, :show], unless: -> { resource&.done? }) do

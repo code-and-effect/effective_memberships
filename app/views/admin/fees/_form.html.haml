@@ -3,7 +3,8 @@
     = f.hidden_field :owner_id
     = f.hidden_field :owner_type
   - else
-    = f.select :owner_id, {'Members' => current_user.class.members.sorted }, polymorphic: true
+    - collection = EffectiveMembershipsOwner.descendants.map { |d| [d.name.to_s, d.members.sorted] }.to_h
+    = f.select :owner_id, collection, polymorphic: true
 
   = f.select :fee_type , EffectiveMemberships.custom_fee_types
   = f.price_field :price

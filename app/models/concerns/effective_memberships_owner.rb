@@ -7,9 +7,12 @@
 module EffectiveMembershipsOwner
   extend ActiveSupport::Concern
 
+  mattr_accessor :descendants
+
   module Base
     def effective_memberships_owner
       include ::EffectiveMembershipsOwner
+      (EffectiveMembershipsOwner.descendants ||= []) << self
     end
   end
 
@@ -40,6 +43,10 @@ module EffectiveMembershipsOwner
     end
 
     scope :members, -> { joins(:membership) }
+  end
+
+  def effective_memberships_owner
+    self
   end
 
   def owner_label
