@@ -125,16 +125,19 @@ module EffectiveMembershipsOwner
     fee
   end
 
-  def build_renewal_fee(period:, late_on:, bad_standing_on:)
+  def build_renewal_fee(category:, period:, late_on:, bad_standing_on:)
     raise('must have an existing membership') unless membership.present?
 
-    fee = fees.find { |fee| fee.fee_type == 'Renewal' && fee.period == period } || fees.build()
-    return fee if fee.purchased?
+    fee = fees.find { |fee| fee.fee_type == 'Renewal' && fee.period == period && fee.category_id == category.id && fee.category_type == category.class.name }
+    return fee if fee&.purchased?
+
+    # Build the renewal fee
+    fee ||= fees.build()
 
     fee.assign_attributes(
       fee_type: 'Renewal',
-      category: membership.category,
-      price: membership.category.renewal_fee.to_i,
+      category: category,
+      price: category.renewal_fee.to_i,
       period: period,
       late_on: late_on,
       bad_standing_on: bad_standing_on
@@ -143,15 +146,15 @@ module EffectiveMembershipsOwner
     fee
   end
 
-  def build_late_fee(period:)
+  def build_late_fee(category:, period:)
     raise('must have an existing membership') unless membership.present?
 
     # Return existing but do not build yet
-    fee = fees.find { |fee| fee.fee_type == 'Late' && fee.period == period }
+    fee = fees.find { |fee| fee.fee_type == 'Late' && fee.period == period && fee.category_id == category.id && fee.category_type == category.class.name }
     return fee if fee&.purchased?
 
     # Only continue if there is a late renewal fee for the same period
-    renewal_fee = fees.find { |fee| fee.fee_type == 'Renewal' && fee.period == period }
+    renewal_fee = fees.find { |fee| fee.fee_type == 'Renewal' && fee.period == period && fee.category_id == category.id && fee.category_type == category.class.name }
     return unless fee.present? || renewal_fee&.late?
 
     # Build the late fee
@@ -159,8 +162,8 @@ module EffectiveMembershipsOwner
 
     fee.assign_attributes(
       fee_type: 'Late',
-      category: membership.category,
-      price: membership.category.late_fee.to_i,
+      category: category,
+      price: category.late_fee.to_i,
       period: period,
     )
 

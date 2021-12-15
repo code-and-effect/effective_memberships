@@ -46,7 +46,7 @@ class FeesTest < ActiveSupport::TestCase
     bad_standing_on = EffectiveMemberships.Registrar.bad_standing_date(period: period)
 
     # Build the fee
-    fee = owner.build_renewal_fee(period: period, late_on: late_on, bad_standing_on: bad_standing_on)
+    fee = owner.build_renewal_fee(category: category, period: period, late_on: late_on, bad_standing_on: bad_standing_on)
 
     assert_equal 'Renewal', fee.fee_type
     assert_equal category.renewal_fee, fee.price
@@ -58,11 +58,11 @@ class FeesTest < ActiveSupport::TestCase
     assert fee.save!
 
     # Now see if it's indempotent
-    fee2 = owner.build_renewal_fee(period: period, late_on: late_on, bad_standing_on: bad_standing_on)
+    fee2 = owner.build_renewal_fee(category: category, period: period, late_on: late_on, bad_standing_on: bad_standing_on)
     assert_equal fee, fee2
 
     owner.reload
-    fee3 = owner.build_renewal_fee(period: period, late_on: late_on, bad_standing_on: bad_standing_on)
+    fee3 = owner.build_renewal_fee(category: category, period: period, late_on: late_on, bad_standing_on: bad_standing_on)
     assert_equal fee, fee3
   end
 
@@ -76,15 +76,15 @@ class FeesTest < ActiveSupport::TestCase
     bad_standing_on = EffectiveMemberships.Registrar.bad_standing_date(period: period)
 
     # Try to build late fee
-    fee = owner.build_late_fee(period: period)
+    fee = owner.build_late_fee(category: category, period: period)
     assert fee.blank? # No existing renewal fee
 
     # Create a renewal fee
-    fee = owner.build_renewal_fee(period: period, late_on: now - 1.second, bad_standing_on: bad_standing_on)
+    fee = owner.build_renewal_fee(category: category, period: period, late_on: now - 1.second, bad_standing_on: bad_standing_on)
     assert fee.late?
 
     # Build late fee again
-    fee = owner.build_late_fee(period: period)
+    fee = owner.build_late_fee(category: category, period: period)
     assert fee.present?
 
     assert_equal 'Late', fee.fee_type
@@ -97,11 +97,11 @@ class FeesTest < ActiveSupport::TestCase
     assert fee.save!
 
     # Now see if it's indempotent
-    fee2 = owner.build_late_fee(period: period)
+    fee2 = owner.build_late_fee(category: category, period: period)
     assert_equal fee, fee2
 
     owner.reload
-    fee3 = owner.build_late_fee(period: period)
+    fee3 = owner.build_late_fee(category: category, period: period)
     assert_equal fee, fee3
   end
 

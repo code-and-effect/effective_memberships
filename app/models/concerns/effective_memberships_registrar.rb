@@ -210,21 +210,25 @@ module EffectiveMembershipsRegistrar
 
     # Create Renewal Fees
     Effective::Membership.create_renewal_fees(period).find_each do |membership|
-      fee = membership.owner.build_renewal_fee(period: period, late_on: late_on, bad_standing_on: bad_standing_on)
-      raise("expected build_renewal_fee to return a fee for period #{period}") unless fee.kind_of?(Effective::Fee)
-      next if fee.purchased?
+      membership.categories.select(&:create_renewal_fees?).map do |category|
+        fee = membership.owner.build_renewal_fee(category: category, period: period, late_on: late_on, bad_standing_on: bad_standing_on)
+        raise("expected build_renewal_fee to return a fee for period #{period}") unless fee.kind_of?(Effective::Fee)
+        next if fee.purchased?
 
-      fee.save!
+        fee.save!
+      end
     end
 
     GC.start
 
     # Create Late Fees
     Effective::Membership.create_late_fees(period).find_each do |membership|
-      fee = membership.owner.build_late_fee(period: period)
-      next if fee.blank? || fee.purchased?
+      membership.categories.select(&:create_late_fees?).map do |category|
+        fee = membership.owner.build_late_fee(category: category, period: period)
+        next if fee.blank? || fee.purchased?
 
-      fee.save!
+        fee.save!
+      end
     end
 
     GC.start

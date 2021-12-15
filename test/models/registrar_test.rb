@@ -101,7 +101,7 @@ class RegistrarTest < ActiveSupport::TestCase
     date = Time.zone.now + 1.year
 
     # Create unpurchased fees
-    owner.build_renewal_fee(period: date, late_on: date, bad_standing_on: date)
+    owner.build_renewal_fee(category: owner.membership.category, period: date, late_on: date, bad_standing_on: date)
     owner.save!
 
     # Create unpurchased order
