@@ -14,8 +14,8 @@ module Admin
 
       col :number
 
-      col :category_ids
-      col :categories
+      col :categories, label: 'Category'
+      col :category_ids, visible: false
 
       col :bad_standing
       col :removed
