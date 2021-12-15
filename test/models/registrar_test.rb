@@ -15,7 +15,8 @@ class RegistrarTest < ActiveSupport::TestCase
     assert_equal next_number, owner.membership.number
 
     assert_equal 1, owner.fees.length
-    assert owner.fees.find { |fee| fee.category == 'Prorated' }
+    assert owner.fees.find { |fee| fee.fee_type == 'Prorated' }
+    assert owner.fees.find { |fee| fee.category == category }
   end
 
   test 'register with skip_fees' do
@@ -44,12 +45,13 @@ class RegistrarTest < ActiveSupport::TestCase
     to = EffectiveMemberships.Category.where.not(id: from.id).first!
 
     assert EffectiveMemberships.Registrar.reclassify!(owner, to: to)
+    assert_equal 1, owner.membership.membership_categories.length
 
     assert_equal to, owner.membership.category
 
     assert_equal 2, owner.fees.length
-    assert owner.fees.find { |fee| fee.category == 'Prorated' }
-    assert owner.fees.find { |fee| fee.category == 'Discount' }
+    assert owner.fees.find { |fee| fee.fee_type == 'Prorated' }
+    assert owner.fees.find { |fee| fee.fee_type == 'Discount' }
   end
 
   test 'bad standing' do
@@ -127,7 +129,8 @@ class RegistrarTest < ActiveSupport::TestCase
     history = owner.membership_histories.last
 
     assert history.removed?
-    assert history.category.blank?
+    assert history.categories.blank?
+    assert history.category_ids.blank?
     assert history.number.blank?
 
     assert owner.membership_removed?

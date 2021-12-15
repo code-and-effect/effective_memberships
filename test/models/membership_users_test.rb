@@ -20,7 +20,7 @@ class MembershipUsersTest < ActiveSupport::TestCase
 
     assert_equal 1, owner.fees.length
 
-    fee = owner.fees.find { |fee| fee.category == 'Prorated' && fee.purchased? }
+    fee = owner.fees.find { |fee| fee.fee_type == 'Prorated' && fee.purchased? }
     assert fee.present?, 'expected a purchased prorated fee'
 
     assert owner.membership.fees_paid_period.present?

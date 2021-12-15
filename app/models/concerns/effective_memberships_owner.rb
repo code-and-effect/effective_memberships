@@ -42,6 +42,10 @@ module EffectiveMembershipsOwner
     scope :members, -> { joins(:membership) }
   end
 
+  def owner_label
+    self.class.name.split('::').last
+  end
+
   def outstanding_fee_payment_fees
     fees.select { |fee| fee.fee_payment_fee? && !fee.purchased? }
   end

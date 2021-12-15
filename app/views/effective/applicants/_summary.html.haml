@@ -9,7 +9,7 @@
 
     - if request.path.start_with?('/admin')
       %tr
-        %th Owner
+        %th= applicant.owner_label
         %td
           - url = (polymorphic_admin_path(applicant.owner) rescue "/admin/users/#{applicant.owner.to_param}/edit")
           = link_to(applicant.owner, url)
@@ -22,7 +22,7 @@
     %tr
       %th Category
       %td
-        = applicant.category
+        = applicant.applicant_type
         %br
         = applicant.category
 

@@ -19,7 +19,7 @@ EffectiveMemberships.setup do |config|
 
   # Fee Categories
   # The defaults include: Applicant, Prorated, Renewal, Late, Admin
-  # config.additional_fee_categories = []
+  # config.additional_fee_types = []
 
   # Mailer Configuration
   # Configure the class responsible to send e-mails.

@@ -85,14 +85,15 @@ module EffectiveMembershipsRegistrar
     raise('expecting a from memberships category') unless from.class.respond_to?(:effective_memberships_category?)
     raise('expected to and from to be different') if from == to
 
-    raise('todo')
-
     date ||= Time.zone.now
 
     membership = owner.membership
 
-    membership.category = to
+    # Assign Category
     membership.registration_on = date
+
+    membership.build_membership_category(category: to)
+    membership.membership_category(category: from).mark_for_destruction
 
     unless skip_fees
       fee = owner.build_prorated_fee(date: date)

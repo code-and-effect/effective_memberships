@@ -28,14 +28,14 @@ class ApplicantsReclassifyTest < ActiveSupport::TestCase
 
     assert_equal 3, applicant.owner.fees.length
 
-    applicant_fee = applicant.owner.fees.find { |fee| fee.category == 'Applicant' }
+    applicant_fee = applicant.owner.fees.find { |fee| fee.fee_type == 'Applicant' }
     assert_equal applicant_fee.price, applicant.category.applicant_fee
 
-    prorated_fee = applicant.owner.fees.find { |fee| fee.category == 'Prorated' }
+    prorated_fee = applicant.owner.fees.find { |fee| fee.fee_type == 'Prorated' }
     assert_equal prorated_fee.category, applicant.category
     assert_equal prorated_fee.price, applicant.category.send("prorated_#{Time.zone.now.strftime('%b').downcase}").to_i
 
-    discount_fee = applicant.owner.fees.find { |fee| fee.category == 'Discount' }
+    discount_fee = applicant.owner.fees.find { |fee| fee.fee_type == 'Discount' }
     assert_equal discount_fee.category, applicant.category
     assert_equal discount_fee.price, 0-applicant.from_category.send("prorated_#{Time.zone.now.strftime('%b').downcase}").to_i
   end

@@ -167,10 +167,10 @@ class ApplicantsTest < ActiveSupport::TestCase
   #   assert applicant.owner.fees.present?
   #   assert_equal 2, applicant.owner.fees.length
 
-  #   applicant_fee = applicant.owner.fees.find { |fee| fee.category == 'Applicant' }
+  #   applicant_fee = applicant.owner.fees.find { |fee| fee.fee_type == 'Applicant' }
   #   assert_equal applicant_fee.price, applicant.category.applicant_fee
 
-  #   prorated_fee = applicant.owner.fees.find { |fee| fee.category == 'Prorated' }
+  #   prorated_fee = applicant.owner.fees.find { |fee| fee.fee_type == 'Prorated' }
   #   assert_equal prorated_fee.price, applicant.category.send("prorated_#{Time.zone.now.strftime('%b').downcase}").to_i
   # end
 

@@ -1,21 +1,9 @@
 module Effective
   class Membership < ActiveRecord::Base
     belongs_to :owner, polymorphic: true
-    #belongs_to :category, polymorphic: true
 
     has_many :membership_categories, inverse_of: :membership
     accepts_nested_attributes_for :membership_categories
-
-
-    has_many :categories, through: :membership_categories
-
-    # def categories
-    #   membership_catgories.map(&:category)
-    # end
-
-    def category
-      categories.first
-    end
 
     log_changes(to: :owner) if respond_to?(:log_changes)
 
@@ -38,7 +26,7 @@ module Effective
       timestamps
     end
 
-    scope :deep, -> { includes(:category, owner: [:fees, :membership]) }
+    scope :deep, -> { includes(owner: [:fees, :membership]) }
     scope :sorted, -> { order(:id) }
 
     scope :with_paid_fees_through, -> (period = nil) {
@@ -77,10 +65,6 @@ module Effective
     validates :joined_on, presence: true
     validates :registration_on, presence: true
 
-    # validate(if: -> { category.present? }) do
-    #   self.errors.add(:category_id, 'must be a memberships category') unless category.class.effective_memberships_category?
-    # end
-
     validate(if: -> { owner.present? }) do
       self.errors.add(:owner_id, 'must be a memberships owner') unless owner.class.effective_memberships_owner?
     end
@@ -93,12 +77,34 @@ module Effective
       'membership'
     end
 
+    # We can't use the polymorphic has_many. So this is a helper.
+    def categories
+      membership_categories.reject(&:marked_for_destruction?).map(&:category)
+    end
+
+    def category_ids
+      membership_categories.reject(&:marked_for_destruction?).map(&:category_id)
+    end
+
+    # We might want to use singular memberships.
+    def category
+      raise('expected singular usage but there are more than one membership') if categories.length > 1
+      categories.first
+    end
+
+    def category_id
+      raise('expected singular usage but there are more than one membership') if categories.length > 1
+      categories.first.id
+    end
+
+    def membership_category(category:)
+      raise('expected a category') unless category.class.respond_to?(:effective_memberships_category?)
+      membership_categories.find { |mc| mc.category_id == category.id && mc.category_type == category.class.name }
+    end
+
     # find or build
     def build_membership_category(category:)
-      raise('expected a category') unless category.class.respond_to?(:effective_memberships_category?)
-
-      membership_categories.find { |mc| mc.category_id == category.id && mc.category_type == category.class.name } ||
-      membership_categories.build(category: category)
+      membership_category(category: category) || membership_categories.build(category: category)
     end
 
     def good_standing?

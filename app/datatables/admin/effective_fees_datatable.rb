@@ -21,7 +21,7 @@ module Admin
         col :parent, search: :string, visible: false
       end
 
-      col :category, search: EffectiveMemberships.fee_categories
+      col :fee_type, search: EffectiveMemberships.fee_types
       col :price, as: :price
       col :purchased?, as: :boolean
 

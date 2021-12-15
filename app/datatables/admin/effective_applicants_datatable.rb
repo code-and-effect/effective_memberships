@@ -22,7 +22,7 @@ module Admin
 
       col :owner
 
-      col :category
+      col :applicant_type
       col :category, search: { collection: EffectiveMemberships.Category.all, polymorphic: false }
       col :from_category, search: { collection: EffectiveMemberships.Category.all, polymorphic: false }, visible: false
 

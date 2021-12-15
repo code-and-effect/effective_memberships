@@ -18,12 +18,12 @@ module EffectiveMembershipsTestBuilder
     build_effective_applicant.tap(&:save!)
   end
 
-  def build_applicant(owner: nil, category: nil, category: nil)
+  def build_applicant(owner: nil, category: nil, applicant_type: nil)
     category ||= Effective::Category.where(title: 'Full Member').first!
     owner ||= build_user_with_address()
 
-    category ||= 'Apply to Join' if owner.membership.blank?
-    category ||= 'Apply to Reclassify' if owner.membership.present?
+    applicant_type ||= 'Apply to Join' if owner.membership.blank?
+    applicant_type ||= 'Apply to Reclassify' if owner.membership.present?
 
     applicant = Effective::Applicant.new(owner: owner, category: category)
     applicant.save!

@@ -132,7 +132,7 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.integer :from_category_id
       t.string :from_category_type
 
-      t.string :category
+      t.string :applicant_type
 
       # Acts as Statused
       t.string :status
@@ -192,7 +192,7 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
     create_table :applicant_experiences do |t|
       t.integer :applicant_id
 
-      t.string :category
+      t.string :level
       t.integer :months
 
       t.date :start_on

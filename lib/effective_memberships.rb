@@ -9,7 +9,7 @@ module EffectiveMemberships
     [
       :categories_table_name, :applicants_table_name, :applicant_reviews_table_name, :fee_payments_table_name,
       :category_class_name, :applicant_class_name, :applicant_review_class_name, :fee_payment_class_name, :registrar_class_name,
-      :additional_fee_categories,
+      :additional_fee_types,
       :layout,
       :mailer, :parent_mailer, :deliver_method, :mailer_layout, :mailer_sender, :mailer_admin, :use_effective_email_templates
     ]

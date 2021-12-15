@@ -11,14 +11,14 @@ class FeesTest < ActiveSupport::TestCase
 
     owner = build_user()
     membership = owner.build_membership
-    membership.category = category
+    membership.build_membership_category(category: category)
     membership.joined_on = now
     membership.number = 1
 
     # Build the fee
     fee = owner.build_prorated_fee(date: now)
 
-    assert_equal 'Prorated', fee.category
+    assert_equal 'Prorated', fee.fee_type
     assert_equal 123_00, fee.price
     assert_equal category, fee.category
     assert_equal period, fee.period
@@ -48,7 +48,7 @@ class FeesTest < ActiveSupport::TestCase
     # Build the fee
     fee = owner.build_renewal_fee(period: period, late_on: late_on, bad_standing_on: bad_standing_on)
 
-    assert_equal 'Renewal', fee.category
+    assert_equal 'Renewal', fee.fee_type
     assert_equal category.renewal_fee, fee.price
     assert_equal category, fee.category
     assert_equal period, fee.period
@@ -87,7 +87,7 @@ class FeesTest < ActiveSupport::TestCase
     fee = owner.build_late_fee(period: period)
     assert fee.present?
 
-    assert_equal 'Late', fee.category
+    assert_equal 'Late', fee.fee_type
     assert_equal category.late_fee, fee.price
     assert_equal category, fee.category
     assert_equal period, fee.period
@@ -120,7 +120,7 @@ class FeesTest < ActiveSupport::TestCase
     # Build discount fee
     fee = owner.build_discount_fee(from: from)
 
-    assert_equal 'Discount', fee.category
+    assert_equal 'Discount', fee.fee_type
     assert_equal -75_00, fee.price
     assert_equal to, fee.category
     assert_equal period, fee.period

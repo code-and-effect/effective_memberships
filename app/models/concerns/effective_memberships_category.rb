@@ -32,7 +32,7 @@ module EffectiveMembershipsCategory
     # rich_text_applicant_select_content
     # rich_text_applicant_select_content
 
-    #has_many :memberships, class_name: 'Effective::Membership', as: :category
+    has_many :membership_categories, class_name: 'Effective::MembershipCategory', as: :category
 
     effective_resource do
       title                 :string

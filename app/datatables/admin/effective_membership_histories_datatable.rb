@@ -11,9 +11,11 @@ module Admin
       col :end_on
 
       col :owner
-      col :category
 
       col :number
+
+      col :category_ids
+      col :categories
 
       col :bad_standing
       col :removed

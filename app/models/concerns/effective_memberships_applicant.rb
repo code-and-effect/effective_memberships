@@ -102,7 +102,7 @@ module EffectiveMembershipsApplicant
     accepts_nested_attributes_for :orders
 
     effective_resource do
-      category               :string
+      applicant_type         :string
 
       # Acts as Statused
       status                 :string, permitted: false
@@ -142,7 +142,7 @@ module EffectiveMembershipsApplicant
 
     # Set Apply to Join or Reclassification
     before_validation(if: -> { new_record? && owner.present? }) do
-      self.category ||= (owner.membership.blank? ? 'Apply to Join' : 'Apply to Reclassify')
+      self.applicant_type ||= (owner.membership.blank? ? 'Apply to Join' : 'Apply to Reclassify')
       self.from_category ||= owner.membership&.category
     end
 
@@ -171,7 +171,7 @@ module EffectiveMembershipsApplicant
 
     # Select Step
     with_options(if: -> { current_step == :select || has_completed_step?(:select) }) do
-      validates :category, presence: true
+      validates :applicant_type, presence: true
       validates :category, presence: true
     end
 
@@ -305,11 +305,15 @@ module EffectiveMembershipsApplicant
   end
 
   def apply_to_join?
-    category == 'Apply to Join'
+    applicant_type == 'Apply to Join'
   end
 
   def reclassification?
-    category == 'Apply to Reclassify'
+    applicant_type == 'Apply to Reclassify'
+  end
+
+  def owner_label
+    owner_type.to_s.split('::').last
   end
 
   def in_progress?
@@ -357,9 +361,11 @@ module EffectiveMembershipsApplicant
       return categories.where(can_apply_new: true)
     end
 
+    category_ids = owner.membership.category_ids
+
     categories.select do |cat|
       cat.can_apply_existing? ||
-      (cat.can_apply_restricted? && cat.can_apply_restricted_ids.include?(owner.membership.category_id))
+      (cat.can_apply_restricted? && (category_ids & cat.can_apply_restricted_ids).present?)
     end
   end
 
@@ -566,7 +572,7 @@ module EffectiveMembershipsApplicant
     elsif reclassification?
       EffectiveMemberships.Registrar.reclassify!(owner, to: category)
     else
-      raise('unsupported applicant approval category')
+      raise('unsupported approval applicant_type')
     end
 
     after_commit { send_email(:applicant_approved) }
