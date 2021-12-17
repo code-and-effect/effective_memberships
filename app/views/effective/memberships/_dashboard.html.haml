@@ -3,22 +3,24 @@
 - membership = current_owner.membership
 
 - if membership.present?
-  %p
-    = succeed('.') do
-      You are a #{membership.category} member
+  - if membership.categories.length == 0
+    You are a member.
+  - elsif membership.categories.length == 1
+    %p You are a #{membership.category} member.
+  - else
+    %p You are a member of the following:
 
-      - if membership.number.present?
-        = "##{membership.number}"
+    %ul
+      - membership.categories.each do |category|
+        %li= category
 
-      who joined on #{membership.joined_on.strftime('%F')}
+  %p Your membership number is ##{membership.number} and you joined on #{membership.joined_on.strftime('%F')}.
 
-      - if membership.registration_on > membership.joined_on
-        and last changed categories on #{membership.registration_on.strftime('%F')}
+  - if membership.registration_on > membership.joined_on
+    %p You last changed categories on #{membership.registration_on.strftime('%F')}.
 
-    - if membership.bad_standing?
-      %p
-        = succeed('.') do
-          Your membership is in bad standing with the following reason: #{membership.bad_standing_reason}
+  - if membership.bad_standing?
+    %p Your membership is in bad standing with the following reason: #{membership.bad_standing_reason}.
 
 - elsif current_owner.membership_removed?
   %p Your membership was removed on #{current_owner.membership_removed_on.strftime('%F')}.

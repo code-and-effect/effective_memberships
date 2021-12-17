@@ -24,6 +24,7 @@ module Admin
       col :fee_type, search: EffectiveMemberships.fee_types
       col :price, as: :price
       col :purchased?, as: :boolean
+      col :purchased_order, visible: false
 
       col :category, search: { collection: EffectiveMemberships.Category.all, polymorphic: false }
 

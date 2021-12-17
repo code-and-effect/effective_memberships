@@ -228,10 +228,9 @@ module EffectiveMembershipsOwner
 
     if membership.bad_standing_changed? || membership_histories.blank?
       build_membership_history()
-      save!
     end
 
-    true
+    save!
   end
 
   def build_membership_history(start_on: nil)
