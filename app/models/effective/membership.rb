@@ -2,7 +2,7 @@ module Effective
   class Membership < ActiveRecord::Base
     belongs_to :owner, polymorphic: true
 
-    has_many :membership_categories, -> { order(:id) }, inverse_of: :membership
+    has_many :membership_categories, -> { order(:id) }, inverse_of: :membership, dependent: :delete_all
     accepts_nested_attributes_for :membership_categories
 
     log_changes(to: :owner) if respond_to?(:log_changes)

@@ -125,8 +125,10 @@ module EffectiveMembershipsFeePayment
 
     after_purchase do |_order|
       raise('expected submit_order to be purchased') unless submit_order&.purchased?
-      EffectiveMemberships.Registrar.fee_payment_purchased!(owner)
+
       submit_purchased!
+      after_submit_purchased!
+      EffectiveMemberships.Registrar.fee_payment_purchased!(owner)
     end
   end
 
@@ -201,12 +203,17 @@ module EffectiveMembershipsFeePayment
     save!
   end
 
+
   # Called automatically via after_purchase hook above
   def submit_purchased!
     return false if was_submitted?
 
     wizard_steps[:checkout] = Time.zone.now
     submit!
+  end
+
+  # A hook to extend
+  def after_submit_purchased!
   end
 
   # Draft -> Submitted

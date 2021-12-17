@@ -1,14 +1,14 @@
 = render 'layout' do
   = render 'effective/fee_payments/content', resource: resource
 
-  - raise('expected a submitted applicant') unless resource.was_submitted?
-  - raise('expected a purchased applicant submit_order') unless resource.submit_order&.purchased?
+  - raise('expected a submitted fee_payment') unless resource.was_submitted?
+  - raise('expected a purchased fee_payment submit_order') unless resource.submit_order&.purchased?
 
   .alert.alert-success.mb-4
     Fee successfully paid on
     = resource.submit_order.purchased_at.strftime('%F')
 
-  = render 'effective/applicants/applicant', applicant: resource
-  = render 'effective/applicants/orders', applicant: resource
+  = render 'effective/fee_payments/fee_payment', fee_payment: resource
+  = render 'effective/fee_payments/orders', fee_payment: resource
 
   = link_to "Return to Dashboard", root_path, class: 'btn btn-lg btn-primary btn-block'

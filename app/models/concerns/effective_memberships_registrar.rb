@@ -33,6 +33,49 @@ module EffectiveMembershipsRegistrar
     raise('to be implemented by app registrar')
   end
 
+  def assign!(owner, categories:, date: nil, number: nil)
+    categories = Array(categories)
+
+    raise('expecting a memberships owner') unless owner.class.respond_to?(:effective_memberships_owner?)
+    raise('expecting a membership category') unless categories.all? { |cat| cat.class.respond_to?(:effective_memberships_category?) }
+
+    # Default Date and next number
+    date ||= Time.zone.now
+    number = next_membership_number(owner, to: categories.first) if number.blank?
+    period = period(date: date)
+    period_end_on = period_end_on(date: date)
+
+    # Find or build a membership
+    membership = owner.membership || owner.build_membership
+
+    # Assign Dates
+    membership.joined_on ||= date  # Only if not already present
+
+    # Assign Number
+    membership.number ||= number
+    membership.number_as_integer ||= (Integer(number) rescue nil)
+
+    # Delete any removed categories
+    membership.membership_categories.each do |membership_category|
+      next if categories.include?(membership_category.category)
+      membership_category.mark_for_destruction
+    end
+
+    # Build any additional categories
+    categories.each do |category|
+      membership.build_membership_category(category: category)
+    end
+
+    changed = membership.membership_categories.any? { |mc| mc.new_record? || mc.marked_for_destruction? }
+
+    if changed
+      membership.registration_on = date # Always new registration_on
+      save!(owner, date: date)
+    end
+
+    owner.update_membership_status!
+  end
+
   def register!(owner, to:, date: nil, number: nil, skip_fees: false)
     raise('expecting a memberships owner') unless owner.class.respond_to?(:effective_memberships_owner?)
     raise('expecting a memberships category') unless to.class.respond_to?(:effective_memberships_category?)
@@ -47,9 +90,6 @@ module EffectiveMembershipsRegistrar
     # Build a membership
     membership = owner.build_membership
 
-    # Assign Category
-    membership.build_membership_category(category: to)
-
     # Assign Dates
     membership.joined_on ||= date  # Only if not already present
     membership.registration_on = date  # Always new registration_on
@@ -57,6 +97,9 @@ module EffectiveMembershipsRegistrar
     # Assign Number
     membership.number = number
     membership.number_as_integer = (Integer(number) rescue nil)
+
+    # Assign Category
+    membership.build_membership_category(category: to)
 
     # Assign fees paid through period
     if skip_fees
@@ -176,7 +219,7 @@ module EffectiveMembershipsRegistrar
 
   def next_membership_number(owner, to:)
     raise('expecting a memberships owner') unless owner.class.respond_to?(:effective_memberships_owner?)
-    raise('expecting a memberships category') unless to.class.respond_to?(:effective_memberships_category?)
+    raise('expecting a membership category') unless Array(to).all? { |to| to.class.respond_to?(:effective_memberships_category?) }
 
     # Just a simple number right now
     number = (Effective::Membership.all.max_number || 0) + 1
