@@ -70,6 +70,7 @@ module EffectiveMembershipsFeePayment
       status_steps           :text, permitted: false
 
       # Dates
+      period                 :date
       submitted_at           :datetime
 
       # Acts as Wizard
@@ -84,9 +85,15 @@ module EffectiveMembershipsFeePayment
     scope :in_progress, -> { where.not(status: [:submitted]) }
     scope :done, -> { where(status: [:submitted]) }
 
+    before_validation do
+      self.period ||= EffectiveMemberships.Registrar.current_period
+    end
+
     before_validation(if: -> { current_step == :start && owner && owner.membership }) do
       self.category ||= owner.membership.categories.first if owner.membership.categories.length == 1
     end
+
+    validates :period, presence: true
 
     # All Steps validations
     validates :owner, presence: true

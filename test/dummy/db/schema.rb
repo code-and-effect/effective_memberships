@@ -292,6 +292,7 @@ ActiveRecord::Schema.define(version: 7) do
     t.string "owner_type"
     t.integer "category_id"
     t.string "category_type"
+    t.date "period"
     t.string "status"
     t.text "status_steps"
     t.text "wizard_steps"

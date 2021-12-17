@@ -356,6 +356,8 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.integer :category_id
       t.string :category_type
 
+      t.date :period
+
       # Acts as Statused
       t.string :status
       t.text :status_steps
