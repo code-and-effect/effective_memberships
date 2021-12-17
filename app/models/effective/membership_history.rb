@@ -27,8 +27,8 @@ module Effective
 
     validates :owner, presence: true
 
-    validates :categories, presence: true, unless: -> { removed? }
-    validates :category_ids, presence: true, unless: -> { removed? }
+    # validates :categories, presence: true, unless: -> { removed? }
+    # validates :category_ids, presence: true, unless: -> { removed? }
 
     validates :start_on, presence: true
 

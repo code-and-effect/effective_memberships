@@ -30,7 +30,9 @@ module EffectiveMembershipsOwner
     accepts_nested_attributes_for :fees, reject_if: :all_blank, allow_destroy: true
 
     has_many :orders, -> { order(:id) }, inverse_of: :user, as: :user, class_name: 'Effective::Order', dependent: :nullify
-    accepts_nested_attributes_for :orders, reject_if: :all_blank, allow_destroy: true
+    # Do not accepts nested attributes
+
+    #accepts_nested_attributes_for :orders, reject_if: :all_blank, allow_destroy: true
 
     has_one :membership, inverse_of: :owner, as: :owner, class_name: 'Effective::Membership'
     accepts_nested_attributes_for :membership
