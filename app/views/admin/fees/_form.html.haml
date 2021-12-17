@@ -3,6 +3,7 @@
     = f.hidden_field :owner_id
     = f.hidden_field :owner_type
   - else
+    - raise('todo')
     - collection = EffectiveMembershipsOwner.descendants.map { |d| [d.name.to_s, d.members.sorted] }.to_h
     = f.select :owner_id, collection, polymorphic: true
 

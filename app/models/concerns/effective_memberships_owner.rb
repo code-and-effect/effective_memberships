@@ -53,6 +53,10 @@ module EffectiveMembershipsOwner
     self.class.name.split('::').last
   end
 
+  def membership_fees_paid?
+    outstanding_fee_payment_fees.blank? && membership && membership.fees_paid?
+  end
+
   def outstanding_fee_payment_fees
     fees.select { |fee| fee.fee_payment_fee? && !fee.purchased? }
   end
@@ -130,6 +134,33 @@ module EffectiveMembershipsOwner
     )
 
     fee
+  end
+
+  def build_title_fee(period:, title:, fee_type: nil, category: nil, price: nil, qb_item_name: nil, tax_exempt: nil)
+    fee_type ||= 'Renewal'
+
+    fee = fees.find do |fee|
+      fee.fee_type == fee_type && fee.period == period && fee.title == title &&
+      (category.blank? || fee.category_id == category.id && fee.category_type == category.class.name)
+    end
+
+    return fee if fee&.purchased?
+
+    # Build the title fee
+    fee ||= fees.build()
+    price ||= (category.renewal_fee.to_i if category.present? && fee_type == 'Renewal')
+
+    fee.assign_attributes(
+      fee_type: fee_type,
+      title: title,
+      category: category,
+      price: price,
+      period: period,
+      qb_item_name: qb_item_name,
+      tax_exempt: tax_exempt,
+      late_on: nil,
+      bad_standing_on: nil
+    )
   end
 
   def build_renewal_fee(category:, period:, late_on:, bad_standing_on:)

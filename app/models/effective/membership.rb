@@ -111,5 +111,9 @@ module Effective
       !bad_standing?
     end
 
+    def fees_paid?
+      fees_paid_period == EffectiveMemberships.Registrar.current_period
+    end
+
   end
 end

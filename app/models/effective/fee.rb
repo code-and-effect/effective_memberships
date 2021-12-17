@@ -7,7 +7,7 @@ module Effective
     # Every fee is charged to a owner
     belongs_to :owner, polymorphic: true
 
-    # This fee may belong to an application or other parent model
+    # This fee may belong to an application, fee payment, or other parent model
     belongs_to :parent, polymorphic: true, optional: true
 
     # The membership category for this fee, if there's only 1 membership.categories
@@ -65,10 +65,11 @@ module Effective
       self.errors.add(:fee_type, 'is not included') unless EffectiveMemberships.fee_types.include?(fee_type)
     end
 
-    with_options(if: -> { fee_type == 'Renewal' }) do
-      validates :late_on, presence: true
-      validates :bad_standing_on, presence: true
-    end
+    validates :late_on, presence: true,
+      if: -> { fee_type == 'Renewal' && category&.create_late_fees? }
+
+    validates :bad_standing_on, presence: true,
+      if: -> { fee_type == 'Renewal' && category&.create_bad_standing? }
 
     def to_s
       title.presence || default_title()
