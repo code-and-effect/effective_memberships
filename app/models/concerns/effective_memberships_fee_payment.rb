@@ -50,9 +50,15 @@ module EffectiveMembershipsFeePayment
     attr_accessor :declare_code_of_ethics
     attr_accessor :declare_truth
 
+    # Throwaway
+    attr_accessor :upgrade
+
     # Application Namespace
     belongs_to :owner, polymorphic: true
     accepts_nested_attributes_for :owner
+
+    belongs_to :user, polymorphic: true, optional: true
+    accepts_nested_attributes_for :user
 
     # Like maybe optionally it makes sense.
     belongs_to :category, polymorphic: true, optional: true

@@ -353,6 +353,9 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.integer :owner_id
       t.string :owner_type
 
+      t.integer :user_id
+      t.string :user_type
+
       t.integer :category_id
       t.string :category_type
 
