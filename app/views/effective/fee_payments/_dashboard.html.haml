@@ -1,0 +1,10 @@
+- authorized = EffectiveResources.authorized?(self, :new, EffectiveMemberships.FeePayment)
+- datatable = EffectiveResources.best('EffectiveFeePaymentsDatatable').new(self)
+- in_progress = current_user.effective_memberships_owner.fee_payments.in_progress
+
+%h2 Fee Payments
+
+- if datatable.present?
+  = render_simple_datatable(datatable)
+- else
+  %p You have no past fee payments. When you do, we'll show them here.

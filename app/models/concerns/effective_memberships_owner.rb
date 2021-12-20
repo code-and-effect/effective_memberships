@@ -22,17 +22,15 @@ module EffectiveMembershipsOwner
 
   included do
     # App scoped
-    has_many :applicants, as: :owner
-    has_many :fee_payments, as: :owner
+    has_many :applicants, -> { order(:id) }, inverse_of: :owner, as: :owner
+    has_many :fee_payments, -> { order(:id) }, inverse_of: :owner, as: :owner
 
     # Effective scoped
     has_many :fees, -> { order(:id) }, inverse_of: :owner, as: :owner, class_name: 'Effective::Fee', dependent: :nullify
     accepts_nested_attributes_for :fees, reject_if: :all_blank, allow_destroy: true
 
     has_many :orders, -> { order(:id) }, inverse_of: :user, as: :user, class_name: 'Effective::Order', dependent: :nullify
-    # Do not accepts nested attributes
-
-    #accepts_nested_attributes_for :orders, reject_if: :all_blank, allow_destroy: true
+    accepts_nested_attributes_for :orders, reject_if: :all_blank, allow_destroy: true
 
     has_one :membership, inverse_of: :owner, as: :owner, class_name: 'Effective::Membership'
     accepts_nested_attributes_for :membership

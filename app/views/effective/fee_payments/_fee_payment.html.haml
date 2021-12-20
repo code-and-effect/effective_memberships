@@ -3,4 +3,4 @@
   - steps = fee_payment.required_steps - blacklist
 
   - steps.select { |step| fee_payment.has_completed_step?(step) }.each do |partial|
-    = render "effective/fee_payments/#{partial}", fee_payment: fee_payment, step: partial
+    = render "effective/fee_payments/#{partial}", fee_payment: fee_payment, resource: fee_payment, step: partial
