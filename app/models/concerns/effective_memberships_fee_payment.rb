@@ -51,7 +51,7 @@ module EffectiveMembershipsFeePayment
     attr_accessor :declare_truth
 
     # Throwaway
-    attr_accessor :upgrade
+    attr_accessor :upgrade, :downgrade
 
     # Application Namespace
     belongs_to :owner, polymorphic: true
@@ -157,6 +157,41 @@ module EffectiveMembershipsFeePayment
 
   def outstanding_fees
     owner&.outstanding_fee_payment_fees
+  end
+
+  def select!
+    reset!
+  end
+
+  def reset!
+    assign_attributes(wizard_steps: wizard_steps.slice(:start))
+    save!
+  end
+
+  # Work with effective_organizations
+  def organization!
+    if upgrade_individual_to_organization?
+      save!
+      update!(owner: owner.representatives.first.organization)
+    elsif downgrade_organization_to_individual?
+      save!
+      update!(owner: current_user)
+    else
+      save!
+    end
+  end
+
+  def upgrade_individual_to_organization?
+    return false unless EffectiveResources.truthy?(upgrade)
+    return false unless owner.class.respond_to?(:effective_organizations_user?)
+    owner.representatives.any?(&:new_record?)
+  end
+
+  def downgrade_organization_to_individual?
+    return false unless EffectiveResources.truthy?(downgrade)
+    return false unless owner.class.respond_to?(:effective_organizations_organization?)
+    return false if current_user.blank?
+    owner.representatives.any?(&:marked_for_destruction?)
   end
 
   # All Fees and Orders
