@@ -244,7 +244,6 @@ module EffectiveMembershipsFeePayment
     save!
   end
 
-
   # Called automatically via after_purchase hook above
   def submit_purchased!
     return false if was_submitted?
