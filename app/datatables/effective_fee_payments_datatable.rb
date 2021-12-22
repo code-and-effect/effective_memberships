@@ -12,18 +12,11 @@ class EffectiveFeePaymentsDatatable < Effective::Datatable
 
     col :orders
 
-    actions_col(show: false) do |fee_payment|
-      if fee_payment.draft?
-        dropdown_link_to('Continue', effective_memberships.fee_payment_build_path(fee_payment, fee_payment.next_step), 'data-turbolinks' => false)
-        dropdown_link_to('Delete', effective_memberships.fee_payment_path(fee_payment), 'data-confirm': "Really delete #{fee_payment}?", 'data-method': :delete)
-      else
-        dropdown_link_to('Show', effective_memberships.fee_payment_path(fee_payment))
-      end
-    end
+    actions_col(new: false)
   end
 
   collection do
-    EffectiveMemberships.FeePayment.deep.where(owner: current_user.effective_memberships_owner)
+    EffectiveMemberships.FeePayment.deep.where(owner: current_user.effective_memberships_owners)
   end
 
 end

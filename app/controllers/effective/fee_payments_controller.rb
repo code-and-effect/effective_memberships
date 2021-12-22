@@ -4,7 +4,7 @@ module Effective
 
     include Effective::WizardController
 
-    resource_scope -> { EffectiveMemberships.FeePayment.deep.where(owner: current_user.effective_memberships_owner) }
+    resource_scope -> { EffectiveMemberships.FeePayment.deep.where(owner: current_user.effective_memberships_owners) }
 
     # Allow only 1 in-progress fee payment at a time
     before_action(only: [:new, :show], unless: -> { resource&.done? }) do
@@ -20,8 +20,7 @@ module Effective
 
     def permitted_params
       params.require(:fee_payment).permit!.except(
-        :owner_id, :owner_type, :status, :status_steps, :wizard_steps,
-        :submitted_at
+        :status, :status_steps, :wizard_steps, :submitted_at
       )
     end
 

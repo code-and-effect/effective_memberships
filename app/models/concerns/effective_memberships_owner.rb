@@ -46,7 +46,19 @@ module EffectiveMembershipsOwner
   end
 
   def effective_memberships_owner
-    self
+    raise('expected singular usage but there are more than one owner') if effective_memberships_owners.length > 1
+    effective_memberships_owners.first
+  end
+
+  def effective_memberships_owners
+    owners = users if respond_to?(:users) && users.any? { |user| user.class.respond_to?(:effective_memberships_owner?) }
+    owners = organizations if respond_to?(:organizations) && organizations.any? { |organization| organization.class.respond_to?(:effective_memberships_owner?) }
+
+    owners || [self]
+  end
+
+  def outstanding_fee_payment_owners
+    effective_memberships_owners.select { |owner| !owner.membership_fees_paid? }
   end
 
   def owner_label
