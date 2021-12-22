@@ -205,15 +205,20 @@ module EffectiveMembershipsFeePayment
 
   # We take over the owner's outstanding fees.
   def find_or_build_submit_fees
-    Array(outstanding_fees).each { |fee| fees << fee }
+    Array(outstanding_fees).each { |fee| fees << fee unless fees.include?(fee) }
     submit_fees
   end
 
   def find_or_build_submit_order
     order = submit_order || orders.build(user: owner)
+    fees = submit_fees()
 
-    submit_fees.each do |fee|
+    fees.each do |fee|
       order.add(fee) unless order.purchasables.include?(fee)
+    end
+
+    order.purchasables.each do |purchasable|
+      order.remove(purchasable) unless fees.include?(purchasable)
     end
 
     order.billing_address = owner.billing_address if owner.billing_address.present?

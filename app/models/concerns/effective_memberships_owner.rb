@@ -177,6 +177,8 @@ module EffectiveMembershipsOwner
       late_on: nil,
       bad_standing_on: nil
     )
+
+    fee
   end
 
   def build_renewal_fee(category:, period:, late_on:, bad_standing_on:)

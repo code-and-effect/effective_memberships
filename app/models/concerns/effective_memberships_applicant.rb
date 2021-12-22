@@ -453,10 +453,15 @@ module EffectiveMembershipsApplicant
 
   def find_or_build_submit_order
     order = submit_order || orders.build(user: owner)
+    fees = submit_fees()
 
     # Adds fees, but does not overwrite any existing price.
-    submit_fees.each do |fee|
+    fees.each do |fee|
       order.add(fee) unless order.purchasables.include?(fee)
+    end
+
+    order.purchasables.each do |purchasable|
+      order.remove(purchasable) unless fees.include?(purchasable)
     end
 
     # From Billing Step
