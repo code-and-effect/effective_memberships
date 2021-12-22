@@ -1,6 +1,4 @@
-- authorized = EffectiveResources.authorized?(self, :new, EffectiveMemberships.FeePayment)
-- datatable = EffectiveResources.best('EffectiveFeePaymentsDatatable').new(self)
-- in_progress = current_user.effective_memberships_owner.fee_payments.in_progress
+- datatable = EffectiveResources.best('EffectiveFeePaymentsDatatable').new(self, namespace: :effective)
 
 %h2 Fee Payments
 

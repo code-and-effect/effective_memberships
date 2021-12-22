@@ -61,6 +61,10 @@ module EffectiveMembershipsOwner
     effective_memberships_owners.select { |owner| !owner.membership_fees_paid? }
   end
 
+  def current_fee_payment_owner
+    outstanding_fee_payment_owners.first || self
+  end
+
   def owner_label
     self.class.name.split('::').last
   end
