@@ -247,6 +247,12 @@ module EffectiveMembershipsApplicant
       validates :declare_truth, acceptance: true
     end
 
+    # Billing Step
+    validate(if: -> { current_step == :billing && owner.present? }) do
+      self.errors.add(:base, "must have a billing address") unless owner.billing_address.present?
+      self.errors.add(:base, "must have an email") unless owner.email.present?
+    end
+
     # Admin Approve
     validate(if: -> { approved_membership_date.present? }) do
       if approved_membership_date.to_date > Time.zone.now.to_date
