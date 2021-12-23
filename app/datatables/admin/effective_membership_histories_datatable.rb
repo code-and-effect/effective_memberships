@@ -14,7 +14,15 @@ module Admin
 
       col :number
 
-      col :categories, label: 'Category'
+      col :categories, label: 'Category' do |history|
+        history.categories.map.with_index do |category, index|
+          category_id = history.category_ids[index]
+          link = link_to(category, effective_memberships.edit_admin_category_path(category_id))
+
+          content_tag(:div, link, class: 'col-resource_item')
+        end.join.html_safe
+      end
+
       col :category_ids, visible: false
 
       col :bad_standing

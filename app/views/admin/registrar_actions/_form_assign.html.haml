@@ -1,0 +1,34 @@
+.card
+  .card-body
+    %h5.card-title Assign
+
+    = effective_form_with(model: [:admin, registrar_action], url: effective_memberships.admin_registrar_actions_path) do |f|
+      = f.hidden_field :owner_id
+      = f.hidden_field :owner_type
+
+      - membership = f.object.owner.membership
+
+      %p.text-muted
+        Assign to one or more categories.
+
+      = f.static_field :current_action, label: 'Current Categories' do
+        - Array(membership&.categories).each do |category|
+          %div= link_to(category, effective_memberships.edit_admin_category_path(category))
+
+        - if membership.blank?
+          None
+
+      = f.check_box :current_action, label: 'Yes, assign this member to categories'
+
+      = f.show_if :current_action, true do
+        - categories = f.object.owner.registrar_action_categories(:assign)
+        = f.select :category_ids, categories, label: 'Assign to', required: true, multiple: true
+
+        - if membership.present?
+          %p The member will keep their existing membership number: #{membership.number}.
+        - else
+          = f.text_field :membership_number, hint: "leave blank to assign the next number"
+
+        %p No fees will be created
+
+        = f.submit 'Assign', border: false, center: true, 'data-confirm': "Really assign #{f.object.owner}?"

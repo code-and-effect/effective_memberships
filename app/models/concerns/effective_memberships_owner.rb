@@ -103,6 +103,10 @@ module EffectiveMembershipsOwner
     membership_histories.find { |history| history.removed? }.start_on
   end
 
+  def registrar_action_categories(action)
+    EffectiveMemberships.Category.sorted.all
+  end
+
   # Instance Methods
   def additional_fee_attributes(fee)
     raise('expected an Effective::Fee') unless fee.kind_of?(Effective::Fee)

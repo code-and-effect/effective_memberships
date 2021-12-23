@@ -7,9 +7,7 @@
       = f.hidden_field :owner_type
 
       - membership = f.object.owner.membership
-
       - period = EffectiveMemberships.Registrar.current_period
-      - date = EffectiveMemberships.Registrar.bad_standing_date(period: period)
 
       %p.text-muted
         Change a member's existing category and optionally create fees.
@@ -22,7 +20,8 @@
       = f.show_if :current_action, true do
         %p The member will keep their existing membership number: #{membership.number}.
 
-        - categories = EffectiveMemberships.Category.all.where.not(id: membership.category_id)
+        - categories = f.object.owner.registrar_action_categories(:reclassify) - membership.categories
+
         = f.select :category_id, categories, label: 'Reclassify to', required: true
 
         = f.check_box :skip_fees, label: 'Yes, skip creating fees and just set the category'

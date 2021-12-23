@@ -9,13 +9,14 @@
       - membership = f.object.owner.membership
 
       - period = EffectiveMemberships.Registrar.current_period
-      - date = EffectiveMemberships.Registrar.bad_standing_date(period: period)
+      - date = (EffectiveMemberships.Registrar.bad_standing_date(period: period) rescue false)
 
       %p.text-muted
-        Members with outstanding renewal fees are automatically marked
-        not in good standing on #{date.strftime('%B %d')}.
-        The status is cleared when they pay their fees.
-        You can also mark a member as always not in good standing.
+        - if date.present?
+          Members with outstanding renewal fees are automatically marked
+          not in good standing on #{date.strftime('%B %d')}.
+          The status is cleared when they pay their fees.
+          You can also mark a member as always in bad standing.
 
       = f.static_field :current_action, label: 'Current Status' do
 

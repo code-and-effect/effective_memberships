@@ -14,6 +14,10 @@ module Admin
       success: -> { "#{resource.owner} has been reclassified to #{resource.owner.membership.category}" },
       redirect: -> { admin_owners_path(resource) }
 
+    submit :assign, 'Assign',
+      success: -> { "#{resource.owner} has been assigned to #{resource.owner.membership.categories.to_sentence}" },
+      redirect: -> { admin_owners_path(resource) }
+
     submit :remove, 'Remove',
       success: -> { "#{resource.owner} has been removed" },
       redirect: -> { admin_owners_path(resource) }
