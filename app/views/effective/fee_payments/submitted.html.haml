@@ -4,11 +4,12 @@
   - raise('expected a submitted fee_payment') unless resource.was_submitted?
   - raise('expected a purchased fee_payment submit_order') unless resource.submit_order&.purchased?
 
-  .alert.alert-success.mb-4
-    Fee successfully paid on
-    = resource.submit_order.purchased_at.strftime('%F')
+  .alert.alert-warning.mb-4
+    Successfully paid on #{resource.submit_order.purchased_at.strftime('%F')}.
+
+  = link_to "Return to Dashboard", root_path, class: 'btn btn-lg btn-primary mb-4'
 
   = render 'effective/fee_payments/fee_payment', fee_payment: resource
   = render 'effective/fee_payments/orders', fee_payment: resource
 
-  = link_to "Return to Dashboard", root_path, class: 'btn btn-lg btn-primary btn-block'
+  = link_to "Return to Dashboard", root_path, class: 'btn btn-lg btn-primary'

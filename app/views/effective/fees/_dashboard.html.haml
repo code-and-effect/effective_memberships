@@ -7,11 +7,11 @@
 - if membership.present?
   - if membership.category.create_renewal_fees?
     - date = EffectiveMemberships.Registrar.renewal_fee_date(date: Time.zone.now)
-    %p Annual fees become available for purchase on #{date.strftime('%B %d')} of each year.
+    %p Annual fees become available for purchase on #{date.strftime('%B %e')} of each year.
 
   - if membership.category.create_late_fees?
     - date = EffectiveMemberships.Registrar.late_fee_date(date: Time.zone.now)
-    %p Late fees will be applied on #{date.strftime('%B %d')}.
+    %p Late fees will be applied on #{date.strftime('%B %e')}.
 
 - if fees.present?
   .alert.alert-warning.mb-3 You have #{pluralize(fees.length , 'outstanding fee')}.

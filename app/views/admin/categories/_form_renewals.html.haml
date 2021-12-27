@@ -7,7 +7,7 @@
   = f.show_if(:create_renewal_fees, true) do
     - date = EffectiveMemberships.Registrar.renewal_fee_date(date: Time.zone.now)
 
-    %p Charged to members, every #{date.strftime('%B %d')}, to renew their dues.
+    %p Charged to members, every #{date.strftime('%B %e')}, to renew their dues.
     = f.price_field :renewal_fee
 
   %h3 Late Fees
@@ -17,7 +17,7 @@
     - period = EffectiveMemberships.Registrar.current_period
     - date = EffectiveMemberships.Registrar.late_fee_date(period: period)
 
-    %p Charged to members, on #{date.strftime('%B %d')}, with outstanding renewal fees
+    %p Charged to members, on #{date.strftime('%B %e')}, with outstanding renewal fees
     = f.price_field :late_fee
 
   %h3 Bad Standing
@@ -27,6 +27,6 @@
     - period = EffectiveMemberships.Registrar.current_period
     - date = EffectiveMemberships.Registrar.bad_standing_date(period: period)
 
-    %p Members with outstanding fees, on #{date.strftime('%B %d')}, will automatically be marked in bad standing.
+    %p Members with outstanding fees, on #{date.strftime('%B %e')}, will automatically be marked in bad standing.
 
   = effective_submit(f)
