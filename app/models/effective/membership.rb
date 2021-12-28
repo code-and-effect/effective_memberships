@@ -26,7 +26,7 @@ module Effective
       timestamps
     end
 
-    scope :deep, -> { includes(owner: [:fees, :membership]) }
+    scope :deep, -> { includes(:membership_categories) }
     scope :sorted, -> { order(:id) }
 
     scope :with_paid_fees_through, -> (period = nil) {
