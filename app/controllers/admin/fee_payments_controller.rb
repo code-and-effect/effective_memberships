@@ -11,7 +11,7 @@ module Admin
     private
 
     def permitted_params
-      model = (params.key?(:effective_applicant) ? :effective_fee_payment : :fee_payment)
+      model = (params.key?(:effective_fee_payment) ? :effective_fee_payment : :fee_payment)
       params.require(model).permit!
     end
 

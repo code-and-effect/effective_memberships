@@ -229,6 +229,8 @@ module EffectiveMembershipsFeePayment
 
     order.billing_address = owner.billing_address if owner.billing_address.present?
 
+    order.save
+
     order
   end
 

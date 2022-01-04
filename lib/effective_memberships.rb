@@ -1,5 +1,4 @@
 require 'effective_resources'
-require 'effective_datatables'
 require 'effective_memberships/engine'
 require 'effective_memberships/version'
 
