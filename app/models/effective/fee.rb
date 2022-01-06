@@ -131,7 +131,7 @@ module Effective
     end
 
     def default_qb_item_name
-      category.present? ? category.qb_item_name : "#{fee_type} Fee"
+      category&.qb_item_name.presence || "#{fee_type} Fee"
     end
 
     def default_tax_exempt

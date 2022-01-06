@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    effective_memberships (0.1.6)
+    effective_memberships (0.1.13)
       effective_bootstrap
       effective_datatables (>= 4.0.0)
       effective_orders
@@ -140,7 +140,7 @@ GEM
       effective_resources
       liquid
       rails (>= 3.2.0)
-    effective_orders (5.2.9)
+    effective_orders (5.2.12)
       coffee-rails
       effective_addresses
       effective_bootstrap
