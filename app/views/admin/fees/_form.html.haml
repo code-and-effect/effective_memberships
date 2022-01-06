@@ -7,8 +7,11 @@
     - collection = EffectiveMembershipsOwner.descendants.map { |d| [d.name.to_s, d.members.sorted] }.to_h
     = f.select :owner_id, collection, polymorphic: true
 
-  = f.select :fee_type , EffectiveMemberships.custom_fee_types
+  - if f.object.new_record?
+    = f.select :fee_type, EffectiveMemberships.custom_fee_types
+  - else
+    = f.static_field :fee_type
+
   = f.price_field :price
 
-  - if fee.new_record?
-    = effective_submit(f)
+  = effective_submit(f)
