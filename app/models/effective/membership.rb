@@ -39,21 +39,15 @@ module Effective
     }
 
     scope :create_renewal_fees, -> (period = nil) {
-      deep.with_unpaid_fees_through(period)
-        .where.not(fees_paid_period: nil) # Must have purchased a Prorated or Renewal Fee before
-        #.where(category_id: EffectiveMemberships.Category.create_renewal_fees)
+      deep.with_unpaid_fees_through(period).where.not(fees_paid_period: nil) # Must have purchased a Prorated or Renewal Fee before
     }
 
     scope :create_late_fees, -> (period = nil) {
-      deep.with_unpaid_fees_through(period)
-        .where.not(fees_paid_period: nil) # Must have purchased a Prorated or Renewal Fee before
-        #.where(category_id: EffectiveMemberships.Category.create_late_fees)
+      deep.with_unpaid_fees_through(period).where.not(fees_paid_period: nil) # Must have purchased a Prorated or Renewal Fee before
     }
 
     scope :create_bad_standing, -> (period = nil) {
-      deep.with_unpaid_fees_through(period)
-        .where.not(fees_paid_period: nil) # Must have purchased a Prorated or Renewal Fee before
-        #.where(category_id: EffectiveMemberships.Category.create_bad_standing)
+      deep.with_unpaid_fees_through(period).where.not(fees_paid_period: nil) # Must have purchased a Prorated or Renewal Fee before
     }
 
     before_validation do

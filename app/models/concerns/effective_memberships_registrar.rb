@@ -253,6 +253,7 @@ module EffectiveMembershipsRegistrar
 
     # Create Renewal Fees
     Effective::Membership.create_renewal_fees(period).find_each do |membership|
+
       membership.categories.select(&:create_renewal_fees?).map do |category|
         fee = membership.owner.build_renewal_fee(category: category, period: period, late_on: late_on, bad_standing_on: bad_standing_on)
         raise("expected build_renewal_fee to return a fee for period #{period}") unless fee.kind_of?(Effective::Fee)

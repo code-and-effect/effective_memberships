@@ -8,10 +8,14 @@ namespace :effective_memberships do
   # rake effective_memberships:create_fees
   desc 'Run daily to create Renewal and Late fees'
   task create_fees: :environment do
-    if ActiveRecord::Base.connection.table_exists?(:memberships)
-      EffectiveLogger.info "Running effective_memberships:create_fees scheduled task" if defined?(EffectiveLogger)
-      EffectiveMemberships.Registrar.create_fees!
+    begin
+      if ActiveRecord::Base.connection.table_exists?(:memberships)
+        EffectiveLogger.info "Running effective_memberships:create_fees scheduled task" if defined?(EffectiveLogger)
+        EffectiveMemberships.Registrar.create_fees!
+      end
+    rescue => e
+      ExceptionNotifier.notify_exception(e) if defined?(ExceptionNotifier)
+      puts "Error creating effective membership fees: #{e.errors.inspect}"
     end
   end
-
 end
