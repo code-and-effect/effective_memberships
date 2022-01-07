@@ -13,6 +13,8 @@ module Admin
       col :created_at, visible: false
       col :id, visible: false
 
+      col :period, visible: false
+
       unless attributes[:owner_id] || attributes[:applicant_id] || attributes[:fee_payment_id]
         col :owner
       end

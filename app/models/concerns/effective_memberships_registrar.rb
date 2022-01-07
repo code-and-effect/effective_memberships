@@ -209,11 +209,11 @@ module EffectiveMembershipsRegistrar
     period_end_on = period_end_on(date: date)
 
     if owner.outstanding_fee_payment_fees.present?
-      fp = EffectiveMemberships.FeePayment.new(owner: owner)
-      fp.ready!
-      fp.submit_order.purchase!(skip_buyer_validations: true, email: false)
+      order = Effective::Order.new(items: owner.outstanding_fee_payment_fees, user: owner)
+      order.purchase!(skip_buyer_validations: true, email: false)
     end
 
+    owner.update_membership_status!
     owner.membership.update!(fees_paid_period: period, fees_paid_through_period: period_end_on)
   end
 
