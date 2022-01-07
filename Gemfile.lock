@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    effective_memberships (0.1.17)
+    effective_memberships (0.1.18)
       effective_bootstrap
       effective_datatables (>= 4.0.0)
       effective_orders
