@@ -5,6 +5,9 @@ module Admin
       order :id
       col :id, visible: false
 
+      col :owner_id, visible: false
+      col :owner_type, visible: false
+
       col :owner
       col :categories
 
