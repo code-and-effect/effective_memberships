@@ -444,6 +444,10 @@ module EffectiveMembershipsApplicant
     orders.find { |order| order.purchasables.any?(&:applicant_submit_fee?) }
   end
 
+  def submit_fee_qb_item_name
+    'Applicant'
+  end
+
   def find_or_build_submit_fees
     return submit_fees if submit_fees.present?
 
@@ -451,7 +455,8 @@ module EffectiveMembershipsApplicant
       owner: owner,
       fee_type: 'Applicant',
       category: category,
-      price: category.applicant_fee
+      price: category.applicant_fee,
+      qb_item_name: submit_fee_qb_item_name()
     )
 
     submit_fees
