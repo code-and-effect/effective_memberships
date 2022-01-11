@@ -107,8 +107,6 @@ module Effective
       EffectiveMemberships.custom_fee_types.include?(fee_type)
     end
 
-    private
-
     def default_period
       EffectiveMemberships.Registrar.current_period
     end
