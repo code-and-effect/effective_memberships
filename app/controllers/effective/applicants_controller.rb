@@ -16,9 +16,6 @@ module Effective
       end
     end
 
-    before_render(only: :show, if: -> { step == :checkout }) do
-      resource.ready!
-    end
 
     after_save do
       flash.now[:success] = ''

@@ -44,6 +44,8 @@ module EffectiveMembershipsFeePayment
       submitted: 'Submitted'
     )
 
+    acts_as_purchasable_wizard
+
     log_changes(except: :wizard_steps) if respond_to?(:log_changes)
 
     # Declarations Step
@@ -110,12 +112,6 @@ module EffectiveMembershipsFeePayment
       validates :declare_truth, acceptance: true
     end
 
-    # Billing Step
-    validate(if: -> { current_step == :billing && owner.present? }) do
-      self.errors.add(:base, "must have a billing address") unless owner.billing_address.present?
-      self.errors.add(:base, "must have an email") unless owner.email.present?
-    end
-
     # Clear required steps memoization
     after_save { @_required_steps = nil }
 
@@ -135,13 +131,30 @@ module EffectiveMembershipsFeePayment
       end
     end
 
-    after_purchase do |_order|
-      raise('expected submit_order to be purchased') unless submit_order&.purchased?
+    # All Fees and Orders
+    # Overriding acts_as_purchasable_wizard
+    def outstanding_fees
+      owner&.outstanding_fee_payment_fees
+    end
 
-      submit_purchased!
-      after_submit_purchased!
+    def submit_fees
+      fees
+    end
+
+    def submit_order
+      orders.first
+    end
+
+    # We take over the owner's outstanding fees.
+    def find_or_build_submit_fees
+      Array(outstanding_fees).each { |fee| fees << fee unless fees.include?(fee) }
+      submit_fees
+    end
+
+    def after_submit_purchased!
       EffectiveMemberships.Registrar.fee_payment_purchased!(owner)
     end
+
   end
 
   def to_s
@@ -155,14 +168,6 @@ module EffectiveMembershipsFeePayment
 
   def done?
     submitted?
-  end
-
-  def can_visit_step?(step)
-    can_revisit_completed_steps(step)
-  end
-
-  def outstanding_fees
-    owner&.outstanding_fee_payment_fees
   end
 
   def select!
@@ -198,85 +203,6 @@ module EffectiveMembershipsFeePayment
     return false unless owner.class.respond_to?(:effective_organizations_organization?)
     return false if current_user.blank?
     owner.representatives.any?(&:marked_for_destruction?)
-  end
-
-  # All Fees and Orders
-  def submit_fees
-    fees
-  end
-
-  def submit_order
-    orders.first
-  end
-
-  # We take over the owner's outstanding fees.
-  def find_or_build_submit_fees
-    Array(outstanding_fees).each { |fee| fees << fee unless fees.include?(fee) }
-    submit_fees
-  end
-
-  def find_or_build_submit_order
-    order = submit_order || orders.build(user: owner)
-    fees = submit_fees()
-
-    fees.each do |fee|
-      order.add(fee) unless order.purchasables.include?(fee)
-    end
-
-    order.purchasables.each do |purchasable|
-      order.remove(purchasable) unless fees.include?(purchasable)
-    end
-
-    order.billing_address = owner.billing_address if owner.billing_address.present?
-
-    order.save
-
-    order
-  end
-
-  # Should be indempotent.
-  def build_submit_fees_and_order
-    return false if was_submitted?
-
-    fees = find_or_build_submit_fees()
-    raise('already has purchased submit fees') if fees.any? { |fee| fee.purchased? }
-
-    order = find_or_build_submit_order()
-    raise('already has purchased submit order') if order.purchased?
-
-    true
-  end
-
-  # Owner clicks on the Billing Submit. Next step is Checkout
-  def billing!
-    ready!
-  end
-
-  def ready!
-    build_submit_fees_and_order
-    save!
-  end
-
-  # Called automatically via after_purchase hook above
-  def submit_purchased!
-    return false if was_submitted?
-
-    wizard_steps[:checkout] = Time.zone.now
-    submit!
-  end
-
-  # A hook to extend
-  def after_submit_purchased!
-  end
-
-  # Draft -> Submitted
-  def submit!
-    raise('already submitted') if was_submitted?
-    raise('expected a purchased order') unless submit_order&.purchased?
-
-    wizard_steps[:checkout] ||= Time.zone.now
-    wizard_steps[:submitted] = Time.zone.now
-    submitted!
   end
 
 end

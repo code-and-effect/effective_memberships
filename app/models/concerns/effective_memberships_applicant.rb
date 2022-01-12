@@ -60,6 +60,8 @@ module EffectiveMembershipsApplicant
       submitted: 'Submitted'
     )
 
+    acts_as_purchasable_wizard
+
     log_changes(except: :wizard_steps) if respond_to?(:log_changes)
 
     has_many_attached :applicant_files
@@ -247,12 +249,6 @@ module EffectiveMembershipsApplicant
       validates :declare_truth, acceptance: true
     end
 
-    # Billing Step
-    validate(if: -> { current_step == :billing && owner.present? }) do
-      self.errors.add(:base, "must have a billing address") unless owner.billing_address.present?
-      self.errors.add(:base, "must have an email") unless owner.email.present?
-    end
-
     # Admin Approve
     validate(if: -> { approved_membership_date.present? }) do
       if approved_membership_date.to_date > Time.zone.now.to_date
@@ -288,10 +284,47 @@ module EffectiveMembershipsApplicant
       end
     end
 
-    after_purchase do |_|
-      raise('expected submit_order to be purchased') unless submit_order&.purchased?
-      submit_purchased!
+    # All Fees and Orders
+    def submit_fees
+      fees.select { |fee| fee.applicant_submit_fee? }
     end
+
+    def submit_order
+      orders.find { |order| order.purchasables.any?(&:applicant_submit_fee?) }
+    end
+
+    def submit_fee_qb_item_name
+      'Applicant'
+    end
+
+    def find_or_build_submit_fees
+      return submit_fees if submit_fees.present?
+
+      fees.build(
+        owner: owner,
+        fee_type: 'Applicant',
+        category: category,
+        price: category.applicant_fee,
+        qb_item_name: submit_fee_qb_item_name()
+      )
+
+      submit_fees
+    end
+
+    # Draft -> Submitted requirements
+    def submit!
+      raise('already submitted') if was_submitted?
+      raise('expected a purchased order') unless submit_order&.purchased?
+
+      after_commit do
+        applicant_references.each { |reference| reference.notify! if reference.submitted? }
+      end
+
+      wizard_steps[:checkout] ||= Time.zone.now
+      wizard_steps[:submitted] = Time.zone.now
+      submitted!
+    end
+
   end
 
   # Instance Methods
@@ -328,10 +361,6 @@ module EffectiveMembershipsApplicant
 
   def done?
     approved? || declined?
-  end
-
-  def can_visit_step?(step)
-    can_revisit_completed_steps(step)
   end
 
   def summary
@@ -435,101 +464,9 @@ module EffectiveMembershipsApplicant
     category&.min_applicant_files.to_i
   end
 
-  # All Fees and Orders
-  def submit_fees
-    fees.select { |fee| fee.applicant_submit_fee? }
-  end
-
-  def submit_order
-    orders.find { |order| order.purchasables.any?(&:applicant_submit_fee?) }
-  end
-
-  def submit_fee_qb_item_name
-    'Applicant'
-  end
-
-  def find_or_build_submit_fees
-    return submit_fees if submit_fees.present?
-
-    fees.build(
-      owner: owner,
-      fee_type: 'Applicant',
-      category: category,
-      price: category.applicant_fee,
-      qb_item_name: submit_fee_qb_item_name()
-    )
-
-    submit_fees
-  end
-
-  def find_or_build_submit_order
-    order = submit_order || orders.build(user: owner)
-    fees = submit_fees()
-
-    # Adds fees, but does not overwrite any existing price.
-    fees.each do |fee|
-      order.add(fee) unless order.purchasables.include?(fee)
-    end
-
-    order.purchasables.each do |purchasable|
-      order.remove(purchasable) unless fees.include?(purchasable)
-    end
-
-    # From Billing Step
-    order.billing_address = owner.billing_address if owner.billing_address.present?
-
-    order.save
-
-    order
-  end
-
-  # Should be indempotent.
-  def build_submit_fees_and_order
-    return false if was_submitted?
-
-    fees = find_or_build_submit_fees()
-    raise('already has purchased submit fees') if fees.any? { |fee| fee.purchased? }
-
-    order = find_or_build_submit_order()
-    raise('already has purchased submit order') if order.purchased?
-
-    true
-  end
-
-  # Owner clicks on the Billing step. Next step is Checkout
-  def billing!
-    ready!
-  end
-
-  # Ready to check out
-  def ready!
-    build_submit_fees_and_order
-    save!
-  end
-
-  # Called automatically via after_purchase hook above
-  def submit_purchased!
-    return false if was_submitted?
-
-    wizard_steps[:checkout] = Time.zone.now
-    submit!
-  end
-
-  # Draft -> Submitted requirements
-  def submit!
-    raise('already submitted') if was_submitted?
-    raise('expected a purchased order') unless submit_order&.purchased?
-
-    after_commit do
-      applicant_references.each { |reference| reference.notify! if reference.submitted? }
-    end
-
-    wizard_steps[:checkout] ||= Time.zone.now
-    wizard_steps[:submitted] = Time.zone.now
-    submitted!
-  end
-
-  # Submitted -> Completed requirements
+  # The submit! method used to be here
+  # But it needs to be inside the included do block
+  # So see above. Sorry.
 
   def applicant_references_required?
     min_applicant_references > 0
