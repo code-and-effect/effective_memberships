@@ -11,8 +11,11 @@ require 'haml-rails'
 require 'wicked'
 
 require 'effective_addresses'
-require 'effective_orders'
 require 'effective_email_templates'
+require 'effective_orders'
+require 'effective_organizations'
+require "effective_roles"
+
 require "effective_memberships"
 
 module Dummy

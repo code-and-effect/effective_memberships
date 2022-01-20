@@ -37,7 +37,7 @@ module EffectiveMembershipsRegistrar
     categories = Array(categories)
 
     raise('expecting a memberships owner') unless owner.class.respond_to?(:effective_memberships_owner?)
-    raise('expecting a membership category') unless categories.all? { |cat| cat.class.respond_to?(:effective_memberships_category?) }
+    raise('expecting a membership category') unless categories.present? && categories.all? { |cat| cat.class.respond_to?(:effective_memberships_category?) }
 
     # Default Date and next number
     date ||= Time.zone.now
@@ -72,6 +72,9 @@ module EffectiveMembershipsRegistrar
       membership.registration_on = date # Always new registration_on
       save!(owner, date: date)
     end
+
+    # Assign member role
+    add_member_role(owner)
 
     owner.update_membership_status!
   end
@@ -112,6 +115,9 @@ module EffectiveMembershipsRegistrar
       fee = owner.build_prorated_fee(date: date)
       raise('already has purchased prorated fee') if fee.purchased?
     end
+
+    # Assign member role
+    add_member_role(owner)
 
     # Save owner
     save!(owner, date: date)
@@ -162,6 +168,9 @@ module EffectiveMembershipsRegistrar
     # Delete unpurchased fees and orders
     owner.outstanding_fee_payment_fees.each { |fee| fee.mark_for_destruction }
     owner.outstanding_fee_payment_orders.each { |order| order.mark_for_destruction }
+
+    # Remove member role
+    remove_member_role(owner)
 
     save!(owner, date: date)
   end
@@ -292,6 +301,34 @@ module EffectiveMembershipsRegistrar
   end
 
   protected
+
+  def add_member_role(owner)
+    owner.add_role(:member)
+
+    if owner.class.respond_to?(:effective_organizations_organization?)
+      organization = owner
+      organization.representatives.each { |representative| representative.user.add_role(:member) }
+    end
+
+    true
+  end
+
+  def remove_member_role(owner)
+    owner.remove_role(:member)
+
+    if owner.class.respond_to?(:effective_organizations_organization?)
+      organization = owner
+
+      organization.representatives.each do |representative|
+        user = representative.user
+        member = user.individual_membership_present? || user.organization_membership_present?(except: organization)
+
+        user.remove_role(:member) if !member
+      end
+    end
+
+    true
+  end
 
   def save!(owner, date: Time.zone.now)
     owner.build_membership_history(start_on: date)

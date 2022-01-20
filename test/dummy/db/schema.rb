@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 7) do
+ActiveRecord::Schema.define(version: 8) do
 
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.string "name", null: false
@@ -413,6 +413,18 @@ ActiveRecord::Schema.define(version: 7) do
     t.index ["user_id"], name: "index_orders_on_user_id"
   end
 
+  create_table "organizations", force: :cascade do |t|
+    t.string "title"
+    t.string "email"
+    t.string "category"
+    t.text "notes"
+    t.integer "roles_mask"
+    t.integer "representatives_count", default: 0
+    t.datetime "updated_at"
+    t.datetime "created_at"
+    t.index ["title"], name: "index_organizations_on_title"
+  end
+
   create_table "products", force: :cascade do |t|
     t.integer "purchased_order_id"
     t.string "name"
@@ -421,6 +433,18 @@ ActiveRecord::Schema.define(version: 7) do
     t.string "qb_item_name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "representatives", force: :cascade do |t|
+    t.integer "organization_id"
+    t.string "organization_type"
+    t.integer "user_id"
+    t.string "user_type"
+    t.integer "roles_mask"
+    t.datetime "updated_at"
+    t.datetime "created_at"
+    t.index ["organization_id", "organization_type"], name: "index_representatives_on_organization_id_and_organization_type"
+    t.index ["user_id", "user_type"], name: "index_representatives_on_user_id_and_user_type"
   end
 
   create_table "subscriptions", force: :cascade do |t|

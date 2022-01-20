@@ -58,6 +58,7 @@ module Effective
     validates :number, presence: true, uniqueness: true
     validates :joined_on, presence: true
     validates :registration_on, presence: true
+    validates :membership_categories, presence: true
 
     validate(if: -> { owner.present? }) do
       self.errors.add(:owner_id, 'must be a memberships owner') unless owner.class.effective_memberships_owner?

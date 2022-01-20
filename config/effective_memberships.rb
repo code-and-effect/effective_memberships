@@ -32,7 +32,7 @@ EffectiveMemberships.setup do |config|
   # config.deliver_method = :deliver_later
 
   # Default layout
-  config.mailer_layout = 'effective_memberships_mailer_layout'
+  # config.mailer_layout = 'effective_memberships_mailer_layout'
 
   # Default From
   config.mailer_sender = "no-reply@example.com"

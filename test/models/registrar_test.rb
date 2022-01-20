@@ -6,12 +6,14 @@ class RegistrarTest < ActiveSupport::TestCase
     category = EffectiveMemberships.Category.first
 
     refute owner.membership.present?
+    refute owner.is?(:member)
     assert_equal 0, owner.fees.length
 
     next_number = EffectiveMemberships.Registrar.next_membership_number(owner, to: category)
     assert EffectiveMemberships.Registrar.register!(owner, to: category)
 
     assert owner.membership.present?
+    assert owner.is?(:member)
     assert_equal next_number, owner.membership.number
 
     assert_equal 1, owner.fees.length
@@ -24,6 +26,7 @@ class RegistrarTest < ActiveSupport::TestCase
     category = EffectiveMemberships.Category.first
 
     refute owner.membership.present?
+    refute owner.is?(:member)
     assert_equal 0, owner.fees.length
 
     next_number = EffectiveMemberships.Registrar.next_membership_number(owner, to: category)
@@ -48,6 +51,7 @@ class RegistrarTest < ActiveSupport::TestCase
     assert_equal 1, owner.membership.membership_categories.length
 
     assert_equal to, owner.membership.category
+    assert owner.is?(:member)
 
     assert_equal 2, owner.fees.length
     assert owner.fees.find { |fee| fee.fee_type == 'Prorated' }
@@ -110,6 +114,7 @@ class RegistrarTest < ActiveSupport::TestCase
 
     # Owner is a member with outstanding fees and orders
     assert owner.membership.present?
+    assert owner.is?(:member)
     assert owner.outstanding_fee_payment_fees.present?
     assert owner.orders.select { |order| order.purchased? == false }.present?
 
@@ -134,6 +139,7 @@ class RegistrarTest < ActiveSupport::TestCase
     assert history.number.blank?
 
     assert owner.membership_removed?
+    refute owner.is?(:member)
     assert_equal Time.zone.now.to_date, owner.membership_removed_on
   end
 

@@ -1,11 +1,12 @@
 PATH
   remote: .
   specs:
-    effective_memberships (0.1.22)
+    effective_memberships (0.1.23)
       effective_bootstrap
       effective_datatables (>= 4.0.0)
       effective_orders
       effective_resources
+      effective_roles
       rails (>= 6.0.0)
       wicked
 
@@ -148,8 +149,17 @@ GEM
       effective_resources
       rails (>= 4.0.0)
       sassc
+    effective_organizations (0.2.0)
+      effective_bootstrap
+      effective_datatables (>= 4.0.0)
+      effective_resources
+      effective_roles
+      rails (>= 6.0.0)
     effective_resources (1.9.17)
       rails (>= 4.0.0)
+    effective_roles (2.3.0)
+      effective_resources
+      rails (>= 3.2.0)
     effective_test_bot (1.2.9)
       capybara (>= 2.15)
       effective_resources
@@ -313,6 +323,7 @@ DEPENDENCIES
   effective_developer
   effective_email_templates
   effective_memberships!
+  effective_organizations
   effective_test_bot
   haml-rails
   pry-byebug

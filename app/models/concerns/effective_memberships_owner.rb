@@ -21,6 +21,8 @@ module EffectiveMembershipsOwner
   end
 
   included do
+    acts_as_role_restricted unless respond_to?(:acts_as_role_restricted?)
+
     # App scoped
     has_many :applicants, -> { order(:id) }, inverse_of: :owner, as: :owner
     has_many :fee_payments, -> { order(:id) }, inverse_of: :owner, as: :owner
@@ -55,6 +57,31 @@ module EffectiveMembershipsOwner
     owners = organizations if respond_to?(:organizations) && organizations.any? { |organization| organization.class.respond_to?(:effective_memberships_owner?) }
 
     owners || [self]
+  end
+
+  # This is the calculated way of determining if an owner is a member or not.
+  # The correct way to check for membership is: current_user.is?(:member)
+  def membership_present?
+    individual_membership_present? || organization_membership_present?
+  end
+
+  def individual_membership_present?
+    membership.present? && !membership.marked_for_destruction?
+  end
+
+  def organization_membership_present?(except: nil)
+    return false unless self.class.respond_to?(:effective_organizations_user?)
+    organizations.any? { |organization| organization != except && organization.membership_present? }
+  end
+
+  def assign_member_role
+    membership_present? ? add_role(:member) : remove_role(:member)
+  end
+
+  # This can be called by a script to recalculate the owner role based on current membership
+  def update_member_role!
+    assign_member_role
+    save!
   end
 
   def outstanding_fee_payment_owners
@@ -230,6 +257,7 @@ module EffectiveMembershipsOwner
     fee
   end
 
+  # Called by the registrar.
   def update_membership_status!
     raise('expected membership to be present') unless membership.present?
 

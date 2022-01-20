@@ -1,8 +1,10 @@
 module EffectiveMembershipsTestBuilder
 
-  def build_member(category: nil)
+  def build_member(category: nil, type: :user)
     category ||= Effective::Category.where(title: 'Full Member').first!
-    owner = build_user_with_address()
+
+    owner = build_user_with_address() if type == :user
+    owner = build_organization_with_address() if type == :organization
 
     EffectiveMemberships.Registrar.register!(owner, to: category)
 
@@ -157,6 +159,28 @@ module EffectiveMembershipsTestBuilder
 
     user.save!
     user
+  end
+
+  def build_organization
+    Organization.new(title: 'Test Organization', email: 'admin@organization.com')
+  end
+
+  def build_organization_with_address
+    organization = build_organization()
+
+    organization.addresses.build(
+      addressable: organization,
+      category: 'billing',
+      full_name: 'Test Organization',
+      address1: '1234 Fake Street',
+      city: 'Victoria',
+      state_code: 'BC',
+      country_code: 'CA',
+      postal_code: 'H0H0H0'
+    )
+
+    organization.save!
+    organization
   end
 
 end

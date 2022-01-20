@@ -16,7 +16,6 @@ module Effective
       end
     end
 
-
     after_save do
       flash.now[:success] = ''
     end
