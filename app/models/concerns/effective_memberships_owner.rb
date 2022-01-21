@@ -53,10 +53,12 @@ module EffectiveMembershipsOwner
   end
 
   def effective_memberships_owners
-    owners = users if respond_to?(:users) && users.any? { |user| user.class.respond_to?(:effective_memberships_owner?) }
-    owners = organizations if respond_to?(:organizations) && organizations.any? { |organization| organization.class.respond_to?(:effective_memberships_owner?) }
+    owners = organizations if self.class.respond_to?(:effective_organizations_user?)
+    owners = users if self.class.respond_to?(:effective_organizations_organization?)
 
-    owners || [self]
+    owners = Array(owners).reject { |owner| owner.try(:archived?) }
+
+    owners.presence || [self]
   end
 
   # This is the calculated way of determining if an owner is a member or not.
