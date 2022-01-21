@@ -16,6 +16,8 @@ EffectiveMemberships::Engine.routes.draw do
     resources :fee_payments, only: [:new, :show] do
       resources :build, controller: :fee_payments, only: [:show, :update]
     end
+
+    get '/directory', to: 'memberships_directory#index'
   end
 
   namespace :admin do

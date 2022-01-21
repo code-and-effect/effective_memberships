@@ -8,7 +8,7 @@ module Admin
       col :owner_id, visible: false
       col :owner_type, visible: false
 
-      col :owner
+      val :owner
       col :categories
 
       col :number
@@ -28,7 +28,7 @@ module Admin
     end
 
     collection do
-      memberships = Effective::Membership.deep.all
+      memberships = Effective::Membership.deep.all.includes(:owner)
 
       raise('expected an owner_id, not user_id') if attributes[:user_id].present?
 
