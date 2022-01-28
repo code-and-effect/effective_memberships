@@ -1,6 +1,3 @@
 .effective-applicant
-  - blacklist = EffectiveMemberships.Applicant.required_wizard_steps
-  - steps = applicant.required_steps - blacklist
-
-  - steps.select { |step| applicant.has_completed_step?(step) }.each do |partial|
+  - applicant.render_steps.each do |partial|
     = render "effective/applicants/#{partial}", applicant: applicant, step: partial

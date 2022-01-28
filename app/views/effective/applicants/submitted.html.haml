@@ -34,11 +34,8 @@
     = collapse('Show application...', card_class: 'my-2') do
       = render 'effective/applicants/applicant', applicant: resource
 
-  = render 'effective/applicants/orders', applicant: resource
-
-  -# - if resource.can_visit_step?(next_step)
-  -#   = effective_form_with(model: resource, url: wizard_path(step)) do |f|
-  -#     = f.hidden_field :current_step
-  -#     = f.submit 'Save and Continue', class: 'btn btn-primary'
+  .mb-4
+    = collapse('Show orders...', card_class: 'my-2') do
+      = render 'effective/applicants/orders', applicant: resource
 
   = link_to "Return to Dashboard", root_path, class: 'btn btn-lg btn-primary btn-block'

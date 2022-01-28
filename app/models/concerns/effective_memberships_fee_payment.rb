@@ -16,10 +16,6 @@ module EffectiveMembershipsFeePayment
   module ClassMethods
     def effective_memberships_fee_payment?; true; end
 
-    def all_wizard_steps
-      const_get(:WIZARD_STEPS).keys
-    end
-
     def required_wizard_steps
       [:start, :summary, :billing, :checkout, :submitted]
     end

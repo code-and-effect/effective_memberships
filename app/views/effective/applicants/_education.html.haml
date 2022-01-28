@@ -4,7 +4,7 @@
       .col-sm
         %h5.card-title= applicant.wizard_step_title(:education)
       .col-sm-auto.text-right
-        = link_to('Edit', wizard_path(:education)) if edit_effective_applicants_wizard?
+        = link_to('Edit', wizard_path(:education)) if edit_effective_wizard?
 
     - datatable = EffectiveApplicantEducationsDatatable.new(applicant_id: applicant.id)
     .mb-4= render_simple_datatable(datatable)

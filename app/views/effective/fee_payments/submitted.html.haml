@@ -9,6 +9,7 @@
 
   = link_to "Return to Dashboard", root_path, class: 'btn btn-lg btn-primary mb-4'
 
+  = render 'effective/fee_payments/summary', fee_payment: resource
   = render 'effective/fee_payments/fee_payment', fee_payment: resource
   = render 'effective/fee_payments/orders', fee_payment: resource
 

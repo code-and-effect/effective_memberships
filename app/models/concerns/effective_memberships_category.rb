@@ -176,7 +176,7 @@ module EffectiveMembershipsCategory
   end
 
   def applicant_wizard_steps_collection
-    wizard_steps = EffectiveMemberships.Applicant.const_get(:WIZARD_STEPS)
+    wizard_steps = EffectiveMemberships.Applicant.all_wizard_steps
     required_steps = EffectiveMemberships.Applicant.required_wizard_steps
 
     wizard_steps.map do |step, title|
@@ -185,7 +185,7 @@ module EffectiveMembershipsCategory
   end
 
   def fee_payment_wizard_steps_collection
-    wizard_steps = EffectiveMemberships.FeePayment.const_get(:WIZARD_STEPS)
+    wizard_steps = EffectiveMemberships.FeePayment.all_wizard_steps
     required_steps = EffectiveMemberships.FeePayment.required_wizard_steps
 
     wizard_steps.map do |step, title|

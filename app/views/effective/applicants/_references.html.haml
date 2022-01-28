@@ -4,7 +4,7 @@
       .col-sm
         %h5.card-title= applicant.wizard_step_title(:references)
       .col-sm-auto.text-right
-        = link_to('Edit', wizard_path(:references)) if edit_effective_applicants_wizard?
+        = link_to('Edit', wizard_path(:references)) if edit_effective_wizard?
 
     - applicant.applicant_references.each_with_index do |applicant_reference, index|
       - if index > 0

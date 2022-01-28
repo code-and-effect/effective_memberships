@@ -4,7 +4,7 @@
       .col-sm
         %h5.card-title= applicant.wizard_step_title(:course_amounts)
       .col-sm-auto.text-right
-        = link_to('Edit', wizard_path(:course_amounts)) if edit_effective_applicants_wizard?
+        = link_to('Edit', wizard_path(:course_amounts)) if edit_effective_wizard?
 
 
     - applicant.applicant_course_areas_collection.each do |area|
