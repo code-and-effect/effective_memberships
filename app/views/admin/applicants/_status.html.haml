@@ -51,9 +51,9 @@
             = applicant.min_applicant_references
             Required References Responded
         - else
-          - if applicant.applicant_references.count(&:submitted?) > 0
+          - if applicant.applicant_references.present?
             %p
-              = applicant.applicant_references.count(&:submitted?)
+              = applicant.applicant_references.count(&:completed?)
               = '/'
               = applicant.applicant_references.count
               References Responded

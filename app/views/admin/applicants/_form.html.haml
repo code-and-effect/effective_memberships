@@ -21,6 +21,10 @@
     = tab 'Process' do
       = render 'admin/applicants/form_process', applicant: applicant
 
+  - if applicant.applicant_references.present?
+    = tab 'References' do
+      .mb-4= render_inline_datatable(Admin::EffectiveApplicantReferencesDatatable.new(applicant: applicant))
+
   - if applicant.fees.present?
     = tab 'Fees' do
       .mb-4= render_inline_datatable(Admin::EffectiveFeesDatatable.new(applicant_id: applicant.to_param))

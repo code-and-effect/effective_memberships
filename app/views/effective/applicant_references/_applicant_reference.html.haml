@@ -23,7 +23,7 @@
           - elsif reference.completed?
             Response completed
 
-    - if reference.applicant.was_submitted? && !reference.completed?
+    - unless reference.applicant.was_approved?
       %tr
         %th Last Notified at
         %td= reference.last_notified_at&.strftime('%F') || 'Never'
