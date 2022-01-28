@@ -8,7 +8,8 @@ class CategoriesTest < ActiveSupport::TestCase
 
   test 'new membership category defaults to all wizard steps' do
     category = build_category()
-    assert_equal Effective::Applicant::WIZARD_STEPS.keys, category.applicant_wizard_steps
+    assert_equal Effective::Applicant::WIZARD_STEPS.keys, Effective::Applicant.all_wizard_steps
+    assert_equal Effective::Applicant.all_wizard_steps, category.applicant_wizard_steps
   end
 
 end
