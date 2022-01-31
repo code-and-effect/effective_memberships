@@ -86,6 +86,7 @@ ActiveRecord::Schema.define(version: 8) do
     t.integer "applicant_course_area_id"
     t.integer "applicant_course_name_id"
     t.integer "applicant_id"
+    t.string "applicant_type"
     t.string "title"
     t.integer "amount"
     t.string "code"
@@ -96,6 +97,7 @@ ActiveRecord::Schema.define(version: 8) do
 
   create_table "applicant_educations", force: :cascade do |t|
     t.integer "applicant_id"
+    t.string "applicant_type"
     t.date "start_on"
     t.date "end_on"
     t.string "institution"
@@ -109,6 +111,7 @@ ActiveRecord::Schema.define(version: 8) do
 
   create_table "applicant_experiences", force: :cascade do |t|
     t.integer "applicant_id"
+    t.string "applicant_type"
     t.string "level"
     t.integer "months"
     t.date "start_on"
@@ -126,6 +129,7 @@ ActiveRecord::Schema.define(version: 8) do
 
   create_table "applicant_references", force: :cascade do |t|
     t.integer "applicant_id"
+    t.string "applicant_type"
     t.string "name"
     t.string "email"
     t.string "phone"
@@ -148,6 +152,7 @@ ActiveRecord::Schema.define(version: 8) do
   create_table "applicant_reviews", force: :cascade do |t|
     t.string "token"
     t.integer "applicant_id"
+    t.string "applicant_type"
     t.integer "reviewer_id"
     t.string "reviewer_type"
     t.string "status"

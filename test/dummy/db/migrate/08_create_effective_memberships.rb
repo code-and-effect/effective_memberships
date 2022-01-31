@@ -172,6 +172,7 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
     # Applicant Educations
     create_table :applicant_educations do |t|
       t.integer :applicant_id
+      t.string :applicant_type
 
       t.date :start_on
       t.date :end_on
@@ -191,6 +192,7 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
     # Applicant Experiences
     create_table :applicant_experiences do |t|
       t.integer :applicant_id
+      t.string :applicant_type
 
       t.string :level
       t.integer :months
@@ -216,6 +218,7 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
     # Applicant References
     create_table :applicant_references do |t|
       t.integer :applicant_id
+      t.string :applicant_type
 
       t.string :name
       t.string :email
@@ -265,6 +268,7 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.integer :applicant_course_area_id
       t.integer :applicant_course_name_id
       t.integer :applicant_id
+      t.string :applicant_type
 
       t.string  :title
       t.integer :amount
@@ -280,6 +284,7 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
     create_table :applicant_reviews do |t|
       t.string :token
       t.integer :applicant_id
+      t.string :applicant_type
 
       t.integer :reviewer_id
       t.string :reviewer_type
