@@ -16,7 +16,7 @@ module Effective
       timestamps
     end
 
-    scope :deep, -> { includes(:applicant) }
+    scope :deep, -> { all }
 
     validates :start_on, presence: true
     validates :end_on, presence: true

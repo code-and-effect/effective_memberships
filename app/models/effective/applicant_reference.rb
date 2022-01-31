@@ -38,7 +38,7 @@ module Effective
       timestamps
     end
 
-    scope :deep, -> { includes(:applicant) }
+    scope :deep, -> { all }
 
     # All step validations
     validates :applicant, presence: true

@@ -17,7 +17,7 @@ module Effective
       timestamps
     end
 
-    scope :deep, -> { includes(:applicant_course_area, :applicant_course_name, :applicant) }
+    scope :deep, -> { includes(:applicant_course_area, :applicant_course_name) }
     scope :sorted, -> { order(:title) }
 
     before_validation(if: -> { applicant_course_name.present? }) do
