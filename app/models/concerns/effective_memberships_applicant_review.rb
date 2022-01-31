@@ -109,30 +109,33 @@ module EffectiveMembershipsApplicantReview
     end
 
     def conflict_of_interest!
-      after_commit { send_email(:applicant_review_conflict_of_interest) }
-
       update!(conflict_of_interest: true, recommendation: nil)
       conflicted!
 
       applicant.save!
+
+      after_commit { send_email(:applicant_review_conflict_of_interest) }
+      true
     end
 
     def accept!
-      after_commit { send_email(:applicant_review_completed) }
-
       assign_attributes(recommendation: 'Accept')
       accepted!
 
       applicant.save!
+
+      after_commit { send_email(:applicant_review_completed) }
+      true
     end
 
     def reject!
-      after_commit { send_email(:applicant_review_completed) }
-
       assign_attributes(recommendation: 'Reject')
       rejected!
 
       applicant.save!
+
+      after_commit { send_email(:applicant_review_completed) }
+      true
     end
 
     private

@@ -312,13 +312,15 @@ module EffectiveMembershipsApplicant
       raise('already submitted') if was_submitted?
       raise('expected a purchased order') unless submit_order&.purchased?
 
+      wizard_steps[:checkout] ||= Time.zone.now
+      wizard_steps[:submitted] = Time.zone.now
+      submitted!
+
       after_commit do
         applicant_references.each { |reference| reference.notify! if reference.submitted? }
       end
 
-      wizard_steps[:checkout] ||= Time.zone.now
-      wizard_steps[:submitted] = Time.zone.now
-      submitted!
+      true
     end
 
   end
@@ -526,9 +528,10 @@ module EffectiveMembershipsApplicant
       raise('unsupported approval applicant_type')
     end
 
-    after_commit { send_email(:applicant_approved) }
-
     save!
+
+    after_commit { send_email(:applicant_approved) }
+    true
   end
 
   # Admin approves an applicant. Registers the owner. Sends an email.
@@ -542,9 +545,10 @@ module EffectiveMembershipsApplicant
     wizard_steps[:submitted] ||= Time.zone.now
     declined!
 
-    after_commit { send_email(:applicant_declined) }
-
     save!
+
+    after_commit { send_email(:applicant_declined) }
+    true
   end
 
   private
