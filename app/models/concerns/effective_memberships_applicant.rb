@@ -77,20 +77,20 @@ module EffectiveMembershipsApplicant
     belongs_to :category, polymorphic: true, optional: true
     belongs_to :from_category, polymorphic: true, optional: true
 
-    has_many :applicant_reviews, -> { order(:id) }, inverse_of: :applicant, dependent: :destroy
+    has_many :applicant_reviews, -> { order(:id) }, as: :applicant, dependent: :destroy
     accepts_nested_attributes_for :applicant_reviews, reject_if: :all_blank, allow_destroy: true
 
     # Effective Namespace
-    has_many :applicant_courses, -> { order(:id) }, class_name: 'Effective::ApplicantCourse', inverse_of: :applicant, dependent: :destroy
+    has_many :applicant_courses, -> { order(:id) }, class_name: 'Effective::ApplicantCourse', as: :applicant, dependent: :destroy
     accepts_nested_attributes_for :applicant_courses, reject_if: :all_blank, allow_destroy: true
 
-    has_many :applicant_educations, -> { order(:id) }, class_name: 'Effective::ApplicantEducation', inverse_of: :applicant, dependent: :destroy
+    has_many :applicant_educations, -> { order(:id) }, class_name: 'Effective::ApplicantEducation', as: :applicant, dependent: :destroy
     accepts_nested_attributes_for :applicant_educations, reject_if: :all_blank, allow_destroy: true
 
-    has_many :applicant_experiences, -> { order(:id) }, class_name: 'Effective::ApplicantExperience', inverse_of: :applicant, dependent: :destroy
+    has_many :applicant_experiences, -> { order(:id) }, class_name: 'Effective::ApplicantExperience', as: :applicant, dependent: :destroy
     accepts_nested_attributes_for :applicant_experiences, reject_if: :all_blank, allow_destroy: true
 
-    has_many :applicant_references, -> { order(:id) }, class_name: 'Effective::ApplicantReference', inverse_of: :applicant, dependent: :destroy
+    has_many :applicant_references, -> { order(:id) }, class_name: 'Effective::ApplicantReference', as: :applicant, dependent: :destroy
     accepts_nested_attributes_for :applicant_references, reject_if: :all_blank, allow_destroy: true
 
     has_many :fees, -> { order(:id) }, as: :parent, class_name: 'Effective::Fee', dependent: :nullify

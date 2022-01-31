@@ -1,6 +1,6 @@
 module Effective
   class ApplicantEducation < ActiveRecord::Base
-    belongs_to :applicant
+    belongs_to :applicant, polymorphic: true
 
     log_changes(to: :applicant) if respond_to?(:log_changes)
 

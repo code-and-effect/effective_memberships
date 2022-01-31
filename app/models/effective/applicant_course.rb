@@ -4,8 +4,8 @@ module Effective
 
     belongs_to :applicant_course_area
 
+    belongs_to :applicant, polymorphic: true, optional: true
     belongs_to :applicant_course_name, optional: true
-    belongs_to :applicant, optional: true
 
     effective_resource do
       title          :string

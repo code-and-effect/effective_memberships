@@ -5,7 +5,7 @@ module Effective
     acts_as_statused :submitted, :completed
     log_changes(to: :applicant) if respond_to?(:log_changes)
 
-    belongs_to :applicant
+    belongs_to :applicant, polymorphic: true
 
     KNOWNS = ['6 months - 1 year', '1 year - 2 years', '2 - 5 years', '5 - 10 years', 'More than 10 years']
     RELATIONSHIPS = ['Supervisor', 'Employer', 'Colleague', 'Other']
