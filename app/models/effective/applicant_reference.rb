@@ -58,7 +58,7 @@ module Effective
       validates :accept_declaration, acceptance: true
     end
 
-    after_commit(on: :create, if: -> { applicant.submitted? }) { notify! }
+    after_commit(on: :create, if: -> { applicant.was_submitted? }) { notify! }
 
     def to_s
       'reference'

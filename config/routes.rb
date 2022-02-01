@@ -23,7 +23,7 @@ EffectiveMemberships::Engine.routes.draw do
   namespace :admin do
     resources :applicants, except: [:new, :create, :show]
 
-    resources :applicant_references, only: [:show] do
+    resources :applicant_references do
       post :notify, on: :member
     end
 

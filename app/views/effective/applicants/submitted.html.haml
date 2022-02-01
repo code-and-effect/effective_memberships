@@ -28,7 +28,7 @@
           References are automatically sent a reference request.
           Click 'New' to add an additional reference, or click 'Notify' to resend the reference request.
 
-        = render_datatable(EffectiveApplicantReferencesDatatable.new(applicant_id: resource.id), inline: true, simple: true)
+        = render_datatable(EffectiveApplicantReferencesDatatable.new(applicant: resource), inline: true, simple: true)
 
   .mb-4
     = collapse('Show application...', card_class: 'my-2') do

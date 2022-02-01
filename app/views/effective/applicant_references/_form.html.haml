@@ -1,10 +1,9 @@
 = effective_form_with(model: applicant_reference, engine: true) do |f|
-  - if inline_datatable?
-    = f.hidden_field :applicant_id
-  - else
-    - raise('expected inline datatable')
+  = f.hidden_field :applicant_id
+  = f.hidden_field :applicant_type
 
   = f.text_field :name
+
   .row
     .col= f.email_field :email
     .col= f.tel_field :phone
@@ -13,6 +12,8 @@
     .col= f.select :relationship, Effective::ApplicantReference::RELATIONSHIPS
     .col= f.select :known, Effective::ApplicantReference::KNOWNS, label: 'Known for'
 
-  %p An email will be sent asking them to complete a reference declaration form.
-
-  = f.submit('Create and Notify Reference')
+  - if f.object.new_record?
+    %p An email will be sent asking them to complete a reference declaration form.
+    = f.submit('Create and Notify Reference')
+  - else
+    = f.submit
