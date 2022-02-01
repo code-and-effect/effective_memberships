@@ -1,14 +1,21 @@
-%h2 Membership
 - current_owner = current_user.effective_memberships_owner
 - membership = current_owner.membership
 
+%h2 Membership
+
 - if membership.present?
   - if membership.categories.length == 0
-    You are a member.
+    %p
+      You do not have an assigned membership category.
+      To fix this, click the Apply to Join button or the Pay Fees button and then complete the wizard.
+      You cannot access member-only pages until this has been completed.
+      Please contact us if you believe this is an error with your account.
+
   - elsif membership.categories.length == 1
     %p You are a #{membership.category} member.
+
   - else
-    %p You are a member of the following:
+    %p You are a member with the following membership categories:
 
     %ul
       - membership.categories.each do |category|
