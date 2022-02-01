@@ -13,6 +13,9 @@ module Admin
       col :late_fee, as: :price
       col :rich_text_body, label: 'Body'
 
+      col :tax_exempt
+      col :qb_item_name, visible: false
+
       actions_col
     end
 
