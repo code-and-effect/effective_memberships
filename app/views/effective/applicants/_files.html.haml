@@ -6,7 +6,7 @@
       .col-sm-auto.text-right
         = link_to('Edit', wizard_path(:files)) if edit_effective_wizard?
 
-    %table.table
+    %table.table.table-sm
       %tbody
         - applicant.applicant_files.each do |file|
 
