@@ -14,11 +14,11 @@ module Effective
     belongs_to :category, polymorphic: true, optional: true
 
     effective_resource do
-      fee_type      :string
+      fee_type          :string
 
-      title         :string
+      title             :string
 
-      period        :date
+      period            :date
 
       late_on           :date
       bad_standing_on   :date
@@ -33,32 +33,22 @@ module Effective
     scope :sorted, -> { order(:id) }
     scope :deep, -> { includes(:owner, :parent, :category) }
 
-    before_validation(if: -> { owner.present? }) do
-      additional = owner.additional_fee_attributes(self)
-      raise('expected a Hash of attributes') unless additional.kind_of?(Hash)
-      assign_attributes(additional)
-    end
-
     before_validation(if: -> { owner && owner.membership }) do
       self.category ||= owner.membership.categories.first if owner.membership.categories.length == 1
     end
 
     before_validation do
-      self.period ||= default_period()
-      self.late_on ||= default_late_on()
-      self.bad_standing_on ||= default_bad_standing_on()
-
-      self.qb_item_name ||= default_qb_item_name()
-      self.tax_exempt = default_tax_exempt() if tax_exempt.nil?
-
+      self.period ||= EffectiveMemberships.Registrar.current_period
       self.title ||= default_title()
     end
 
     validates :fee_type, presence: true
-    validates :price, presence: true
 
     validates :title, presence: true
     validates :period, presence: true
+
+    validates :price, presence: true
+    validates :tax_exempt, inclusion: { in: [true, false] }
     validates :qb_item_name, presence: true
 
     validate(if: -> { fee_type.present? }) do
@@ -107,33 +97,8 @@ module Effective
       EffectiveMemberships.custom_fee_types.include?(fee_type)
     end
 
-    def default_period
-      EffectiveMemberships.Registrar.current_period
-    end
-
-    def default_late_on
-      nil
-    end
-
-    def default_bad_standing_on
-      nil
-    end
-
     def default_title
-      [
-        period&.strftime('%Y').presence,
-        category.to_s.presence,
-        fee_type.presence,
-        'Fee'
-      ].join(' ')
-    end
-
-    def default_qb_item_name
-      category&.qb_item_name.presence || "#{fee_type}"
-    end
-
-    def default_tax_exempt
-      category.present? ? category.tax_exempt : false
+      [period&.strftime('%Y'), category, fee_type, 'Fee'].compact.join(' ')
     end
 
   end
