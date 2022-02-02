@@ -33,12 +33,6 @@ module Effective
     scope :sorted, -> { order(:id) }
     scope :deep, -> { includes(:owner, :parent, :category) }
 
-    before_validation(if: -> { owner.present? }) do
-      additional = owner.additional_fee_attributes(self)
-      raise('expected a Hash of attributes') unless additional.kind_of?(Hash)
-      assign_attributes(additional)
-    end
-
     before_validation(if: -> { owner && owner.membership }) do
       self.category ||= owner.membership.categories.first if owner.membership.categories.length == 1
     end

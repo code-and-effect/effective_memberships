@@ -110,6 +110,7 @@ module EffectiveMembershipsCategory
     scope :create_bad_standing, -> { where(create_bad_standing: true) }
 
     validates :title, presence: true, uniqueness: true
+
     validates :position, presence: true
 
     after_initialize(if: -> { new_record? }) do
@@ -138,6 +139,9 @@ module EffectiveMembershipsCategory
       validates :prorated_oct, presence: true, numericality: { greater_than_or_equal_to: 0 }
       validates :prorated_nov, presence: true, numericality: { greater_than_or_equal_to: 0 }
       validates :prorated_dec, presence: true, numericality: { greater_than_or_equal_to: 0 }
+
+      validates :qb_item_name, presence: true
+      validates :tax_exempt, inclusion: { in: [true, false] }
     end
   end
 
