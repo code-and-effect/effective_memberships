@@ -301,6 +301,7 @@ module EffectiveMembershipsApplicant
         fee_type: 'Applicant',
         category: category,
         price: category.applicant_fee,
+        tax_exempt: category.tax_exempt,
         qb_item_name: submit_fee_qb_item_name()
       )
 

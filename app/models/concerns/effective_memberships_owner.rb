@@ -156,8 +156,10 @@ module EffectiveMembershipsOwner
     fee.assign_attributes(
       fee_type: 'Prorated',
       category: category,
+      period: period,
       price: price,
-      period: period
+      tax_exempt: category.tax_exempt,
+      qb_item_name: category.qb_item_name
     )
 
     fee
@@ -178,8 +180,10 @@ module EffectiveMembershipsOwner
     fee.assign_attributes(
       fee_type: 'Discount',
       category: category,
+      period: period,
       price: price,
-      period: period
+      tax_exempt: category.tax_exempt,
+      qb_item_name: category.qb_item_name
     )
 
     fee
@@ -200,13 +204,13 @@ module EffectiveMembershipsOwner
     price ||= (category.renewal_fee.to_i if category.present? && fee_type == 'Renewal')
 
     fee.assign_attributes(
-      fee_type: fee_type,
       title: title,
+      fee_type: fee_type,
       category: category,
-      price: price,
       period: period,
-      qb_item_name: qb_item_name,
+      price: price,
       tax_exempt: tax_exempt,
+      qb_item_name: qb_item_name,
       late_on: nil,
       bad_standing_on: nil
     )
@@ -226,10 +230,12 @@ module EffectiveMembershipsOwner
     fee.assign_attributes(
       fee_type: 'Renewal',
       category: category,
-      price: category.renewal_fee.to_i,
       period: period,
+      price: category.renewal_fee.to_i,
+      tax_exempt: category.tax_exempt,
+      qb_item_name: category.qb_item_name,
       late_on: late_on,
-      bad_standing_on: bad_standing_on
+      bad_standing_on: bad_standing_on,
     )
 
     fee
@@ -252,8 +258,10 @@ module EffectiveMembershipsOwner
     fee.assign_attributes(
       fee_type: 'Late',
       category: category,
-      price: category.late_fee.to_i,
       period: period,
+      price: category.late_fee.to_i,
+      tax_exempt: category.tax_exempt,
+      qb_item_name: category.qb_item_name
     )
 
     fee
