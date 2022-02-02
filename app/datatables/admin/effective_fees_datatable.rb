@@ -25,6 +25,9 @@ module Admin
 
       col :fee_type, search: EffectiveMemberships.fee_types
       col :price, as: :price
+      col :tax_exempt, visible: false
+      col :qb_item_name, visible: false
+
       col :purchased?, as: :boolean
       col :purchased_order, visible: false
 

@@ -20,7 +20,7 @@
           %th Total Months
           %td= applicant.applicant_experiences_months
 
-    - datatable = EffectiveApplicantExperiencesDatatable.new(applicant_id: applicant.id)
+    - datatable = EffectiveApplicantExperiencesDatatable.new(applicant: applicant)
     .mb-4= render_simple_datatable(datatable)
 
     - if applicant.applicant_experiences_details.present?

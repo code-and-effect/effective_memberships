@@ -6,7 +6,7 @@
       .col-sm-auto.text-right
         = link_to('Edit', wizard_path(:education)) if edit_effective_wizard?
 
-    - datatable = EffectiveApplicantEducationsDatatable.new(applicant_id: applicant.id)
+    - datatable = EffectiveApplicantEducationsDatatable.new(applicant: applicant)
     .mb-4= render_simple_datatable(datatable)
 
     - if applicant.applicant_educations_details.present?

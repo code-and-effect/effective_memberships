@@ -8,7 +8,7 @@
 
 
     - applicant.applicant_course_areas_collection.each do |area|
-      - datatable = EffectiveApplicantCoursesDatatable.new(applicant_id: applicant.id, applicant_course_area_id: area.id)
+      - datatable = EffectiveApplicantCoursesDatatable.new(applicant: applicant, applicant_course_area_id: area.id)
 
       .mb-4
         %h6= area
