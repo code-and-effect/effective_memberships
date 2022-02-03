@@ -219,7 +219,7 @@ module EffectiveMembershipsRegistrar
 
     if owner.outstanding_fee_payment_fees.present?
       order = Effective::Order.new(items: owner.outstanding_fee_payment_fees, user: owner)
-      order.purchase!(skip_buyer_validations: true, email: false)
+      order.mark_as_purchased!
     end
 
     owner.update_membership_status!
