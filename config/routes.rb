@@ -18,7 +18,13 @@ EffectiveMemberships::Engine.routes.draw do
     end
 
     get '/directory', to: 'memberships_directory#index'
-    get '/memberships/:membership_id/membership_card', to: 'membership_cards#show', as: :memberships_card_membership
+
+    resources :membership_cards, only: :index
+
+    resources :memberships, only: [] do
+      get :membership_card, on: :member, to: 'membership_cards#show'
+    end
+
   end
 
   namespace :admin do

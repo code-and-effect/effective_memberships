@@ -1,0 +1,16 @@
+- owners = current_user.effective_memberships_owners
+
+- owners.each do |owner|
+  - membership = owner.membership
+  - card = EffectiveMemberships.MembershipCard.new(membership: membership)
+
+  - next unless EffectiveResources.authorized?(self, :show, card)
+
+  = card('Membership Card') do
+    %p
+      Your membership card for
+      = membership.categories.to_sentence
+      = membership.owner.to_s
+      is available for download:
+
+    %p= link_to 'Download Membership Card', effective_memberships.membership_card_membership_path(membership, format: :pdf), class: 'btn btn-primary'
