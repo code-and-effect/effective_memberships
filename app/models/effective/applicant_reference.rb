@@ -2,7 +2,12 @@ module Effective
   class ApplicantReference < ActiveRecord::Base
     acts_as_tokened
     acts_as_addressable :reference
-    acts_as_statused :submitted, :completed
+
+    acts_as_statused(
+      :submitted, # Was submitted by the applicant
+      :completed # Was completed by the reference.
+    )
+
     log_changes(to: :applicant) if respond_to?(:log_changes)
 
     belongs_to :applicant, polymorphic: true

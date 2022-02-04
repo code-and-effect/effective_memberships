@@ -35,7 +35,7 @@
 
   - if applicant.owner.applicants.any? { |other| other.was_submitted? && other.id != applicant.id }
     = tab 'Other Applications' do
-      = render_datatable(Admin::EffectiveApplicantsDatatable.new(owner_id: applicant.owner_id, except_id: applicant.id))
+      = render_datatable(Admin::EffectiveApplicantsDatatable.new(owner: applicant.owner, except_id: applicant.id))
 
   - if applicant.persisted? && applicant.respond_to?(:log_changes_datatable)
     = tab 'Logs' do
