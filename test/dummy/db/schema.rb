@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 8) do
+ActiveRecord::Schema.define(version: 9) do
 
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.string "name", null: false
@@ -450,6 +450,77 @@ ActiveRecord::Schema.define(version: 8) do
     t.datetime "created_at"
     t.index ["organization_id", "organization_type"], name: "index_representatives_on_organization_id_and_organization_type"
     t.index ["user_id", "user_type"], name: "index_representatives_on_user_id_and_user_type"
+  end
+
+  create_table "ring_wizards", force: :cascade do |t|
+    t.string "token"
+    t.integer "owner_id"
+    t.string "owner_type"
+    t.integer "user_id"
+    t.string "user_type"
+    t.string "status"
+    t.text "status_steps"
+    t.text "wizard_steps"
+    t.datetime "submitted_at"
+    t.datetime "updated_at"
+    t.datetime "created_at"
+    t.index ["owner_id", "owner_type"], name: "index_ring_wizards_on_owner_id_and_owner_type"
+    t.index ["status"], name: "index_ring_wizards_on_status"
+    t.index ["token"], name: "index_ring_wizards_on_token"
+  end
+
+  create_table "rings", force: :cascade do |t|
+    t.integer "owner_id"
+    t.string "owner_type"
+    t.integer "ring_wizard_id"
+    t.string "ring_wizard_type"
+    t.integer "size"
+    t.string "metal"
+    t.datetime "issued_at"
+    t.integer "purchased_order_id"
+    t.integer "price"
+    t.boolean "tax_exempt", default: false
+    t.string "qb_item_name"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "stamp_wizards", force: :cascade do |t|
+    t.string "token"
+    t.integer "owner_id"
+    t.string "owner_type"
+    t.integer "user_id"
+    t.string "user_type"
+    t.string "status"
+    t.text "status_steps"
+    t.text "wizard_steps"
+    t.datetime "submitted_at"
+    t.datetime "updated_at"
+    t.datetime "created_at"
+    t.index ["owner_id", "owner_type"], name: "index_stamp_wizards_on_owner_id_and_owner_type"
+    t.index ["status"], name: "index_stamp_wizards_on_status"
+    t.index ["token"], name: "index_stamp_wizards_on_token"
+  end
+
+  create_table "stamps", force: :cascade do |t|
+    t.integer "owner_id"
+    t.string "owner_type"
+    t.integer "stamp_wizard_id"
+    t.string "stamp_wizard_type"
+    t.integer "applicant_id"
+    t.string "applicant_type"
+    t.string "status"
+    t.text "status_steps"
+    t.string "category"
+    t.string "name"
+    t.string "name_confirmation"
+    t.datetime "issued_at"
+    t.integer "purchased_order_id"
+    t.integer "price"
+    t.boolean "tax_exempt", default: false
+    t.string "qb_item_name"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "subscriptions", force: :cascade do |t|
