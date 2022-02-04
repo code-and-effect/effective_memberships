@@ -49,6 +49,7 @@ module EffectiveMembershipsApplicant
       experience: 'Work Experience',
       references: 'References',
       files: 'Attach Files',
+      stamp: 'Professional Stamp',
       declarations: 'Declarations',
       summary: 'Review',
       billing: 'Billing Address',
@@ -93,10 +94,14 @@ module EffectiveMembershipsApplicant
     has_many :applicant_references, -> { order(:id) }, class_name: 'Effective::ApplicantReference', as: :applicant, inverse_of: :applicant, dependent: :destroy
     accepts_nested_attributes_for :applicant_references, reject_if: :all_blank, allow_destroy: true
 
-    has_many :fees, -> { order(:id) }, as: :parent, inverse_of: :parent, class_name: 'Effective::Fee', dependent: :nullify
+    has_many :stamps, -> { order(:id) }, class_name: 'Effective::Stamp', as: :applicant, inverse_of: :applicant, dependent: :destroy
+    accepts_nested_attributes_for :stamps, reject_if: :all_blank, allow_destroy: true
+
+    # Effective Namespace polymorphic
+    has_many :fees, -> { order(:id) }, class_name: 'Effective::Fee', as: :parent, inverse_of: :parent, dependent: :destroy
     accepts_nested_attributes_for :fees, reject_if: :all_blank, allow_destroy: true
 
-    has_many :orders, -> { order(:id) }, as: :parent, inverse_of: :parent, class_name: 'Effective::Order', dependent: :nullify
+    has_many :orders, -> { order(:id) }, class_name: 'Effective::Order', as: :parent, inverse_of: :parent, dependent: :destroy
     accepts_nested_attributes_for :orders
 
     effective_resource do
@@ -274,6 +279,9 @@ module EffectiveMembershipsApplicant
 
         applicant_steps = Array(category&.applicant_wizard_steps)
 
+        # Special logic for stamp step
+        applicant_steps.delete(:stamp) unless apply_to_join?
+
         wizard_steps.select do |step|
           required_steps.include?(step) || category.blank? || applicant_steps.include?(step)
         end
@@ -315,7 +323,9 @@ module EffectiveMembershipsApplicant
 
       wizard_steps[:checkout] ||= Time.zone.now
       wizard_steps[:submitted] = Time.zone.now
+
       submitted!
+      stamps.each { |stamp| stamp.submitted! }
 
       after_commit do
         applicant_references.each { |reference| reference.notify! if reference.submitted? }
@@ -461,6 +471,11 @@ module EffectiveMembershipsApplicant
   # Files Step
   def min_applicant_files
     category&.min_applicant_files.to_i
+  end
+
+  # Stamps step
+  def stamp
+    stamps.first || stamps.build(owner: owner)
   end
 
   # The submit! method used to be here

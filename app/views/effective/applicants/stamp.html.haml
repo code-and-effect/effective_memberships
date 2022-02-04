@@ -1,0 +1,41 @@
+= render 'layout' do
+  = render 'effective/applicants/content', resource: resource
+
+  .card
+    .card-body
+      %p Should your application be approved, you are eligible to receive a Professional Stamp.
+
+      %p Please confirm your name as it should appear on any Professional Stamp.
+
+      = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+        = f.hidden_field :id
+
+        = f.fields_for(:stamps, f.object.stamp) do |fs|
+          = render 'effective/applicants/stamp_fields', f: fs
+
+        = f.save 'Save and Continue'
+
+
+
+-# = f.text_field :name
+-# = f.text_field :name_confirmation, hint: 'must match name'
+
+-#       - if resource.min_applicant_references > 0
+-#         .alert.alert-danger You must include #{resource.min_applicant_references} or more references.
+
+-#       = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+-#         = f.hidden_field :id
+
+-#         = f.has_many(:applicant_references, cards: true) do |arf|
+-#           %h4 Reference
+
+-#           = arf.text_field :name, label: 'Full Name'
+-#           .row
+-#             .col= arf.email_field :email
+-#             .col= arf.tel_field :phone
+
+-#           .row
+-#             .col= arf.select :relationship, Effective::ApplicantReference::RELATIONSHIPS
+-#             .col= arf.select :known, Effective::ApplicantReference::KNOWNS, label: 'Known for'
+
+-#         = f.save 'Save and Continue'

@@ -1,0 +1,23 @@
+= f.text_field :name
+= f.text_field :name_confirmation, hint: 'must match name'
+
+%h2 Stamp Information
+
+%table.table
+  %thead
+    %th Stamp
+    %th.order_price Cost
+  %tbody
+    %tr
+      %td Physical
+      %td.order_price $50.00 + GST
+    %tr
+      %td Digital-only
+      %td.order_price $25.00 + GST
+
+%p Please select a stamp:
+
+= f.select :category, Effective::Stamp::CATEGORIES
+
+= f.show_if :category, 'Physical' do
+  = effective_address_fields(f, :shipping)
