@@ -1,0 +1,36 @@
+.card
+  .card-body
+    .row
+      .col-sm
+        %h5.card-title= applicant.wizard_step_title(:stamp)
+      .col-sm-auto.text-right
+        = link_to('Edit', wizard_path(:stamp)) if edit_effective_wizard?
+
+    - applicant.stamps.each do |stamp|
+      %table.table.table-sm
+        %tbody
+          %tr
+            %th Name
+            %td= stamp.name
+
+          %tr
+            %th Name Confirmation
+            %td= stamp.name_confirmation
+
+          %tr
+            %th Category
+            %td= stamp.category
+
+          - if stamp.shipping_address.present?
+            %tr
+              %th Shipping Address
+              %td= stamp.shipping_address.to_html
+
+          - if applicant.was_approved?
+            %tr
+              %th Submitted
+              %td= stamp.submitted_at&.strftime('%F') || '-'
+
+            %tr
+              %th Issued
+              %td= stamp.issued_at&.strftime('%F') || 'Not Issued'

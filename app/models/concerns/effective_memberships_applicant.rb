@@ -143,6 +143,8 @@ module EffectiveMembershipsApplicant
     scope :in_progress, -> { where.not(status: [:approved, :declined]) }
     scope :done, -> { where(status: [:approved, :declined]) }
 
+    scope :not_draft, -> { where.not(status: :draft) }
+
     # Set Apply to Join or Reclassification
     before_validation(if: -> { new_record? && owner.present? }) do
       self.applicant_type ||= (owner.membership.blank? ? 'Apply to Join' : 'Apply to Reclassify')
@@ -290,30 +292,30 @@ module EffectiveMembershipsApplicant
 
     # All Fees and Orders
     def submit_fees
-      fees.select { |fee| fee.applicant_submit_fee? }
-    end
+      # Find or build submit fee
+      fee = fees.first || fees.build(owner: owner, fee_type: 'Applicant')
 
-    def submit_order
-      orders.find { |order| order.purchasables.any?(&:applicant_submit_fee?) }
-    end
+      unless fee.purchased?
+        fee.assign_attributes(
+          category: category,
+          price: category.applicant_fee,
+          tax_exempt: category.applicant_fee_tax_exempt,
+          qb_item_name: category.applicant_fee_qb_item_name
+        )
+      end
 
-    def submit_fee_qb_item_name
-      'Applicant'
-    end
+      # Update stamp price
+      stamp = stamps.first
 
-    def find_or_build_submit_fees
-      return submit_fees if submit_fees.present?
+      if stamp.present? && !stamp.purchased?
+        stamp.assign_attributes(
+          price: category.stamp_fee,
+          tax_exempt: category.stamp_fee_tax_exempt,
+          qb_item_name: category.stamp_fee_qb_item_name
+        )
+      end
 
-      fees.build(
-        owner: owner,
-        fee_type: 'Applicant',
-        category: category,
-        price: category.applicant_fee,
-        tax_exempt: category.tax_exempt,
-        qb_item_name: submit_fee_qb_item_name()
-      )
-
-      submit_fees
+      (fees + stamps)
     end
 
     # Draft -> Submitted requirements
@@ -325,7 +327,7 @@ module EffectiveMembershipsApplicant
       wizard_steps[:submitted] = Time.zone.now
 
       submitted!
-      stamps.each { |stamp| stamp.submitted! }
+      stamps.each { |stamp| stamp.submit! }
 
       after_commit do
         applicant_references.each { |reference| reference.notify! if reference.submitted? }
@@ -420,10 +422,6 @@ module EffectiveMembershipsApplicant
     # Reset the progress so far. They have to click through screens again.
     assign_attributes(wizard_steps: wizard_steps.slice(:start, :select))
 
-    # Delete any fees and orders. Keep all other data.
-    submit_fees.each { |fee| fee.mark_for_destruction }
-    submit_order.mark_for_destruction if submit_order
-
     save!
   end
 
@@ -475,7 +473,12 @@ module EffectiveMembershipsApplicant
 
   # Stamps step
   def stamp
-    stamps.first || stamps.build(owner: owner)
+    stamps.first || stamps.build(
+      owner: owner,
+      name: owner.to_s,
+      shipping_address: (owner.try(:shipping_address) || owner.try(:billing_address)),
+      price: 0
+    )
   end
 
   # The submit! method used to be here

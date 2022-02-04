@@ -1,9 +1,10 @@
 module Admin
   class EffectiveApplicantsDatatable < Effective::Datatable
     filters do
-      scope :all
+      scope :not_draft, label: 'All'
       scope :in_progress, label: 'Open / Active'
       scope :done, label: 'Done'
+      scope :draft
     end
 
     datatable do

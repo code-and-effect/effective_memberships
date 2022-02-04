@@ -180,7 +180,7 @@ module EffectiveMembershipsCategory
   end
 
   def applicant_wizard_steps_collection
-    wizard_steps = EffectiveMemberships.Applicant.all_wizard_steps
+    wizard_steps = EffectiveMemberships.Applicant.wizard_steps_hash
     required_steps = EffectiveMemberships.Applicant.required_wizard_steps
 
     wizard_steps.map do |step, title|
@@ -189,12 +189,32 @@ module EffectiveMembershipsCategory
   end
 
   def fee_payment_wizard_steps_collection
-    wizard_steps = EffectiveMemberships.FeePayment.all_wizard_steps
+    wizard_steps = EffectiveMemberships.FeePayment.wizard_steps_hash
     required_steps = EffectiveMemberships.FeePayment.required_wizard_steps
 
     wizard_steps.map do |step, title|
       [title, step, 'disabled' => required_steps.include?(step)]
     end
+  end
+
+  def applicant_fee_qb_item_name
+    'Applicant'
+  end
+
+  def applicant_fee_tax_exempt
+    tax_exempt
+  end
+
+  def stamp_fee
+    0
+  end
+
+  def stamp_fee_qb_item_name
+    qb_item_name
+  end
+
+  def stamp_fee_tax_exempt
+    tax_exempt
   end
 
 end
