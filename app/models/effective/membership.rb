@@ -29,6 +29,8 @@ module Effective
     scope :deep, -> { includes(membership_categories: :category) }
     scope :sorted, -> { order(:id) }
 
+    scope :good_standing, -> { where(bad_standing: [nil, false]) }
+
     scope :with_paid_fees_through, -> (period = nil) {
       where(arel_table[:fees_paid_period].gteq(period || EffectiveMemberships.Registrar.current_period))
     }

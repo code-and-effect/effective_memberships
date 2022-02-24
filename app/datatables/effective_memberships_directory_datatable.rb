@@ -11,7 +11,7 @@ class EffectiveMembershipsDirectoryDatatable < Effective::Datatable
   end
 
   collection do
-    scope = Effective::Membership.deep.includes(:owner)
+    scope = Effective::Membership.deep.good_standing.includes(:owner)
 
     archived_klasses.each do |klass|
       scope = scope.where.not(owner_id: klass.archived.select('id'), owner_type: klass.name)
