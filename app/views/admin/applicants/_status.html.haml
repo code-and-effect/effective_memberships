@@ -11,6 +11,8 @@
       %th
         - # Next action button
   %tbody
+
+    -# Draft
     %tr
       %td In Progress
       %td= applicant.created_at.strftime('%F')
@@ -21,6 +23,8 @@
         - else
           = '-'
       %td
+
+    - # Submitted
     %tr
       %td Application Submitted
       %td= applicant.submitted_at&.strftime('%F') || '-'
@@ -30,6 +34,8 @@
         - else
           = '-'
       %td
+
+    - # Waiting to Complete
     %tr
       %td Waiting to Complete
       %td= applicant.submitted_at&.strftime('%F') || '-'
@@ -63,71 +69,83 @@
             References Not Required
 
       %td
-        -# - if !applicant.was_approved? && applicant.transcripts_required? && !applicant.transcripts_approved?
-        -#   = link_to 'Process Transcripts', '#transcripts', 'data-click-tab': true, class: 'btn btn-sm btn-primary'
+        - if applicant.submitted?
+          = link_to 'Complete Applicant', '#process', 'data-click-tab': true, class: 'btn btn-sm btn-primary'
 
-        -# - if !applicant.was_approved? && applicant.nwpta_form_required? && !applicant.nwpta_form_received?
-        -#   = link_to 'Receive NWPTA Form', '#nwpta-verification-form', 'data-click-tab': true, class: 'btn btn-sm btn-primary'
-
+    - # Missing Information
     %tr
-      %td Application Complete
+      %td Missing Information
+      %td= applicant.missing_info_at&.strftime('%F') || '-'
+      %td= applicant.missing_info_reason
+      %td
+
+    - # Completed
+    %tr
+      %td Application Completed
       %td= applicant.completed_at&.strftime('%F') || '-'
       %td
+        - if applicant.completed_at.present?
+          = icon('check', class: 'small-1')
+          Done
       %td
+
+    - # Reviewed
+    - if EffectiveMemberships.applicant_reviews?
+      %tr.effective-memberships-applicant-status-reviewed
+        %td Reviews
+        %td= applicant.reviewed_at&.strftime('%F') || '-'
+        %td
+          - applicant.reviewed_requirements.each do |requirement, completed|
+            - next if requirement.to_s == 'Applicant Reviews'
+
+            %p
+              = icon((completed ? 'check' : 'x'), class: 'small-1')
+              = requirement
+
+          - if applicant.applicant_reviews_required?
+            %p
+              - if applicant.reviewed_requirements['Applicant Reviews']
+                = icon('check', class: 'small-1')
+
+              = applicant.applicant_reviews.count(&:completed?)
+              = '/'
+              = applicant.min_applicant_reviews
+              Reviews Completed
+          - else
+            %p
+              = icon('check', class: 'small-1')
+              Reviews Not Required
+
+        %td
+          - # Button to create reviews here
 
     %tr
-      %td Reviews
-      %td= applicant.reviewed_at&.strftime('%F') || '-'
+      %td Waiting to Process
       %td
-        - applicant.reviewed_requirements.each do |requirement, completed|
-          - next if requirement.to_s == 'Applicant Reviews'
-
-          %p
-            = icon((completed ? 'check' : 'x'), class: 'small-1')
-            = requirement
-
-        - if applicant.applicant_reviews_required?
-          %p
-            - if applicant.reviewed_requirements['Applicant Reviews']
-              = icon('check', class: 'small-1')
-
-            = applicant.applicant_reviews.count(&:completed?)
-            = '/'
-            = applicant.min_applicant_reviews
-            Reviews Completed
+        - if EffectiveMemberships.applicant_reviews?
+          = applicant.reviewed_at&.strftime('%F') || '-'
         - else
-          %p
-            = icon('check', class: 'small-1')
-            Reviews Not Required
-
+          = applicant.completed_at&.strftime('%F') || '-'
       %td
-        - if applicant.was_reviewed? && !applicant.was_approved?
+      %td
+        - if applicant.was_submitted? && !(applicant.approved? || applicant.declined?)
           = link_to 'Process Applicant', '#process', 'data-click-tab': true, class: 'btn btn-sm btn-primary'
 
-    - if applicant.declined_at.present?
-      %tr
-        %td Processed
-        %td= applicant.declined_at.strftime('%F')
-        %td
+    %tr
+      %td Processed
+      %td= (applicant.approved_at&.strftime('%F') || applicant.declined_at&.strftime('%F') || '-')
+      %td
+        - if applicant.was_approved? && !applicant.approved?
+          = icon('check', class: 'small-1')
+          Approved
+
+        - elsif applicant.was_declined? || applicant.declined?
           = icon('check', class: 'small-1')
           Declined
           %br
           = applicant.declined_reason
-        %td
 
-    - if applicant.was_approved?
-      %tr
-        %td Processed
-        %td= applicant.approved_at&.strftime('%F')
-        %td
-          - if applicant.was_approved?
-            = icon('check', class: 'small-1')
-            Approved
-          - elsif applicant.declined?
-            = icon('check', class: 'small-1')
-            Declined
-            %br
-            = applicant.declined_reason
-          - else
-            = '-'
-        %td
+        - elsif applicant.approved?
+          = icon('check', class: 'small-1')
+          Approved
+      %td

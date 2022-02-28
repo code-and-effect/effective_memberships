@@ -5,4 +5,10 @@
 
   = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
     = f.hidden_field :id
-    = f.submit 'Save and Continue', border: false, left: true
+
+    = f.submit(border: false, left: true) do
+      -# Missing Info
+      - if EffectiveResources.authorized?(self, :resubmit, resource)
+        = f.save 'Submit Application'
+      - else
+        = f.save 'Save and Continue'

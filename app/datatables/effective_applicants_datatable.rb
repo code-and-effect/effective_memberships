@@ -6,14 +6,20 @@ class EffectiveApplicantsDatatable < Effective::Datatable
     col :id, visible: false
 
     col :category, label: 'Category'
-    col :status
+    col :status, search: effective_memberships_status_collection()
 
     col :created_at, label: 'Created', as: :date
     col :updated_at, label: 'Updated', as: :date, visible: false
+
     col :submitted_at, label: 'Submitted', as: :date
-    col :completed_at, label: 'Completed', as: :date
-    col :reviewed_at, label: 'Reviewed', as: :date
-    col :approved_at, label: 'Approved', visible: false, as: :date
+    col :completed_at, label: 'Completed', as: :date, visible: false
+    col :missing_info_at, label: 'Missing Info', as: :date, visible: false
+
+    if EffectiveMemberships.applicant_reviews?
+      col :reviewed_at, label: 'Reviewed', as: :date
+    end
+
+    col :approved_at, label: 'Approved', as: :date
 
     col :orders
 

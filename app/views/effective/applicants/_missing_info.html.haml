@@ -1,0 +1,18 @@
+%h3 Missing Information
+%p The following information is missing: #{resource.missing_info_reason}.
+
+%p
+  Please revisit each wizard step and
+  = link_to 'complete all missing information', wizard_path(:demographics)
+  for this application.
+
+%p
+  Once you're ready, click below to re-submit your application with the updated information.
+
+%p
+  = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+    = f.hidden_field :id
+    = f.save 'Submit Application', 'data-confirm': "Really submit application?"
+
+%p
+  %small * No additional payment required.

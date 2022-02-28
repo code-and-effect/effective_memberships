@@ -298,6 +298,14 @@ module EffectiveMembershipsApplicant
       end
     end
 
+    def can_visit_step?(step)
+      if missing_info?
+        return [:start, :select, :billing, :checkout].exclude?(step)
+      end
+
+      can_revisit_completed_steps(step)
+    end
+
     # All Fees and Orders
     def submit_fees
       # Find or build submit fee
@@ -401,7 +409,7 @@ module EffectiveMembershipsApplicant
         "This application has been completed and is now ready for an admin to approve or decline it. If approved, prorated fees will be generated."
       end
     when 'missing_info'
-      "Application is missing the following information: <ul><li>#{missing_info_reason}</li></ul>"
+      "Missing the following information: <ul><li>#{missing_info_reason}</li></ul>"
     when 'reviewed'
       "This application has been reviewed and is now ready for an admin to approve or decline it. If approved, prorated fees will be generated."
     when 'approved'
@@ -503,7 +511,8 @@ module EffectiveMembershipsApplicant
     min_applicant_references > 0
   end
 
-  # When an application is submitted, these must be done to go to completed
+  # When an application is submitted, these must be done to go to completed.
+  # An Admin can override this and just set them to completed.
   def completed_requirements
     {
       'Applicant References' => (!applicant_references_required? || applicant_references.count(&:completed?) >= min_applicant_references)
@@ -532,6 +541,15 @@ module EffectiveMembershipsApplicant
     true
   end
 
+  def resubmit!
+    raise('applicant must have been submitted and missing info to resubmit!') unless was_submitted? && was_missing_info?
+    raise('already submitted') if submitted?
+    raise('expected a purchased order') unless submit_order&.purchased?
+
+    assign_attributes(skip_to_step: :submitted, submitted_at: Time.zone.now)
+    submitted!
+  end
+
   # Completed -> Reviewed requirements
   def applicant_reviews_required?
     (min_applicant_reviews > 0 || applicant_reviews.present?)
@@ -542,6 +560,7 @@ module EffectiveMembershipsApplicant
   end
 
   # When an application is completed, these must be done to go to reviewed
+  # An Admin can override this and just set them to reviewed.
   def reviewed_requirements
     {
       'Applicant Reviews' => (!applicant_reviews_required? || applicant_reviews.count(&:completed?) >= min_applicant_reviews)
@@ -549,8 +568,10 @@ module EffectiveMembershipsApplicant
   end
 
   def review!
-    return false unless completed? && reviewed_requirements.values.all?
-    # Could send registrar an email here saying this applicant is ready to approve
+    raise('applicant must have been submitted to review!') unless was_submitted?
+
+    # Let an admin ignore these requirements if need be
+    # return false unless completed? && reviewed_requirements.values.all?
     reviewed!
   end
 

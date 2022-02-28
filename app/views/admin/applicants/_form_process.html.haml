@@ -4,19 +4,19 @@
 
 %p Process applicant:
 
-= tabs(list: { class: 'nav nav-pills'}, content: { class: 'tab-content border-0' }, active: :none) do
-  - if EffectiveResources.authorized?(self, :missing, applicant)
-    = tab 'Missing Information' do
-      = render('admin/applicants/form_missing_info', applicant: applicant)
-
+= accordion do
   - if EffectiveResources.authorized?(self, :complete, applicant)
-    = tab 'Complete this Applicant' do
+    = collapse 'Complete this Applicant' do
       = render('admin/applicants/form_complete', applicant: applicant)
 
+  - if EffectiveResources.authorized?(self, :missing, applicant)
+    = collapse 'Missing Information' do
+      = render('admin/applicants/form_missing_info', applicant: applicant)
+
   - if EffectiveResources.authorized?(self, :approve, applicant)
-    = tab 'Approve this Applicant' do
+    = collapse 'Approve this Applicant' do
       = render('admin/applicants/form_approve', applicant: applicant)
 
   - if EffectiveResources.authorized?(self, :decline, applicant)
-    = tab 'Decline this Applicant' do
+    = collapse 'Decline this Applicant' do
       = render('admin/applicants/form_decline', applicant: applicant)

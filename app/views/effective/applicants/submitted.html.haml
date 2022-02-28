@@ -5,8 +5,7 @@
   - raise('expected a purchased applicant submit_order') unless resource.submit_order&.purchased?
 
   .alert.alert-success.mb-4
-    This application was submitted on
-    = resource.submit_order.purchased_at.strftime('%F')
+    This application was submitted on #{resource.submitted_at.strftime('%F')}
 
   - unless resource.approved?
     .card
@@ -20,15 +19,18 @@
   .card
     .card-body= render 'effective/applicants/summary', applicant: resource
 
-  - if resource.min_applicant_references.to_i > 0 || resource.applicant_references.present?
-    .card
-      .card-body
-        %h3 Confidential References
-        %p
-          References are automatically sent a reference request.
-          Click 'New' to add an additional reference, or click 'Notify' to resend the reference request.
+  - if resource.missing_info?
+    = card do
+      = render 'effective/applicants/missing_info', applicant: resource
 
-        = render_datatable(EffectiveApplicantReferencesDatatable.new(applicant: resource), inline: true, simple: true)
+  - if resource.min_applicant_references.to_i > 0 || resource.applicant_references.present?
+    = card do
+      %h3 Confidential References
+      %p
+        References are automatically sent a reference request.
+        Click 'New' to add an additional reference, or click 'Notify' to resend the reference request.
+
+      = render_datatable(EffectiveApplicantReferencesDatatable.new(applicant: resource), inline: true, simple: true)
 
   .mb-4
     = collapse('Show application...', card_class: 'my-2') do

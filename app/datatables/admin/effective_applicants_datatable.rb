@@ -11,14 +11,19 @@ module Admin
       order :id
       col :id, visible: false
 
-      col :status
+      col :status, search: effective_memberships_status_collection()
 
       col :created_at, label: 'Created', as: :date, visible: false
       col :updated_at, label: 'Updated', visible: false
 
       col :submitted_at, label: 'Submitted', visible: false, as: :date
       col :completed_at, label: 'Completed', visible: false, as: :date
-      col :reviewed_at, label: 'Reviewed', visible: false, as: :date
+      col :missing_info_at, label: 'Missing Info', visible: false, as: :date
+
+      if EffectiveMemberships.applicant_reviews?
+        col :reviewed_at, label: 'Reviewed', visible: false, as: :date
+      end
+
       col :approved_at, label: 'Approved', visible: false, as: :date
 
       col :owner
