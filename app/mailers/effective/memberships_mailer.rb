@@ -5,14 +5,24 @@ module Effective
     default from: -> { EffectiveMemberships.mailer_sender }
     layout -> { EffectiveMemberships.mailer_layout || 'effective_memberships_mailer_layout' }
 
+    def applicant_completed(resource, opts = {})
+      @assigns = assigns_for(resource)
+      mail(to: resource.owner.email, **headers_for(resource, opts))
+    end
+
+    def applicant_missing_info(resource, opts = {})
+      @assigns = assigns_for(resource)
+      mail(to: resource.owner.email, **headers_for(resource, opts))
+    end
+
     def applicant_approved(resource, opts = {})
       @assigns = assigns_for(resource)
-      mail(to: EffectiveMemberships.mailer_admin, **headers_for(resource, opts))
+      mail(to: resource.owner.email, **headers_for(resource, opts))
     end
 
     def applicant_declined(resource, opts = {})
       @assigns = assigns_for(resource)
-      mail(to: EffectiveMemberships.mailer_admin, **headers_for(resource, opts))
+      mail(to: resource.owner.email, **headers_for(resource, opts))
     end
 
     def applicant_reference_notification(resource, opts = {})
@@ -49,11 +59,11 @@ module Effective
 
         url: effective_memberships.applicant_url(applicant),
         admin_url: effective_memberships.edit_admin_applicant_url(applicant),
-      }
 
-      if applicant.declined_reason.present?
-        values.merge!(declined_reason: applicant.declined_reason)
-      end
+        # Optional
+        declined_reason: applicant.declined_reason.presence,
+        missing_info_reason: applicant.missing_info_reason.presence
+      }.compact
 
       { applicant: values }
     end

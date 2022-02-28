@@ -33,7 +33,9 @@ module Admin
 
       col :category, search: { collection: EffectiveMemberships.Category.all, polymorphic: false }
 
-      aggregate :total
+      unless attributes[:total] == false
+        aggregate :total
+      end
 
       if attributes[:applicant_id]
         actions_col(new: false)
@@ -63,11 +65,11 @@ module Admin
     end
 
     def applicant
-      @applicant ||= EffectiveMemberships.Applicant.find(attributes[:applicant_id])
+      @applicant ||= EffectiveMemberships.Applicant.where(id: attributes[:applicant_id]).first!
     end
 
     def fee_payment
-      @fee_payment ||= EffectiveMemberships.FeePayment.find(attributes[:fee_payment_id])
+      @fee_payment ||= EffectiveMemberships.FeePayment.where(id: attributes[:fee_payment_id]).first!
     end
 
   end

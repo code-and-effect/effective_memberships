@@ -32,12 +32,13 @@ module EffectiveMembershipsApplicant
     acts_as_tokened
 
     acts_as_statused(
-      :draft,       # Just Started
-      :submitted,   # Completed wizard. Paid applicant fee.
-      :completed,   # Admin has received all deliverables. The application is complete and ready for review.
-      :reviewed,    # All applicant reviews completed
-      :declined,    # Exit state. Application was declined.
-      :approved     # Exit state. Application was approved.
+      :draft,         # Just Started
+      :submitted,     # Completed wizard. Paid applicant fee.
+      :missing_info,  # Admin has indicated information is missing. The applicant can edit applicant and add info
+      :completed,     # Admin has received all deliverables. The application is complete and ready for review.
+      :reviewed,      # All applicant reviews completed
+      :declined,      # Exit state. Application was declined.
+      :approved       # Exit state. Application was approved.
     )
 
     acts_as_wizard(
@@ -121,18 +122,22 @@ module EffectiveMembershipsApplicant
       declined_at            :datetime
       declined_reason        :text
 
+      # Missing Info
+      missing_info_at        :datetime
+      missing_info_reason    :text
+
       # Applicant Educations
-      applicant_educations_details  :text
+      applicant_educations_details    :text
 
       # Applicant Experiences
-      applicant_experiences_months   :integer
-      applicant_experiences_details  :text
+      applicant_experiences_months    :integer
+      applicant_experiences_details   :text
 
       # Additional Information
-      additional_information         :text
+      additional_information          :text
 
       # Acts as Wizard
-      wizard_steps           :text, permitted: false
+      wizard_steps                    :text, permitted: false
 
       timestamps
     end
@@ -264,9 +269,12 @@ module EffectiveMembershipsApplicant
     # Admin Decline
     validates :declined_reason, presence: true, if: -> { declined? }
 
+    # Admin Missing Info
+    validates :missing_info_reason, presence: true, if: -> { missing_info? }
+
     # These two try completed and try reviewed
-    before_save(if: -> { submitted? }) { complete! }
-    before_save(if: -> { completed? }) { review! }
+    # before_save(if: -> { submitted? }) { complete! }
+    # before_save(if: -> { completed? }) { review! }
 
     # Clear required steps memoization
     after_save { @_required_steps = nil }
@@ -288,6 +296,14 @@ module EffectiveMembershipsApplicant
           required_steps.include?(step) || category.blank? || applicant_steps.include?(step)
         end
       end
+    end
+
+    def can_visit_step?(step)
+      if missing_info?
+        return [:start, :select, :billing, :checkout].exclude?(step)
+      end
+
+      can_revisit_completed_steps(step)
     end
 
     # All Fees and Orders
@@ -374,6 +390,10 @@ module EffectiveMembershipsApplicant
     approved? || declined?
   end
 
+  def status_label
+    (status_was || status).to_s.gsub('_', ' ')
+  end
+
   def summary
     case status_was
     when 'draft'
@@ -388,6 +408,8 @@ module EffectiveMembershipsApplicant
       else
         "This application has been completed and is now ready for an admin to approve or decline it. If approved, prorated fees will be generated."
       end
+    when 'missing_info'
+      "Missing the following information: <ul><li>#{missing_info_reason}</li></ul>"
     when 'reviewed'
       "This application has been reviewed and is now ready for an admin to approve or decline it. If approved, prorated fees will be generated."
     when 'approved'
@@ -489,7 +511,8 @@ module EffectiveMembershipsApplicant
     min_applicant_references > 0
   end
 
-  # When an application is submitted, these must be done to go to completed
+  # When an application is submitted, these must be done to go to completed.
+  # An Admin can override this and just set them to completed.
   def completed_requirements
     {
       'Applicant References' => (!applicant_references_required? || applicant_references.count(&:completed?) >= min_applicant_references)
@@ -497,9 +520,34 @@ module EffectiveMembershipsApplicant
   end
 
   def complete!
-    return false unless submitted? && completed_requirements.values.all?
-    # Could send registrar an email here saying this applicant is ready to review
+    raise('applicant must have been submitted to complete!') unless was_submitted?
+
+    # Let an admin ignore these requirements if need be
+    # return false unless submitted? && completed_requirements.values.all?
+
+    assign_attributes(missing_info_reason: nil)
     completed!
+
+    after_commit { send_email(:applicant_completed) }
+    true
+  end
+
+  def missing!
+    raise('applicant must have been submitted to missing!') unless was_submitted?
+
+    missing_info!
+
+    after_commit { send_email(:applicant_missing_info) }
+    true
+  end
+
+  def resubmit!
+    raise('applicant must have been submitted and missing info to resubmit!') unless was_submitted? && was_missing_info?
+    raise('already submitted') if submitted?
+    raise('expected a purchased order') unless submit_order&.purchased?
+
+    assign_attributes(skip_to_step: :submitted, submitted_at: Time.zone.now)
+    submitted!
   end
 
   # Completed -> Reviewed requirements
@@ -512,6 +560,7 @@ module EffectiveMembershipsApplicant
   end
 
   # When an application is completed, these must be done to go to reviewed
+  # An Admin can override this and just set them to reviewed.
   def reviewed_requirements
     {
       'Applicant Reviews' => (!applicant_reviews_required? || applicant_reviews.count(&:completed?) >= min_applicant_reviews)
@@ -519,8 +568,10 @@ module EffectiveMembershipsApplicant
   end
 
   def review!
-    return false unless completed? && reviewed_requirements.values.all?
-    # Could send registrar an email here saying this applicant is ready to approve
+    raise('applicant must have been submitted to review!') unless was_submitted?
+
+    # Let an admin ignore these requirements if need be
+    # return false unless completed? && reviewed_requirements.values.all?
     reviewed!
   end
 
@@ -532,6 +583,8 @@ module EffectiveMembershipsApplicant
     # Complete the wizard step. Just incase this is run out of order.
     wizard_steps[:checkout] ||= Time.zone.now
     wizard_steps[:submitted] ||= Time.zone.now
+    assign_attributes(missing_info_reason: nil)
+
     approved!
 
     if apply_to_join?

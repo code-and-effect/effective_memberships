@@ -6,5 +6,7 @@ module Effective
 
     resource_scope -> { EffectiveMemberships.Applicant.deep.where(owner: current_user.effective_memberships_owners) }
 
+    submit :resubmit, 'Submit Application'
+
   end
 end

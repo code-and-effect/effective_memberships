@@ -1,0 +1,17 @@
+---
+subject: 'Your application is missing information'
+from: 'admin@example.com'
+---
+Hello {{ user.name }},
+
+Your application for {{ applicant.to_category }} is missing information:
+
+{{ applicant.missing_info_reason }}
+
+Please update your application with this info.
+
+{{ applicant.url }}
+
+Thank you.
+
+Please contact us for assistance.

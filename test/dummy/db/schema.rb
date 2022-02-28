@@ -190,6 +190,8 @@ ActiveRecord::Schema.define(version: 9) do
     t.datetime "approved_at"
     t.datetime "declined_at"
     t.text "declined_reason"
+    t.datetime "missing_info_at"
+    t.text "missing_info_reason"
     t.text "applicant_educations_details"
     t.integer "applicant_experiences_months"
     t.text "applicant_experiences_details"

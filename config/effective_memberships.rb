@@ -21,6 +21,11 @@ EffectiveMemberships.setup do |config|
   # The defaults include: Applicant, Prorated, Renewal, Late, Admin
   # config.additional_fee_types = []
 
+  # Applicant Reviews
+  # When true, display the reviewed state and require Category.min_applicant_reviews
+  # When false, hide the reviewed state entirely
+  # config.applicant_reviews = false
+
   # Mailer Configuration
   # Configure the class responsible to send e-mails.
   # config.mailer = 'Effective::MembershipsMailer'

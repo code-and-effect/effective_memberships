@@ -1,0 +1,11 @@
+= effective_form_with(model: [:admin, applicant], engine: true) do |f|
+  %p This applicant will be marked as <strong>missing information</strong> with the following:
+
+  = f.text_field :missing_info_reason, required: true, label: 'Explanation of missing info'
+
+  %h3 Email to send
+
+  %p The following email will be sent:
+  = email_form_fields(f, :applicant_missing_info)
+
+  = f.submit 'Missing Info Applicant', border: false, center: true, 'data-confirm': "Missing Info #{f.object.owner}?"

@@ -74,11 +74,75 @@ class ApplicantsTest < ActiveSupport::TestCase
     end
 
     assert applicant.completed_requirements['Applicant References']
-    assert applicant.completed?
+
+    # So it's not completed yet. We no longer automatically go to completed. This is an Admin step.
+    #assert applicant.completed?
   end
 
   test 'moves to reviewed when reviewed' do
     # TODO
+  end
+
+  test 'completing an applicant sends an email' do
+    applicant = build_submitted_applicant()
+
+    assert_email do
+      EffectiveResources.transaction { applicant.complete! }
+    end
+
+    assert_equal 'completed', applicant.status
+    assert applicant.completed?
+  end
+
+  test 'can complete with custom email content' do
+    applicant = build_submitted_applicant()
+
+    applicant.assign_attributes(
+      email_form_action: :applicant_completed,
+      email_form_skip: false,
+      email_form_from: 'a@b.com',
+      email_form_subject: 'Test Completed Subject',
+      email_form_body: 'Test Completed Body'
+    )
+
+    assert_email(body: 'Test Completed Body', subject: 'Test Completed Subject') do
+      EffectiveResources.transaction { applicant.complete! }
+    end
+
+    assert_equal 'completed', applicant.status
+    assert applicant.completed?
+  end
+
+  test 'missing info an applicant sends an email' do
+    applicant = build_submitted_applicant()
+    applicant.missing_info_reason = 'Test missing info'
+
+    assert_email do
+      EffectiveResources.transaction { applicant.missing! }
+    end
+
+    assert_equal 'missing_info', applicant.status
+    assert applicant.missing_info?
+  end
+
+  test 'can missing with custom email content' do
+    applicant = build_submitted_applicant()
+    applicant.missing_info_reason = 'Test missing info'
+
+    applicant.assign_attributes(
+      email_form_action: :applicant_missing_info,
+      email_form_skip: false,
+      email_form_from: 'a@b.com',
+      email_form_subject: 'Test Missing Info Subject',
+      email_form_body: 'Test Missing Info Body'
+    )
+
+    assert_email(body: 'Test Missing Info Body', subject: 'Test Missing Info Subject') do
+      EffectiveResources.transaction { applicant.missing! }
+    end
+
+    assert_equal 'missing_info', applicant.status
+    assert applicant.missing_info?
   end
 
   test 'declining an applicant sends an email' do
