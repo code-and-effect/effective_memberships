@@ -5,14 +5,19 @@ module Effective
     default from: -> { EffectiveMemberships.mailer_sender }
     layout -> { EffectiveMemberships.mailer_layout || 'effective_memberships_mailer_layout' }
 
+    def applicant_completed(resource, opts = {})
+      @assigns = assigns_for(resource)
+      mail(to: resource.owner.email, **headers_for(resource, opts))
+    end
+
     def applicant_approved(resource, opts = {})
       @assigns = assigns_for(resource)
-      mail(to: EffectiveMemberships.mailer_admin, **headers_for(resource, opts))
+      mail(to: resource.owner.email, **headers_for(resource, opts))
     end
 
     def applicant_declined(resource, opts = {})
       @assigns = assigns_for(resource)
-      mail(to: EffectiveMemberships.mailer_admin, **headers_for(resource, opts))
+      mail(to: resource.owner.email, **headers_for(resource, opts))
     end
 
     def applicant_reference_notification(resource, opts = {})

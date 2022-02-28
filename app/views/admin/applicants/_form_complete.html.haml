@@ -1,0 +1,8 @@
+= effective_form_with(model: [:admin, applicant], engine: true) do |f|
+  %p The #{applicant} will be <strong>completed</strong>. All deliverables have been received and all requirements completed.
+
+  %h3 Email to send
+  %p The following email will be sent:
+  = email_form_fields(f, :applicant_completed)
+
+  = f.submit 'Complete Applicant', border: false, center: true, 'data-confirm': "Complete #{f.object.owner}?"

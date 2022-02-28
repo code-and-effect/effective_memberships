@@ -122,17 +122,17 @@ module EffectiveMembershipsApplicant
       declined_reason        :text
 
       # Applicant Educations
-      applicant_educations_details  :text
+      applicant_educations_details    :text
 
       # Applicant Experiences
-      applicant_experiences_months   :integer
-      applicant_experiences_details  :text
+      applicant_experiences_months    :integer
+      applicant_experiences_details   :text
 
       # Additional Information
-      additional_information         :text
+      additional_information          :text
 
       # Acts as Wizard
-      wizard_steps           :text, permitted: false
+      wizard_steps                    :text, permitted: false
 
       timestamps
     end
@@ -265,8 +265,8 @@ module EffectiveMembershipsApplicant
     validates :declined_reason, presence: true, if: -> { declined? }
 
     # These two try completed and try reviewed
-    before_save(if: -> { submitted? }) { complete! }
-    before_save(if: -> { completed? }) { review! }
+    # before_save(if: -> { submitted? }) { complete! }
+    # before_save(if: -> { completed? }) { review! }
 
     # Clear required steps memoization
     after_save { @_required_steps = nil }
@@ -497,9 +497,18 @@ module EffectiveMembershipsApplicant
   end
 
   def complete!
-    return false unless submitted? && completed_requirements.values.all?
-    # Could send registrar an email here saying this applicant is ready to review
+    raise('applicant must have been submitted to complete!') unless was_submitted?
+
+    # Let an admin ignore these requirements if need be
+    # return false unless submitted? && completed_requirements.values.all?
+
+    # Complete the wizard step. Just incase this is run out of order.
+    wizard_steps[:checkout] ||= Time.zone.now
+    wizard_steps[:submitted] ||= Time.zone.now
     completed!
+
+    after_commit { send_email(:applicant_completed) }
+    true
   end
 
   # Completed -> Reviewed requirements

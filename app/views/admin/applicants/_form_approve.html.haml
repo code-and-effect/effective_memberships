@@ -1,13 +1,9 @@
 = effective_form_with(model: [:admin, applicant], engine: true) do |f|
-  %p The #{applicant} will be <strong>approved</strong> to the following membership category.
-
-  %h3 Category
-  = f.static_field :category, label: 'Applied for'
+  %p The #{applicant} will be <strong>approved</strong> to the following membership category:
 
   - categories = EffectiveMemberships.Category.all
   = f.select :category_id, categories, label: 'Approve to'
 
-  %h3 Number
   %p
     - if applicant.owner.membership&.number_was.present?
       The member will keep their existing membership number: #{applicant.owner.membership.number}.

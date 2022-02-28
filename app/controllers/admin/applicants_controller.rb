@@ -8,6 +8,13 @@ module Admin
     resource_scope -> { EffectiveMemberships.Applicant.deep.all }
     datatable -> { Admin::EffectiveApplicantsDatatable.new }
 
+    submit :complete, 'Complete Applicant', success: -> {
+      [
+        "Successfully completed #{resource.owner} #{resource}",
+        ("and sent #{resource.owner.email} a notification" unless resource.email_form_skip)
+      ].compact.join(' ')
+    }
+
     submit :approve, 'Approve Applicant', success: -> {
       [
         "Successfully approved #{resource.owner} #{resource}",

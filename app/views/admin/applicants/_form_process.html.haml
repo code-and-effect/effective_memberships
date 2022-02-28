@@ -2,17 +2,17 @@
   %span.badge.badge-secondary= applicant.status
   = applicant.summary
 
-= tabs(list: { class: 'nav nav-pills'}) do
+%p Process applicant:
+
+= tabs(list: { class: 'nav nav-pills'}, content: { class: 'tab-content border-0' }, active: :none) do
+  - if EffectiveResources.authorized?(self, :complete, applicant)
+    = tab 'Complete this Applicant' do
+      = render('admin/applicants/form_complete', applicant: applicant)
+
   - if EffectiveResources.authorized?(self, :approve, applicant)
     = tab 'Approve this Applicant' do
-      .card.mt-4
-        .card-body
-          %h5.card-title Approve
-          = render('admin/applicants/form_approve', applicant: applicant)
+      = render('admin/applicants/form_approve', applicant: applicant)
 
   - if EffectiveResources.authorized?(self, :decline, applicant)
     = tab 'Decline this Applicant' do
-      .card.mt-4
-        .card-body
-          %h5.card-title Decline
-          = render('admin/applicants/form_decline', applicant: applicant)
+      = render('admin/applicants/form_decline', applicant: applicant)
