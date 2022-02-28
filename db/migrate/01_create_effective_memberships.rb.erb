@@ -151,6 +151,10 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.datetime :declined_at
       t.text :declined_reason
 
+      # Missing
+      t.datetime :missing_info_at
+      t.text :missing_info_reason
+
       # Applicant Educations
       t.text :applicant_educations_details
 

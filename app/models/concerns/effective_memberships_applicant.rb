@@ -32,12 +32,13 @@ module EffectiveMembershipsApplicant
     acts_as_tokened
 
     acts_as_statused(
-      :draft,       # Just Started
-      :submitted,   # Completed wizard. Paid applicant fee.
-      :completed,   # Admin has received all deliverables. The application is complete and ready for review.
-      :reviewed,    # All applicant reviews completed
-      :declined,    # Exit state. Application was declined.
-      :approved     # Exit state. Application was approved.
+      :draft,         # Just Started
+      :submitted,     # Completed wizard. Paid applicant fee.
+      :missing_info,  # Admin has indicated information is missing. The applicant can edit applicant and add info
+      :completed,     # Admin has received all deliverables. The application is complete and ready for review.
+      :reviewed,      # All applicant reviews completed
+      :declined,      # Exit state. Application was declined.
+      :approved       # Exit state. Application was approved.
     )
 
     acts_as_wizard(
@@ -120,6 +121,10 @@ module EffectiveMembershipsApplicant
       # Declined
       declined_at            :datetime
       declined_reason        :text
+
+      # Missing Info
+      missing_info_at        :datetime
+      missing_info_reason    :text
 
       # Applicant Educations
       applicant_educations_details    :text
@@ -264,6 +269,9 @@ module EffectiveMembershipsApplicant
     # Admin Decline
     validates :declined_reason, presence: true, if: -> { declined? }
 
+    # Admin Missing Info
+    validates :missing_info_reason, presence: true, if: -> { missing_info? }
+
     # These two try completed and try reviewed
     # before_save(if: -> { submitted? }) { complete! }
     # before_save(if: -> { completed? }) { review! }
@@ -374,6 +382,10 @@ module EffectiveMembershipsApplicant
     approved? || declined?
   end
 
+  def status_label
+    (status_was || status).to_s.gsub('_', ' ')
+  end
+
   def summary
     case status_was
     when 'draft'
@@ -388,6 +400,8 @@ module EffectiveMembershipsApplicant
       else
         "This application has been completed and is now ready for an admin to approve or decline it. If approved, prorated fees will be generated."
       end
+    when 'missing_info'
+      "Application is missing the following information: <ul><li>#{missing_info_reason}</li></ul>"
     when 'reviewed'
       "This application has been reviewed and is now ready for an admin to approve or decline it. If approved, prorated fees will be generated."
     when 'approved'
@@ -502,12 +516,19 @@ module EffectiveMembershipsApplicant
     # Let an admin ignore these requirements if need be
     # return false unless submitted? && completed_requirements.values.all?
 
-    # Complete the wizard step. Just incase this is run out of order.
-    wizard_steps[:checkout] ||= Time.zone.now
-    wizard_steps[:submitted] ||= Time.zone.now
+    assign_attributes(missing_info_reason: nil)
     completed!
 
     after_commit { send_email(:applicant_completed) }
+    true
+  end
+
+  def missing!
+    raise('applicant must have been submitted to missing!') unless was_submitted?
+
+    missing_info!
+
+    after_commit { send_email(:applicant_missing_info) }
     true
   end
 
@@ -541,6 +562,8 @@ module EffectiveMembershipsApplicant
     # Complete the wizard step. Just incase this is run out of order.
     wizard_steps[:checkout] ||= Time.zone.now
     wizard_steps[:submitted] ||= Time.zone.now
+    assign_attributes(missing_info_reason: nil)
+
     approved!
 
     if apply_to_join?

@@ -15,6 +15,13 @@ module Admin
       ].compact.join(' ')
     }
 
+    submit :missing, 'Missing Info Applicant', success: -> {
+      [
+        "Successfully marked #{resource.owner} #{resource} as missing info",
+        ("and sent #{resource.owner.email} a notification" unless resource.email_form_skip)
+      ].compact.join(' ')
+    }
+
     submit :approve, 'Approve Applicant', success: -> {
       [
         "Successfully approved #{resource.owner} #{resource}",

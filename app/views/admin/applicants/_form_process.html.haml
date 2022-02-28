@@ -1,10 +1,14 @@
 %p
-  %span.badge.badge-secondary= applicant.status
+  %span.badge.badge-secondary= applicant.status_label
   = applicant.summary
 
 %p Process applicant:
 
 = tabs(list: { class: 'nav nav-pills'}, content: { class: 'tab-content border-0' }, active: :none) do
+  - if EffectiveResources.authorized?(self, :missing, applicant)
+    = tab 'Missing Information' do
+      = render('admin/applicants/form_missing_info', applicant: applicant)
+
   - if EffectiveResources.authorized?(self, :complete, applicant)
     = tab 'Complete this Applicant' do
       = render('admin/applicants/form_complete', applicant: applicant)
