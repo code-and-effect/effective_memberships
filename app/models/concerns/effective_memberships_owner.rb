@@ -56,7 +56,9 @@ module EffectiveMembershipsOwner
     owners = organizations if self.class.respond_to?(:effective_organizations_user?)
     owners = users if self.class.respond_to?(:effective_organizations_organization?)
 
-    owners = Array(owners).reject { |owner| owner.try(:archived?) }
+    owners = Array(owners)
+      .select { |owner| owner.class.respond_to?(:effective_memberships_owner?) }
+      .reject { |owner| owner.try(:archived?) }
 
     owners.presence || [self]
   end
@@ -73,7 +75,11 @@ module EffectiveMembershipsOwner
 
   def organization_membership_present?(except: nil)
     return false unless self.class.respond_to?(:effective_organizations_user?)
-    organizations.any? { |organization| organization != except && organization.membership_present? }
+
+    organizations
+      .select { |organization| organization.class.respond_to?(:effective_memberships_owner?) }
+      .reject { |organization| organization.try(:archived?) }
+      .any? { |organization| organization != except && organization.membership_present? }
   end
 
   def assign_member_role
