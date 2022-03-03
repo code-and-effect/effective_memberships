@@ -50,17 +50,6 @@ module EffectiveMemberships
     mailer&.constantize || Effective::MembershipsMailer
   end
 
-  def self.parent_mailer_class
-    return parent_mailer.constantize if parent_mailer.present?
-
-    if use_effective_email_templates
-      require 'effective_email_templates'
-      Effective::EmailTemplatesMailer
-    else
-      ActionMailer::Base
-    end
-  end
-
   def self.fee_types
     required = ['Applicant', 'Prorated', 'Discount', 'Renewal', 'Late', 'Admin']
     additional = Array(additional_fee_types)
@@ -71,23 +60,6 @@ module EffectiveMemberships
   # You can delete these if unpurchased
   def self.custom_fee_types
     ['Admin']
-  end
-
-  def self.send_email(email, *args)
-    raise('expected args to be an Array') unless args.kind_of?(Array)
-
-    if defined?(Tenant)
-      tenant = Tenant.current || raise('expected a current tenant')
-      args.last.kind_of?(Hash) ? args.last.merge!(tenant: tenant) : args << { tenant: tenant }
-    end
-
-    deliver_method = EffectiveMemberships.deliver_method || EffectiveResources.deliver_method
-
-    begin
-      EffectiveMemberships.mailer_class.send(email, *args).send(deliver_method)
-    rescue => e
-      raise if Rails.env.development? || Rails.env.test?
-    end
   end
 
 end

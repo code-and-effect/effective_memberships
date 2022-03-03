@@ -1,9 +1,10 @@
 module Effective
   class MembershipsMailer < EffectiveMemberships.parent_mailer_class
-    include EffectiveEmailTemplatesMailer
+
+    include EffectiveEmailTemplatesMailer if EffectiveMemberships.use_effective_email_templates
 
     default from: -> { EffectiveMemberships.mailer_sender }
-    layout -> { EffectiveMemberships.mailer_layout || 'effective_memberships_mailer_layout' }
+    layout -> { EffectiveMemberships.mailer_layout }
 
     def applicant_completed(resource, opts = {})
       @assigns = assigns_for(resource)

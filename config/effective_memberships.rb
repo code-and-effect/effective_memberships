@@ -26,27 +26,20 @@ EffectiveMemberships.setup do |config|
   # When false, hide the reviewed state entirely
   # config.applicant_reviews = false
 
-  # Mailer Configuration
+  # Mailer Settings
+  # Please see config/initializers/effective_resources.rb for default effective_* gem mailer settings
+  #
   # Configure the class responsible to send e-mails.
   # config.mailer = 'Effective::MembershipsMailer'
+  #
+  # Override effective_resource mailer defaults
+  #
+  # config.parent_mailer = nil      # The parent class responsible for sending emails
+  # config.deliver_method = nil     # The deliver method, deliver_later or deliver_now
+  # config.mailer_layout = nil      # Default mailer layout
+  # config.mailer_sender = nil      # Default From value
+  # config.mailer_admin = nil       # Default To value for Admin correspondence
 
-  # Configure the parent class responsible to send e-mails.
-  # config.parent_mailer = 'ActionMailer::Base'
-
-  # Default deliver method
-  # config.deliver_method = :deliver_later
-
-  # Default layout
-  # config.mailer_layout = 'effective_memberships_mailer_layout'
-
-  # Default From
-  config.mailer_sender = "no-reply@example.com"
-
-  # Send Admin correspondence To
-  config.mailer_admin = "admin@example.com"
-
-  # Will work with effective_email_templates gem:
-  # - The audit and audit review email content will be preopulated based off the template
-  # - Uses an EmailTemplatesMailer mailer instead of ActionMailer::Base for default parent_mailer
-  config.use_effective_email_templates = false
+  # Will work with effective_email_templates gem
+  config.use_effective_email_templates = true
 end
