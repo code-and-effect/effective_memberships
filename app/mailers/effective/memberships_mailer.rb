@@ -1,41 +1,60 @@
 module Effective
   class MembershipsMailer < EffectiveMemberships.parent_mailer_class
 
+    include EffectiveMailer
     include EffectiveEmailTemplatesMailer if EffectiveMemberships.use_effective_email_templates
-
-    default from: -> { EffectiveMemberships.mailer_sender }
-    layout -> { EffectiveMemberships.mailer_layout }
 
     def applicant_completed(resource, opts = {})
       @assigns = assigns_for(resource)
-      mail(to: resource.owner.email, **headers_for(resource, opts))
+      @applicant = resource
+
+      subject = subject_for(__method__, 'Applicant Completed', resource, opts)
+      headers = headers_for(resource, opts)
+
+      mail(to: resource.owner.email, subject: subject, **headers)
     end
 
     def applicant_missing_info(resource, opts = {})
       @assigns = assigns_for(resource)
-      mail(to: resource.owner.email, **headers_for(resource, opts))
+      @applicant = resource
+
+      subject = subject_for(__method__, 'Applicant Missing Info', resource, opts)
+      headers = headers_for(resource, opts)
+
+      mail(to: resource.owner.email, subject: subject, **headers)
     end
 
     def applicant_approved(resource, opts = {})
       @assigns = assigns_for(resource)
-      mail(to: resource.owner.email, **headers_for(resource, opts))
+      @applicant = resource
+
+      subject = subject_for(__method__, 'Applicant Approved', resource, opts)
+      headers = headers_for(resource, opts)
+
+      mail(to: resource.owner.email, subject: subject, **headers)
     end
 
     def applicant_declined(resource, opts = {})
       @assigns = assigns_for(resource)
-      mail(to: resource.owner.email, **headers_for(resource, opts))
+      @applicant = resource
+
+      subject = subject_for(__method__, 'Applicant Declined', resource, opts)
+      headers = headers_for(resource, opts)
+
+      mail(to: resource.owner.email, subject: subject, **headers)
     end
 
     def applicant_reference_notification(resource, opts = {})
       @assigns = assigns_for(resource)
-      mail(to: resource.email, **headers_for(resource, opts))
+      @applicant_reference = resource
+
+      subject = subject_for(__method__, 'Reference Requested', resource, opts)
+      headers = headers_for(resource, opts)
+
+      mail(to: resource.email, subject: subject, **headers)
     end
 
     protected
-
-    def headers_for(resource, opts = {})
-      resource.respond_to?(:log_changes_datatable) ? opts.merge(log: resource) : opts
-    end
 
     def assigns_for(resource)
       if resource.class.respond_to?(:effective_memberships_applicant?)
