@@ -44,7 +44,8 @@ module EffectiveMembershipsApplicant
     acts_as_wizard(
       start: 'Start',
       select: 'Select Application Type',
-      demographics: 'Demographics',
+      demographics: 'Demographics',         # Individual only. Users fields.
+      organization: 'Organization',         # Organization only. Organization fields.
       education: 'Education',
       course_amounts: 'Courses',
       experience: 'Work Experience',
@@ -76,7 +77,7 @@ module EffectiveMembershipsApplicant
     belongs_to :user, polymorphic: true
     accepts_nested_attributes_for :user
 
-    belongs_to :organization, polymorphic: true
+    belongs_to :organization, polymorphic: true, optional: true
     accepts_nested_attributes_for :organization
 
     belongs_to :category, polymorphic: true, optional: true
@@ -159,13 +160,10 @@ module EffectiveMembershipsApplicant
     }
 
     # Set Apply to Join or Reclassification
-    before_validation(if: -> { new_record? && owner.present? }) do
-      self.applicant_type ||= (owner.membership.blank? ? 'Apply to Join' : 'Apply to Reclassify')
-      self.from_category ||= owner.membership&.category
-    end
-
-    before_validation(if: -> { current_step == :select && category_id.present? }) do
-      self.category_type ||= EffectiveMemberships.Category.name
+    before_validation(if: -> { (new_record? || current_step == :select) && owner.present? }) do
+      self.category_type ||= (EffectiveMemberships.Category.name if category_id.present?)
+      self.applicant_type = (owner.membership.blank? ? 'Apply to Join' : 'Apply to Reclassify')
+      self.from_category = owner.membership&.category
     end
 
     before_validation(if: -> { current_step == :experience }) do
@@ -180,17 +178,19 @@ module EffectiveMembershipsApplicant
       errors.add(:category_id, "can't reclassify to existing category") if category_id == from_category_id
     end
 
-    # Start Step
-    with_options(if: -> { current_step == :start && owner.present? }) do
-      validate do
-        errors.add(:base, 'may not have outstanding fees') if owner.outstanding_fee_payment_fees.present?
-      end
+    validate(if: -> { category.present? }) do
+      self.errors.add(:organization, "can't be blank when organization category") if category.organization? && organization.blank?
+      self.errors.add(:organization, "must be blank when individual category") if category.individual? && organization.present?
     end
 
     # Select Step
     with_options(if: -> { current_step == :select || has_completed_step?(:select) }) do
       validates :applicant_type, presence: true
       validates :category, presence: true
+    end
+
+    validate(if: -> { current_step == :select && owner.present? }) do
+      self.errors.add(:base, 'may not have outstanding fees') if owner.outstanding_fee_payment_fees.present?
     end
 
     # Applicant Educations Step
@@ -299,6 +299,7 @@ module EffectiveMembershipsApplicant
 
         # Special logic for stamp step
         applicant_steps.delete(:stamp) unless apply_to_join?
+        applicant_steps.delete(:organization) unless category&.organization?
 
         wizard_steps.select do |step|
           required_steps.include?(step) || category.blank? || applicant_steps.include?(step)
@@ -382,6 +383,10 @@ module EffectiveMembershipsApplicant
     organization || user
   end
 
+  def build_organization(params = {})
+    self.organization = EffectiveMemberships.Organization.new(params)
+  end
+
   def apply_to_join?
     applicant_type == 'Apply to Join'
   end
@@ -437,11 +442,11 @@ module EffectiveMembershipsApplicant
   def can_apply_categories_collection
     categories = EffectiveMemberships.Category.sorted.can_apply
 
-    if owner.blank? || owner.membership.blank?
+    if user.blank? || !user.is?(:member)
       return categories.where(can_apply_new: true)
     end
 
-    category_ids = owner.membership.category_ids
+    category_ids = user.memberships.map(&:category_ids).flatten
 
     categories.select do |cat|
       cat.can_apply_existing? ||

@@ -3,7 +3,7 @@
 - if current_user.organizations.present?
   %p You are a representative for #{pluralize(current_user.organizations.length, 'organization')}.
 
-  - datatable = EffectiveResources.best('EffectiveMembershipsDatatable').new(self, namespace: :effective)
+  - datatable = EffectiveResources.best('EffectiveOrganizationsDatatable').new(self, namespace: :effective)
   = render_datatable(datatable, simple: true)
 
 - else

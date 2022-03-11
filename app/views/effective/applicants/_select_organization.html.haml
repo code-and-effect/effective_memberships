@@ -1,0 +1,12 @@
+%p Please select an organization to continue.
+
+= f.radios :organization_id, effective_memberships_select_organization_collection(f.object), label: false
+
+= f.show_if(:organization_id, 'new') do
+  = f.fields_for :organization, f.object.build_organization do |fo|
+    = fo.text_field :title, label: 'New Organization Name', required: true, hint: 'Please enter the name of your organization'
+
+    = fo.fields_for :representatives, fo.object.build_representative(user: f.object.user) do |fr|
+      = fr.hidden_field :user_id
+      = fr.hidden_field :user_type
+      = fr.hidden_field :roles, value: [:owner]

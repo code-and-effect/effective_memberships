@@ -34,6 +34,10 @@ module EffectiveMembershipsUser
     organizations.select { |organization| organization.is?(:member) && !organization.archived? }
   end
 
+  def memberships
+    ([membership] + membership_organizations.map(&:membership)).compact
+  end
+
   # def effective_memberships_owners
   #   [self] + organizations.reject(&:archived?)
   # end

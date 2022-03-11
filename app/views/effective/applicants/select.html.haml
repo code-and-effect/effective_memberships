@@ -2,6 +2,7 @@
   = render 'effective/applicants/content', resource: resource
 
   - categories = resource.can_apply_categories_collection()
+  - organization_categories = categories.select(&:organization?)
 
   .card
     .card-body
@@ -16,12 +17,20 @@
         = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
           = f.hidden_field :id
 
+          = f.hidden_field :organization_id, value: nil
+          = f.hidden_field :organization_type, value: nil
+
           = f.select :category_id, categories, required: true
 
           - categories.each do |mc|
             = f.show_if(:category_id, mc.id) do
-              .my-4
+              .mb-4
                 %h3= mc.to_s
+                %small.text-muted #{mc.category} #{mc.category_type} Membership
                 = mc.rich_text_body
+
+          - if organization_categories.present?
+            = f.show_if_any(:category_id, organization_categories.map(&:id)) do
+              = render('effective/applicants/select_organization', f: f)
 
           = f.save 'Save and Continue'

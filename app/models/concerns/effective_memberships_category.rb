@@ -162,6 +162,14 @@ module EffectiveMembershipsCategory
     can_apply_new? || can_apply_existing? || can_apply_restricted?
   end
 
+  def individual?
+    category_type == 'Individual'
+  end
+
+  def organization?
+    category_type == 'Organization'
+  end
+
   def prorated_fee(date:)
     send("prorated_#{date.strftime('%b').downcase}").to_i
   end
