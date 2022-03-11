@@ -73,8 +73,11 @@ module EffectiveMembershipsApplicant
     attr_accessor :approved_membership_date
 
     # Application Namespace
-    belongs_to :owner, polymorphic: true
-    accepts_nested_attributes_for :owner
+    belongs_to :user, polymorphic: true
+    accepts_nested_attributes_for :user
+
+    belongs_to :organization, polymorphic: true
+    accepts_nested_attributes_for :organization
 
     belongs_to :category, polymorphic: true, optional: true
     belongs_to :from_category, polymorphic: true, optional: true
@@ -142,13 +145,18 @@ module EffectiveMembershipsApplicant
       timestamps
     end
 
-    scope :deep, -> { includes(:owner, :category, :from_category, :orders) }
+    scope :deep, -> { includes(:user, :organization, :category, :from_category, :orders) }
     scope :sorted, -> { order(:id) }
 
     scope :in_progress, -> { where.not(status: [:approved, :declined]) }
     scope :done, -> { where(status: [:approved, :declined]) }
 
     scope :not_draft, -> { where.not(status: :draft) }
+
+    scope :for, -> (user) {
+      raise('expected a effective memberships user') unless user.class.try(:effective_memberships_user?)
+      where(user: user).or(where(organization: user.organizations))
+    }
 
     # Set Apply to Join or Reclassification
     before_validation(if: -> { new_record? && owner.present? }) do
@@ -165,7 +173,7 @@ module EffectiveMembershipsApplicant
     end
 
     # All Steps validations
-    validates :owner, presence: true
+    validates :user, presence: true
     validates :from_category, presence: true, if: -> { reclassification? }
 
     validate(if: -> { reclassification? }) do
@@ -368,6 +376,10 @@ module EffectiveMembershipsApplicant
     else
       'New Applicant'
     end
+  end
+
+  def owner
+    organization || user
   end
 
   def apply_to_join?

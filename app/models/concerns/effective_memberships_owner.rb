@@ -23,10 +23,6 @@ module EffectiveMembershipsOwner
   included do
     acts_as_role_restricted unless respond_to?(:acts_as_role_restricted?)
 
-    # App scoped
-    has_many :applicants, -> { order(:id) }, inverse_of: :owner, as: :owner
-    has_many :fee_payments, -> { order(:id) }, inverse_of: :owner, as: :owner
-
     # Effective scoped
     has_many :fees, -> { order(:id) }, inverse_of: :owner, as: :owner, class_name: 'Effective::Fee', dependent: :nullify
     accepts_nested_attributes_for :fees, reject_if: :all_blank, allow_destroy: true

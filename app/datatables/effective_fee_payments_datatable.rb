@@ -17,8 +17,7 @@ class EffectiveFeePaymentsDatatable < Effective::Datatable
   end
 
   collection do
-    EffectiveMemberships.FeePayment.deep.done
-      .where(owner: current_user.effective_memberships_owners)
+    scope = EffectiveMemberships.FeePayment.deep.done.for(current_user)
   end
 
 end

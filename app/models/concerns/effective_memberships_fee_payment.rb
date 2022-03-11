@@ -52,11 +52,11 @@ module EffectiveMembershipsFeePayment
     attr_accessor :upgrade, :downgrade
 
     # Application Namespace
-    belongs_to :owner, polymorphic: true
-    accepts_nested_attributes_for :owner
-
     belongs_to :user, polymorphic: true, optional: true
     accepts_nested_attributes_for :user
+
+    belongs_to :organization, polymorphic: true
+    accepts_nested_attributes_for :organization
 
     # Like maybe optionally it makes sense.
     belongs_to :category, polymorphic: true, optional: true
@@ -83,24 +83,29 @@ module EffectiveMembershipsFeePayment
       timestamps
     end
 
-    scope :deep, -> { includes(:owner, :category, :orders) }
+    scope :deep, -> { includes(:user, :organization, :category, :orders) }
     scope :sorted, -> { order(:id) }
 
     scope :in_progress, -> { where.not(status: [:submitted]) }
     scope :done, -> { where(status: [:submitted]) }
 
+    scope :for, -> (user) {
+      raise('expected a effective memberships user') unless user.class.try(:effective_memberships_user?)
+      where(user: user).or(where(organization: user.organizations))
+    }
+
     before_validation do
       self.period ||= EffectiveMemberships.Registrar.current_period
     end
 
-    before_validation(if: -> { current_step == :start && owner && owner.membership }) do
-      self.category ||= owner.membership.categories.first if owner.membership.categories.length == 1
+    before_validation(if: -> { current_step == :start && user && user.membership }) do
+      self.category ||= user.membership.categories.first if user.membership.categories.length == 1
     end
 
     validates :period, presence: true
 
     # All Steps validations
-    validates :owner, presence: true
+    validates :user, presence: true
 
     # Declarations Step
     with_options(if: -> { current_step == :declarations }) do
@@ -131,6 +136,10 @@ module EffectiveMembershipsFeePayment
     # Overriding acts_as_purchasable_wizard
     def outstanding_fees
       owner&.outstanding_fee_payment_fees
+    end
+
+    def owner
+      organization || user
     end
 
     def submit_fees

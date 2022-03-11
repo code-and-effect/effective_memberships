@@ -27,6 +27,11 @@ module EffectiveMembershipsOrganization
     # rich_text_body
     # has_many_rich_texts
 
+    # App scoped
+    has_many :applicants, -> { order(:id) }, inverse_of: :organization, as: :organization
+    has_many :fee_payments, -> { order(:id) }, inverse_of: :organization, as: :organization
+
+    # Effective scoped
     has_many :representatives, -> { Effective::Representative.sorted },
       class_name: 'Effective::Representative', inverse_of: :organization, dependent: :delete_all
 
@@ -61,6 +66,10 @@ module EffectiveMembershipsOrganization
   # Instance Methods
   def to_s
     title.presence || 'organization'
+  end
+
+  def membership_present?
+    membership.present? && !membership.marked_for_destruction?
   end
 
   def representative(user:)

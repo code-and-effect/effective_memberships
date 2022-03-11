@@ -4,7 +4,7 @@ module Effective
 
     include Effective::WizardController
 
-    resource_scope -> { EffectiveMemberships.Applicant.deep.where(owner: current_user.effective_memberships_owners) }
+    resource_scope -> { EffectiveMemberships.Applicant.deep.where(user: current_user) }
 
     submit :resubmit, 'Submit Application'
 

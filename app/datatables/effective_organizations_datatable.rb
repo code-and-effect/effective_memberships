@@ -1,5 +1,5 @@
 # Dashboard Organizations
-class EffectiveMembershipsDatatable < Effective::Datatable
+class EffectiveOrganizationsDatatable < Effective::Datatable
   datatable do
     order :title
 

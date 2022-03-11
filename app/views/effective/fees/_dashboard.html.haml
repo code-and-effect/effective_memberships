@@ -1,22 +1,22 @@
-%h2 Fees
-- current_owner = current_user.effective_memberships_owner
+-# %h2 Fees
+-# - current_owner = current_user.effective_memberships_owner
 
-- fees = current_owner.outstanding_fee_payment_fees
-- membership = current_owner.membership
+-# - fees = current_owner.outstanding_fee_payment_fees
+-# - membership = current_owner.membership
 
-- if membership.present?
-  - if membership.category.create_renewal_fees?
-    - date = EffectiveMemberships.Registrar.renewal_fee_date(date: Time.zone.now)
-    %p Annual fees become available for purchase on #{date.strftime('%B %e')} of each year.
+-# - if membership.present?
+-#   - if membership.category.create_renewal_fees?
+-#     - date = EffectiveMemberships.Registrar.renewal_fee_date(date: Time.zone.now)
+-#     %p Annual fees become available for purchase on #{date.strftime('%B %e')} of each year.
 
-  - if membership.category.create_late_fees?
-    - date = EffectiveMemberships.Registrar.late_fee_date(date: Time.zone.now)
-    %p Late fees will be applied on #{date.strftime('%B %e')}.
+-#   - if membership.category.create_late_fees?
+-#     - date = EffectiveMemberships.Registrar.late_fee_date(date: Time.zone.now)
+-#     %p Late fees will be applied on #{date.strftime('%B %e')}.
 
-- if fees.present?
-  .alert.alert-warning.mb-3 You have #{pluralize(fees.length , 'outstanding fee')}.
+-# - if fees.present?
+-#   .alert.alert-warning.mb-3 You have #{pluralize(fees.length , 'outstanding fee')}.
 
-  %p= link_to 'Pay Fees', effective_memberships.new_fee_payment_path, class: 'btn btn-primary'
+-#   %p= link_to 'Pay Fees', effective_memberships.new_fee_payment_path, class: 'btn btn-primary'
 
-- else
-  %p You have no outstanding fees at this time. Thank you!
+-# - else
+-#   %p You have no outstanding fees at this time. Thank you!
