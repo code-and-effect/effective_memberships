@@ -305,7 +305,7 @@ module EffectiveMembershipsRegistrar
   def add_member_role(owner)
     owner.add_role(:member)
 
-    if owner.class.respond_to?(:effective_organizations_organization?)
+    if owner.class.respond_to?(:effective_memberships_organization?)
       organization = owner
       organization.representatives.each { |representative| representative.user.add_role(:member) }
     end
@@ -316,7 +316,7 @@ module EffectiveMembershipsRegistrar
   def remove_member_role(owner)
     owner.remove_role(:member)
 
-    if owner.class.respond_to?(:effective_organizations_organization?)
+    if owner.class.respond_to?(:effective_memberships_organization?)
       organization = owner
 
       organization.representatives.each do |representative|

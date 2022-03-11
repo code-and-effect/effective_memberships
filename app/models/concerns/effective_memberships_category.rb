@@ -16,6 +16,10 @@ module EffectiveMembershipsCategory
   module ClassMethods
     def effective_memberships_category?; true; end
 
+    def category_types
+      ['Individual', 'Organization']
+    end
+
     def categories
       []
     end
@@ -35,6 +39,8 @@ module EffectiveMembershipsCategory
     has_many :membership_categories, class_name: 'Effective::MembershipCategory', as: :category
 
     effective_resource do
+      category_type         :string
+
       title                 :string
       category              :string
       position              :integer
@@ -110,7 +116,7 @@ module EffectiveMembershipsCategory
     scope :create_bad_standing, -> { where(create_bad_standing: true) }
 
     validates :title, presence: true, uniqueness: true
-
+    validates :category_type, presence: true
     validates :position, presence: true
 
     after_initialize(if: -> { new_record? }) do
@@ -121,6 +127,7 @@ module EffectiveMembershipsCategory
 
     before_validation do
       self.position ||= (self.class.pluck(:position).compact.max || -1) + 1
+      self.category_type ||= self.class.category_types.first
     end
 
     with_options(if: -> { can_apply? }) do

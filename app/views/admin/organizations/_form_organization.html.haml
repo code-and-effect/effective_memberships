@@ -1,0 +1,9 @@
+= effective_form_with(model: [:admin, organization], engine: true) do |f|
+  = render 'admin/organizations/fields', f: f
+
+  = effective_submit(f)
+
+- if organization.persisted?
+  %h2 Representatives
+  - datatable = Admin::EffectiveRepresentativesDatatable.new(organization: organization)
+  = render_inline_datatable(datatable)

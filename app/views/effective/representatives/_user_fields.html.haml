@@ -1,0 +1,7 @@
+= f.email_field :email
+
+- if f.object.respond_to?(:first_name)
+  = f.text_field :first_name
+
+- if f.object.respond_to?(:last_name)
+  = f.text_field :last_name

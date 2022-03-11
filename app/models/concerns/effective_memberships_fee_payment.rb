@@ -175,7 +175,7 @@ module EffectiveMembershipsFeePayment
     save!
   end
 
-  # Work with effective_organizations
+  # Work with organizations
   def organization!
     if upgrade_individual_to_organization?
       save!
@@ -190,13 +190,13 @@ module EffectiveMembershipsFeePayment
 
   def upgrade_individual_to_organization?
     return false unless EffectiveResources.truthy?(upgrade)
-    return false unless owner.class.respond_to?(:effective_organizations_user?)
+    return false unless owner.class.respond_to?(:effective_memberships_user?)
     owner.representatives.any?(&:new_record?)
   end
 
   def downgrade_organization_to_individual?
     return false unless EffectiveResources.truthy?(downgrade)
-    return false unless owner.class.respond_to?(:effective_organizations_organization?)
+    return false unless owner.class.respond_to?(:effective_memberships_organization?)
     return false if current_user.blank?
     owner.representatives.any?(&:marked_for_destruction?)
   end

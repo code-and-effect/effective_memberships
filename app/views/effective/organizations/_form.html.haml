@@ -1,0 +1,8 @@
+= tabs do
+  = tab 'Organization' do
+    = render 'effective/organizations/form_organization', organization: organization
+
+  - if organization.persisted?
+    - if organization.respond_to?(:log_changes_datatable)
+      = tab 'Logs' do
+        = render_inline_datatable(organization.log_changes_datatable)

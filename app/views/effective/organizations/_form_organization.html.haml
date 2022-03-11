@@ -1,0 +1,11 @@
+- url = (organization.persisted? ? effective_memberships.organization_path(organization) : effective_memberships.organizations_path)
+
+= effective_form_with(model: organization, url: url) do |f|
+  = render 'effective/organizations/fields', f: f
+
+  = f.submit
+
+- if organization.persisted?
+  %h2 Representatives
+  - datatable = EffectiveRepresentativesDatatable.new(organization: organization)
+  = render_inline_datatable(datatable)

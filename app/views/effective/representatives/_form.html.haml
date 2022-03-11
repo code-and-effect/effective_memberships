@@ -1,0 +1,33 @@
+= effective_form_with(model: representative, engine: true) do |f|
+  - f.object.user_type ||= current_user.class.name
+
+  = f.hidden_field :user_id
+  = f.hidden_field :user_type
+  = f.hidden_field :organization_id
+  = f.hidden_field :organization_type
+
+  - if f.object.new_record?
+    - unless inline_datatable? && inline_datatable.attributes[:organization_id].present?
+      = f.select :organization, { 'Organizations' => EffectiveMemberships.Organization.sorted }, polymorphic: true
+
+    = f.checks :roles, EffectiveRoles.roles_collection(f.object, skip_disabled: true)
+
+    - unless inline_datatable? && inline_datatable.attributes[:user_id].present?
+      = f.hidden_field :new_representative_user_action, value: 'Invite new user'
+
+      = f.fields_for :user, (f.object.user || f.object.build_user) do |fu|
+        = render 'effective/representatives/user_fields', f: fu
+
+  - if f.object.persisted?
+    - unless inline_datatable? && inline_datatable.attributes[:organization_id].present?
+      = f.static_field :organization
+
+    - unless inline_datatable? && inline_datatable.attributes[:user_id].present?
+      = f.static_field :user
+
+    = f.checks :roles, EffectiveRoles.roles_collection(f.object, skip_disabled: true)
+
+    = f.fields_for :user, f.object.user do |fu|
+      = render 'effective/representatives/user_fields', f: fu
+
+  = f.submit

@@ -30,7 +30,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'haml-rails'
   spec.add_development_dependency 'pry-byebug'
   spec.add_development_dependency 'effective_test_bot'
-  spec.add_development_dependency 'effective_organizations'
   spec.add_development_dependency 'effective_developer' # Optional but suggested
   spec.add_development_dependency 'effective_email_templates' # Optional but suggested
 end
