@@ -48,9 +48,6 @@ module EffectiveMembershipsFeePayment
     attr_accessor :declare_code_of_ethics
     attr_accessor :declare_truth
 
-    # Throwaway
-    attr_accessor :upgrade, :downgrade
-
     # Application Namespace
     belongs_to :user, polymorphic: true, optional: true
     accepts_nested_attributes_for :user
@@ -142,6 +139,10 @@ module EffectiveMembershipsFeePayment
       organization || user
     end
 
+    def owner_symbol
+      organization? ? :organization : :user
+    end
+
     def submit_fees
       fees
     end
@@ -182,32 +183,6 @@ module EffectiveMembershipsFeePayment
   def reset!
     assign_attributes(wizard_steps: wizard_steps.slice(:start))
     save!
-  end
-
-  # Work with organizations
-  def organization!
-    if upgrade_individual_to_organization?
-      save!
-      update!(owner: owner.representatives.first.organization)
-    elsif downgrade_organization_to_individual?
-      save!
-      update!(owner: current_user)
-    else
-      save!
-    end
-  end
-
-  def upgrade_individual_to_organization?
-    return false unless EffectiveResources.truthy?(upgrade)
-    return false unless owner.class.respond_to?(:effective_memberships_user?)
-    owner.representatives.any?(&:new_record?)
-  end
-
-  def downgrade_organization_to_individual?
-    return false unless EffectiveResources.truthy?(downgrade)
-    return false unless owner.class.respond_to?(:effective_memberships_organization?)
-    return false if current_user.blank?
-    owner.representatives.any?(&:marked_for_destruction?)
   end
 
 end

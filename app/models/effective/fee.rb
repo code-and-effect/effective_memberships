@@ -4,7 +4,7 @@ module Effective
 
     log_changes(to: :owner) if respond_to?(:log_changes)
 
-    # Every fee is charged to a owner
+    # Every fee is charged to a owner: a user or an organization
     belongs_to :owner, polymorphic: true
 
     # This fee may belong to an application, fee payment, or other parent model
