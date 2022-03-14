@@ -21,6 +21,7 @@ module EffectiveMembershipsOrganization
 
   included do
     effective_memberships_owner
+
     acts_as_addressable :billing # effective_addresses
     log_changes(except: [:representatives, :users]) if respond_to?(:log_changes)
 
@@ -71,6 +72,10 @@ module EffectiveMembershipsOrganization
 
   def membership_present?
     membership.present? && !membership.marked_for_destruction?
+  end
+
+  def outstanding_fee_payment_fees
+    fees.select { |fee| fee.fee_payment_fee? && !fee.purchased? }
   end
 
   def representative(user:)

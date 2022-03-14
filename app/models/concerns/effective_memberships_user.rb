@@ -35,8 +35,16 @@ module EffectiveMembershipsUser
   end
 
   def memberships
-    ([membership] + membership_organizations.map(&:membership)).compact
+    Array(membership) + membership_organizations.map(&:membership)
   end
+
+  def memberships_owners
+    Array(is?(:member) ? self : nil) + membership_organizations
+  end
+
+  # def memberships_outstanding_fee_payment_fees
+  #   (outstanding_fee_payment_fees + membership_organizations.map(&:outstanding_fee_payment_fees)).flatten
+  # end
 
   # def effective_memberships_owners
   #   [self] + organizations.reject(&:archived?)

@@ -6,4 +6,4 @@
       .col-sm-auto.text-right
         = link_to('Edit', wizard_path(:organization)) if edit_effective_wizard?
 
-    = render 'organizations/demographics', applicant: applicant, organization: applicant.organization
+    = render 'organizations/demographics', parent: applicant, organization: applicant.organization

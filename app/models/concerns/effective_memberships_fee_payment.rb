@@ -32,7 +32,8 @@ module EffectiveMembershipsFeePayment
 
     acts_as_wizard(
       start: 'Start',
-      demographics: 'Demographics',
+      demographics: 'Demographics',         # Individual only. Users fields.
+      organization: 'Organization',         # Organization only. Organization fields.
       declarations: 'Declarations',
       summary: 'Review',
       billing: 'Billing Address',
@@ -49,19 +50,19 @@ module EffectiveMembershipsFeePayment
     attr_accessor :declare_truth
 
     # Application Namespace
-    belongs_to :user, polymorphic: true, optional: true
+    belongs_to :user, polymorphic: true
     accepts_nested_attributes_for :user
 
-    belongs_to :organization, polymorphic: true
+    belongs_to :organization, polymorphic: true, optional: true
     accepts_nested_attributes_for :organization
 
     # Like maybe optionally it makes sense.
     belongs_to :category, polymorphic: true, optional: true
 
+    # Effective Namespace
     has_many :fees, -> { order(:id) }, as: :parent, class_name: 'Effective::Fee', dependent: :nullify
     accepts_nested_attributes_for :fees, reject_if: :all_blank, allow_destroy: true
 
-    # Effective Namespace
     has_many :orders, -> { order(:id) }, as: :parent, class_name: 'Effective::Order', dependent: :nullify
     accepts_nested_attributes_for :orders
 
@@ -95,14 +96,17 @@ module EffectiveMembershipsFeePayment
       self.period ||= EffectiveMemberships.Registrar.current_period
     end
 
+    before_validation(if: -> { new_record? || current_step == :start }) do
+      self.organization_type = (EffectiveMemberships.Organization.name if organization_id.present?)
+    end
+
     before_validation(if: -> { current_step == :start && user && user.membership }) do
       self.category ||= user.membership.categories.first if user.membership.categories.length == 1
     end
 
-    validates :period, presence: true
-
     # All Steps validations
     validates :user, presence: true
+    validates :period, presence: true
 
     # Declarations Step
     with_options(if: -> { current_step == :declarations }) do
@@ -123,6 +127,8 @@ module EffectiveMembershipsFeePayment
 
         fee_payment_steps = Array(category&.fee_payment_wizard_steps)
 
+        fee_payment_steps.delete(:organization) unless organization?
+
         wizard_steps.select do |step|
           required_steps.include?(step) || category.blank? || fee_payment_steps.include?(step)
         end
@@ -131,18 +137,6 @@ module EffectiveMembershipsFeePayment
 
     # All Fees and Orders
     # Overriding acts_as_purchasable_wizard
-    def outstanding_fees
-      owner&.outstanding_fee_payment_fees
-    end
-
-    def owner
-      organization || user
-    end
-
-    def owner_symbol
-      organization? ? :organization : :user
-    end
-
     def submit_fees
       fees
     end
@@ -153,7 +147,7 @@ module EffectiveMembershipsFeePayment
 
     # We take over the owner's outstanding fees.
     def find_or_build_submit_fees
-      Array(outstanding_fees).each { |fee| fees << fee unless fees.include?(fee) }
+      Array(owner.outstanding_fee_payment_fees).each { |fee| fees << fee unless fees.include?(fee) }
       submit_fees
     end
 
@@ -165,6 +159,22 @@ module EffectiveMembershipsFeePayment
 
   def to_s
     'Fee Payment'
+  end
+
+  def owner
+    organization || user
+  end
+
+  def owner_symbol
+    organization? ? :organization : :user
+  end
+
+  def individual?
+    !owner.kind_of?(EffectiveMemberships.Organization)
+  end
+
+  def organization?
+    owner.kind_of?(EffectiveMemberships.Organization)
   end
 
   # Instance Methods

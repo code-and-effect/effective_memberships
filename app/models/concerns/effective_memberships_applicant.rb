@@ -398,12 +398,12 @@ module EffectiveMembershipsApplicant
     applicant_type == 'Apply to Reclassify'
   end
 
-  def organization?
-    owner.kind_of?(EffectiveMemberships.Organization) && category&.organization?
+  def individual?
+    !(owner.kind_of?(EffectiveMemberships.Organization) && category&.organization?)
   end
 
-  def individual?
-    owner.kind_of?(EffectiveMemberships.Organization) == false && category&.individual?
+  def organization?
+    owner.kind_of?(EffectiveMemberships.Organization) && category&.organization?
   end
 
   def in_progress?

@@ -4,7 +4,6 @@ module Effective
 
     include Effective::WizardController
 
-    resource_scope -> { EffectiveMemberships.FeePayment.deep.where(owner: current_user.effective_memberships_owners) }
-
+    resource_scope -> { EffectiveMemberships.FeePayment.deep.where(user: current_user) }
   end
 end

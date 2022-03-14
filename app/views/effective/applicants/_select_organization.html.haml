@@ -1,6 +1,6 @@
 %p Please select an organization to continue.
 
-= f.radios :organization_id, effective_memberships_select_organization_collection(f.object), label: false
+= f.radios :organization_id, effective_memberships_select_applicant_organization_collection(f.object), label: false
 = f.hidden_field :organization_type, value: EffectiveMemberships.Organization.name
 
 = f.show_if(:organization_id, 'new') do

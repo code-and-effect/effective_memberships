@@ -6,7 +6,7 @@
       = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
         = f.hidden_field :id
 
-        = f.fields_for(:owner, f.object.owner) do |fu|
+        = f.fields_for(:user, f.object.user) do |fu|
           = render 'users/fields_demographics', f: fu, user: f.object.user, parent: resource
 
         = f.save 'Save and Continue'

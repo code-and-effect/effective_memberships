@@ -1,9 +1,23 @@
 = effective_form_with(model: [:admin, organization], engine: true) do |f|
-  = render 'admin/organizations/fields', f: f
+  .row
+    .col-sm-6
+      %h2 Demographics
+      = render 'admin/organizations/fields', f: f
+
+      %h2 Billing Address
+      = effective_address_fields(f, :billing)
+
+    .col-sm-6
+      %h2 Membership
+      = render 'admin/memberships/status', owner: f.object
+
+      - f.object.users.each do |user|
+        %p
+          = link_to(user, "/admin/users/#{user.to_param}/edit")
+          - if user.try(:archived?)
+            %span.badge.badge-warning Archived
+
+      %h2 Admin Only
+      %p No additional fields
 
   = effective_submit(f)
-
-- if organization.persisted?
-  %h2 Representatives
-  - datatable = Admin::EffectiveRepresentativesDatatable.new(organization: organization)
-  = render_inline_datatable(datatable)

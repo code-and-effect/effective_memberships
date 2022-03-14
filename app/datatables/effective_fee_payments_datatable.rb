@@ -6,7 +6,9 @@ class EffectiveFeePaymentsDatatable < Effective::Datatable
     col :token, visible: false
     col :created_at, visible: false
 
-    col :owner
+    col :user
+    col :organization
+
     col :status, visible: false
     col :submitted_at, label: 'Submitted', as: :date
     col :period, visible: false
@@ -16,7 +18,7 @@ class EffectiveFeePaymentsDatatable < Effective::Datatable
     actions_col(new: false)
   end
 
-  collection do
+  collection(apply_belongs_to: false) do
     scope = EffectiveMemberships.FeePayment.deep.done.for(current_user)
   end
 

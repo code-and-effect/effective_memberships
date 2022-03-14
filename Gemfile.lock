@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    effective_memberships (0.3.13)
+    effective_memberships (0.3.14)
       effective_bootstrap
       effective_datatables (>= 4.0.0)
       effective_orders
@@ -142,7 +142,7 @@ GEM
       effective_resources
       liquid
       rails (>= 3.2.0)
-    effective_orders (5.3.2)
+    effective_orders (5.4.2)
       coffee-rails
       effective_addresses
       effective_bootstrap
@@ -150,13 +150,7 @@ GEM
       effective_resources
       rails (>= 4.0.0)
       sassc
-    effective_organizations (0.2.0)
-      effective_bootstrap
-      effective_datatables (>= 4.0.0)
-      effective_resources
-      effective_roles
-      rails (>= 6.0.0)
-    effective_products (0.0.8)
+    effective_products (0.0.9)
       effective_bootstrap
       effective_datatables (>= 4.0.0)
       effective_orders
@@ -332,7 +326,6 @@ DEPENDENCIES
   effective_developer
   effective_email_templates
   effective_memberships!
-  effective_organizations
   effective_test_bot
   haml-rails
   pry-byebug

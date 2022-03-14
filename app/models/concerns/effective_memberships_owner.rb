@@ -84,17 +84,17 @@ module EffectiveMembershipsOwner
     save!
   end
 
-  def outstanding_fee_payment_owners
-    effective_memberships_owners.select { |owner| !owner.membership_fees_paid? }
-  end
+  # def outstanding_fee_payment_owners
+  #   effective_memberships_owners.select { |owner| !owner.membership_fees_paid? }
+  # end
 
-  def current_fee_payment_owner
-    outstanding_fee_payment_owners.first || self
-  end
+  # def current_fee_payment_owner
+  #   outstanding_fee_payment_owners.first || self
+  # end
 
-  def owner_label
-    self.class.name.split('::').last
-  end
+  # def owner_label
+  #   self.class.name.split('::').last
+  # end
 
   def membership_fees_paid?
     outstanding_fee_payment_fees.blank? && membership && membership.fees_paid?
@@ -104,9 +104,9 @@ module EffectiveMembershipsOwner
     fees.select { |fee| fee.fee_payment_fee? && !fee.purchased? }
   end
 
-  def outstanding_fee_payment_orders
-    orders.select { |order| order.parent_type.to_s.include?('FeePayment') && !order.purchased? }
-  end
+  # def outstanding_fee_payment_orders
+  #   orders.select { |order| order.parent_type.to_s.include?('FeePayment') && !order.purchased? }
+  # end
 
   def bad_standing_fees
     fees.select { |fee| fee.bad_standing? }
