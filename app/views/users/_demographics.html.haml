@@ -1,0 +1,50 @@
+-# This is a placeholder file that should be overriden by the main application
+
+%table.table.table-sm
+  %tbody
+    %tr
+      %th Name
+      %td= user.to_s
+
+    %tr
+      %th Email
+      %td= mail_to user.email
+
+    - if user.respond_to?(:job_title)
+      %tr
+        %th Job Title:
+        %td= user.job_title.presence || '-'
+
+    - if user.respond_to?(:date_of_birth)
+      %tr
+        %th Date of Birth
+        %td= user.date_of_birth&.strftime('%F').presence || '-'
+
+    - if user.respond_to?(:phone)
+      %tr
+        %th Phone:
+        %td= user.phone.presence || '-'
+
+    - if user.respond_to?(:home_phone)
+      %tr
+        %th Home Phone:
+        %td= user.home_phone.presence || '-'
+
+    - if user.respond_to?(:cell_phone)
+      %tr
+        %th Cell Phone:
+        %td= user.cell_phone.presence || '-'
+
+    - if user.respond_to?(:fax)
+      %tr
+        %th Fax:
+        %td= user.fax.presence || '-'
+
+    - if user.respond_to?(:billing_address)
+      %tr
+        %th Billing Address:
+        %td
+          - if user.billing_address.present?
+            = user.billing_address.to_html
+          - else
+            = '-'

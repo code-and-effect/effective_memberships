@@ -61,6 +61,7 @@ module EffectiveMembershipsOrganization
     scope :sorted, -> { order(:title) }
 
     validates :title, presence: true, uniqueness: true
+    validates :email, presence: true
   end
 
   # Instance Methods

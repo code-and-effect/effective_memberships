@@ -1,8 +1,8 @@
 - url = (organization.persisted? ? effective_memberships.organization_path(organization) : effective_memberships.organizations_path)
 
 = effective_form_with(model: organization, url: url) do |f|
-  = render 'effective/organizations/fields', f: f
-
+  %h2 Organization Info
+  = render 'organizations/demographics_fields', f: f, organization: organization
   = f.submit
 
 - if organization.persisted?

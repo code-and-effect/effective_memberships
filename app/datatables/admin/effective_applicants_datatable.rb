@@ -26,7 +26,8 @@ module Admin
 
       col :approved_at, label: 'Approved', visible: false, as: :date
 
-      col :owner
+      col :user
+      col :organization
 
       col :applicant_type
       col :category, search: { collection: EffectiveMemberships.Category.all, polymorphic: false }

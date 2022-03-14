@@ -161,7 +161,6 @@ module EffectiveMembershipsApplicant
 
     # Set Apply to Join or Reclassification
     before_validation(if: -> { (new_record? || current_step == :select) && owner.present? }) do
-      self.category_type ||= (EffectiveMemberships.Category.name if category_id.present?)
       self.applicant_type = (owner.membership.blank? ? 'Apply to Join' : 'Apply to Reclassify')
       self.from_category = owner.membership&.category
     end
@@ -179,8 +178,8 @@ module EffectiveMembershipsApplicant
     end
 
     validate(if: -> { category.present? }) do
-      self.errors.add(:organization, "can't be blank when organization category") if category.organization? && organization.blank?
-      self.errors.add(:organization, "must be blank when individual category") if category.individual? && organization.present?
+      self.errors.add(:organization_id, "can't be blank when organization category") if category.organization? && organization.blank?
+      self.errors.add(:organization_id, "must be blank when individual category") if category.individual? && organization.present?
     end
 
     # Select Step
@@ -383,6 +382,10 @@ module EffectiveMembershipsApplicant
     organization || user
   end
 
+  def owner_symbol
+    organization? ? :organization : :user
+  end
+
   def build_organization(params = {})
     self.organization = EffectiveMemberships.Organization.new(params)
   end
@@ -395,8 +398,12 @@ module EffectiveMembershipsApplicant
     applicant_type == 'Apply to Reclassify'
   end
 
-  def owner_label
-    owner_type.to_s.split('::').last
+  def organization?
+    owner.kind_of?(EffectiveMemberships.Organization) && category&.organization?
+  end
+
+  def individual?
+    owner.kind_of?(EffectiveMemberships.Organization) == false && category&.individual?
   end
 
   def in_progress?

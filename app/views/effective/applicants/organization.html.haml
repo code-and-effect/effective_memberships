@@ -1,0 +1,19 @@
+= render 'layout' do
+
+  = render 'effective/applicants/content', resource: resource
+
+  .card
+    .card-body
+      - datatable = EffectiveResources.best('EffectiveRepresentativesDatatable').new(self, organization: resource.organization)
+
+      %h2 Representatives
+      = render_datatable(datatable, inline: true, simple: true)
+
+      %h2 Organization Info
+      = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+        = f.hidden_field :id
+
+        = f.fields_for(:organization, f.object.organization) do |fo|
+          = render 'organizations/demographics_fields', f: fo, organization: f.object.organization, applicant: resource
+
+        = f.save 'Save and Continue'

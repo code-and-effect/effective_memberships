@@ -1,0 +1,29 @@
+-# This is a placeholder file that should be overriden by the main application
+
+- if f.object.respond_to?(:first_name)
+  = f.text_field :first_name
+
+- if f.object.respond_to?(:last_name)
+  = f.text_field :last_name
+
+- if f.object.respond_to?(:job_title)
+  = f.text_field :job_title
+
+- if f.object.respond_to?(:date_of_birth)
+  = f.date_field :date_of_birth
+
+- if f.object.respond_to?(:phone)
+  = f.tel_field :phone
+
+- if f.object.respond_to?(:home_phone)
+  = f.tel_field :home_phone
+
+- if f.object.respond_to?(:cell_phone)
+  = f.tel_field :cell_phone
+
+- if f.object.respond_to?(:fax)
+  = f.tel_field :fax
+
+- if f.object.respond_to?(:billing_address)
+  %h2 Billing Address
+  = effective_address_fields(f, :billing_address)

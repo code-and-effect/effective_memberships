@@ -19,6 +19,7 @@
 
           = f.hidden_field :organization_id, value: nil
           = f.hidden_field :organization_type, value: nil
+          = f.hidden_field :category_type, value: EffectiveMemberships.Category.name
 
           = f.select :category_id, categories, required: true
 
