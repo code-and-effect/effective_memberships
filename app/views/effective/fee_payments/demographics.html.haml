@@ -7,6 +7,6 @@
         = f.hidden_field :id
 
         = f.fields_for(:owner, f.object.owner) do |fu|
-          = render 'effective/fee_payments/demographics_fields', f: fu
+          = render 'users/fields_demographics', f: fu, user: f.object.user, parent: resource
 
         = f.save 'Save and Continue'

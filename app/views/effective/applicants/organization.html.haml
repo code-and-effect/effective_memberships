@@ -14,6 +14,6 @@
         = f.hidden_field :id
 
         = f.fields_for(:organization, f.object.organization) do |fo|
-          = render 'organizations/demographics_fields', f: fo, organization: f.object.organization, applicant: resource
+          = render 'organizations/fields_demographics', f: fo, organization: f.object.organization, parent: resource
 
         = f.save 'Save and Continue'

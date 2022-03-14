@@ -8,6 +8,6 @@
         = f.hidden_field :id
 
         = f.fields_for(:user, f.object.user) do |fu|
-          = render 'users/demographics_fields', f: fu, user: f.object.user, applicant: resource
+          = render 'users/fields_demographics', f: fu, user: f.object.user, parent: resource
 
         = f.save 'Save and Continue'

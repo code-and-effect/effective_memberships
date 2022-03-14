@@ -2,7 +2,7 @@
 
 = effective_form_with(model: organization, url: url) do |f|
   %h2 Organization Info
-  = render 'organizations/demographics_fields', f: f, organization: organization
+  = render 'organizations/fields_demographics', f: f, organization: organization
   = f.submit
 
 - if organization.persisted?
