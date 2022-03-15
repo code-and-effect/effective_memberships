@@ -164,18 +164,20 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
 
     # Applicants
     create_table :applicants do |t|
+      t.string :applicant_type
       t.string :token
 
-      t.integer :owner_id
-      t.string :owner_type
+      t.integer :user_id
+      t.string :user_type
+
+      t.integer :organization_id
+      t.string :organization_type
 
       t.integer :category_id
       t.string :category_type
 
       t.integer :from_category_id
       t.string :from_category_type
-
-      t.string :applicant_type
 
       # Acts as Statused
       t.string :status
@@ -404,11 +406,11 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
     create_table :fee_payments do |t|
       t.string :token
 
-      t.integer :owner_id
-      t.string :owner_type
-
       t.integer :user_id
       t.string :user_type
+
+      t.integer :organization_id
+      t.string :organization_type
 
       t.integer :category_id
       t.string :category_type

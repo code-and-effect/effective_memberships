@@ -104,9 +104,9 @@ module EffectiveMembershipsOwner
     fees.select { |fee| fee.fee_payment_fee? && !fee.purchased? }
   end
 
-  # def outstanding_fee_payment_orders
-  #   orders.select { |order| order.parent_type.to_s.include?('FeePayment') && !order.purchased? }
-  # end
+  def outstanding_fee_payment_orders
+    orders.select { |order| order.parent_type.to_s.include?('FeePayment') && !order.purchased? }
+  end
 
   def bad_standing_fees
     fees.select { |fee| fee.bad_standing? }

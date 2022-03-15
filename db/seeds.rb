@@ -56,6 +56,24 @@ retired = Effective::Category.create!(
   tax_exempt: false
 )
 
+member = Effective::Category.create!(
+  category_type: 'Organization',
+  title: "Corporate",
+  can_apply_new: true,
+  can_apply_existing: true,
+  create_renewal_fees: true,
+  create_late_fees: true,
+  min_applicant_references: 2,
+  min_applicant_reviews: 2,
+  applicant_fee: 100_00,
+  renewal_fee: 250_00,
+  late_fee: 50_00,
+  prorated_jan: 120_00, prorated_feb: 110_00, prorated_mar: 100_00, prorated_apr: 90_00, prorated_may: 80_00, prorated_jun: 70_00,
+  prorated_jul: 60_00, prorated_aug: 50_00, prorated_sep: 40_00, prorated_oct: 30_00, prorated_nov: 20_00, prorated_dec: 10_00,
+  qb_item_name: 'Corporate Member Quickbooks Name',
+  tax_exempt: false
+)
+
 area = Effective::ApplicantCourseArea.create!(title: 'Science')
 area.applicant_course_names.create!(title: 'Science 100')
 area.applicant_course_names.create!(title: 'Science 200')

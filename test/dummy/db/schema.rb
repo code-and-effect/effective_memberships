@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 9) do
+ActiveRecord::Schema.define(version: 8) do
 
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.string "name", null: false
@@ -173,14 +173,16 @@ ActiveRecord::Schema.define(version: 9) do
   end
 
   create_table "applicants", force: :cascade do |t|
+    t.string "applicant_type"
     t.string "token"
-    t.integer "owner_id"
-    t.string "owner_type"
+    t.integer "user_id"
+    t.string "user_type"
+    t.integer "organization_id"
+    t.string "organization_type"
     t.integer "category_id"
     t.string "category_type"
     t.integer "from_category_id"
     t.string "from_category_type"
-    t.string "applicant_type"
     t.string "status"
     t.text "status_steps"
     t.text "wizard_steps"
@@ -198,7 +200,7 @@ ActiveRecord::Schema.define(version: 9) do
     t.text "additional_information"
     t.datetime "updated_at"
     t.datetime "created_at"
-    t.index ["owner_id", "owner_type"], name: "index_applicants_on_owner_id_and_owner_type"
+    t.index "\"owner_id\", \"owner_type\"", name: "index_applicants_on_owner_id_and_owner_type"
     t.index ["status"], name: "index_applicants_on_status"
     t.index ["token"], name: "index_applicants_on_token"
   end
@@ -226,6 +228,7 @@ ActiveRecord::Schema.define(version: 9) do
   end
 
   create_table "categories", force: :cascade do |t|
+    t.string "category_type"
     t.string "title"
     t.string "category"
     t.integer "position"
@@ -295,10 +298,10 @@ ActiveRecord::Schema.define(version: 9) do
 
   create_table "fee_payments", force: :cascade do |t|
     t.string "token"
-    t.integer "owner_id"
-    t.string "owner_type"
     t.integer "user_id"
     t.string "user_type"
+    t.integer "organization_id"
+    t.string "organization_type"
     t.integer "category_id"
     t.string "category_type"
     t.date "period"
@@ -308,7 +311,7 @@ ActiveRecord::Schema.define(version: 9) do
     t.datetime "submitted_at"
     t.datetime "updated_at"
     t.datetime "created_at"
-    t.index ["owner_id", "owner_type"], name: "index_fee_payments_on_owner_id_and_owner_type"
+    t.index "\"owner_id\", \"owner_type\"", name: "index_fee_payments_on_owner_id_and_owner_type"
     t.index ["status"], name: "index_fee_payments_on_status"
     t.index ["token"], name: "index_fee_payments_on_token"
   end
@@ -421,11 +424,15 @@ ActiveRecord::Schema.define(version: 9) do
   end
 
   create_table "organizations", force: :cascade do |t|
-    t.string "title"
     t.string "email"
+    t.string "title"
+    t.string "phone"
+    t.string "fax"
+    t.string "website"
     t.string "category"
     t.text "notes"
     t.integer "roles_mask"
+    t.boolean "archived", default: false
     t.integer "representatives_count", default: 0
     t.datetime "updated_at"
     t.datetime "created_at"

@@ -109,7 +109,7 @@ class RegistrarTest < ActiveSupport::TestCase
     owner.save!
 
     # Create unpurchased order
-    fp = EffectiveMemberships.FeePayment.new(owner: owner)
+    fp = EffectiveMemberships.FeePayment.new(user: owner)
     fp.ready!
 
     # Owner is a member with outstanding fees and orders

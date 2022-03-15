@@ -1,14 +1,15 @@
 module EffectiveMembershipsTestBuilder
 
   def build_member(category: nil, type: :user)
-    category ||= Effective::Category.where(title: 'Full Member').first!
+    category ||= Effective::Category.where(title: (type == :user ? 'Full Member' : 'Corporate')).first!
 
-    owner = build_user_with_address() if type == :user
-    owner = build_organization_with_address() if type == :organization
+    user = build_user_with_address()
+    organization = build_organization_with_address() if type == :organization
+    owner = (organization || user)
 
     EffectiveMemberships.Registrar.register!(owner, to: category)
 
-    fp = EffectiveMemberships.FeePayment.new(owner: owner)
+    fp = EffectiveMemberships.FeePayment.new(user: user, organization: organization)
     fp.ready!
     fp.submit_order.purchase!
     owner.reload
@@ -20,20 +21,23 @@ module EffectiveMembershipsTestBuilder
     build_effective_applicant.tap(&:save!)
   end
 
-  def build_applicant(owner: nil, category: nil, applicant_type: nil)
-    category ||= Effective::Category.where(title: 'Full Member').first!
-    owner ||= build_user_with_address()
+  def build_applicant(user: nil, organization: nil, category: nil, applicant_type: nil, type: :user)
+    category ||= Effective::Category.where(title: (type == :user ? 'Full Member' : 'Corporate')).first!
+
+    user ||= build_user_with_address()
+    organization ||= build_organization_with_address() if type == :organization
+    owner = (organization || user)
 
     applicant_type ||= 'Apply to Join' if owner.membership.blank?
     applicant_type ||= 'Apply to Reclassify' if owner.membership.present?
 
-    applicant = Effective::Applicant.new(owner: owner, category: category)
+    applicant = Effective::Applicant.new(user: user, organization: organization, category: category)
     applicant.save!
     applicant
   end
 
-  def build_submitted_applicant(owner: nil, category: nil)
-    applicant = build_applicant(owner: owner, category: category)
+  def build_submitted_applicant(user: nil, category: nil)
+    applicant = build_applicant(user: user, category: category)
     applicant.ready!
     applicant.submit_order.purchase!
     applicant.reload
@@ -43,27 +47,27 @@ module EffectiveMembershipsTestBuilder
   # Note, I'm skipping over review! and just setting reviewed!
   # Because I don't wanna do all the completed requirements
   # Use build_reviewable_applicant() if you want to test the applicant reviews on a reviewable submitted applicant
-  def build_reviewed_applicant(owner: nil, category: nil)
-    applicant = build_submitted_applicant(owner: owner, category: category)
+  def build_reviewed_applicant(user: nil, category: nil)
+    applicant = build_submitted_applicant(user: user, category: category)
     applicant.reviewed!
     applicant
   end
 
-  def build_declined_applicant(owner: nil, category: nil)
-    applicant = build_reviewed_applicant(owner: owner, category: category)
+  def build_declined_applicant(user: nil, category: nil)
+    applicant = build_reviewed_applicant(user: user, category: category)
     applicant.declined_reason = 'Declined'
     applicant.decline!
     applicant
   end
 
-  def build_approved_applicant(owner: nil, category: nil)
-    applicant = build_reviewed_applicant(owner: owner, category: category)
+  def build_approved_applicant(user: nil, category: nil)
+    applicant = build_reviewed_applicant(user: user, category: category)
     applicant.approve!
     applicant
   end
 
-  def build_reviewable_applicant(owner: nil, category: nil)
-    applicant = build_submitted_applicant(owner: owner, category: category)
+  def build_reviewable_applicant(user: nil, category: nil)
+    applicant = build_submitted_applicant(user: user, category: category)
 
     # Build References
     applicant.min_applicant_references.times do |x|
@@ -104,7 +108,7 @@ module EffectiveMembershipsTestBuilder
     )
   end
 
-  def build_applicant_review(applicant: nil, owner: nil)
+  def build_applicant_review(applicant: nil, user: nil)
     applicant ||= build_applicant()
     reviewer ||= build_user()
 

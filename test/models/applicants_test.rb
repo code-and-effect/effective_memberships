@@ -27,10 +27,11 @@ class ApplicantsTest < ActiveSupport::TestCase
 
   test 'required_steps are based on membership category' do
     applicant = build_applicant()
+
     all_steps = applicant.class::WIZARD_STEPS.keys
 
     # Default has all steps
-    assert_equal all_steps, applicant.required_steps
+    assert_equal (all_steps - [:organization]), applicant.required_steps
 
     # When membership category only wants demographics
     applicant.category.update!(applicant_wizard_steps: [:demographics])
@@ -41,6 +42,12 @@ class ApplicantsTest < ActiveSupport::TestCase
     applicant.update!(category: nil)
     assert_equal all_steps, applicant.required_steps
   end
+
+  test 'includes the organization step when organization' do
+    applicant = build_applicant(type: :organization)
+    assert applicant.required_steps.include?(:organization)
+  end
+
 
   test 'moves to completed when complete' do
     applicant = build_reviewable_applicant()
@@ -222,19 +229,19 @@ class ApplicantsTest < ActiveSupport::TestCase
   end
 
   test 'approving creates prorated fees' do
-    owner = build_user_with_address()
-    assert owner.fees.blank?
+    user = build_user_with_address()
+    assert user.fees.blank?
 
-    applicant = build_submitted_applicant(owner: owner)
+    applicant = build_submitted_applicant(user: user)
     EffectiveResources.transaction { applicant.approve! }
 
-    assert applicant.owner.fees.present?
-    assert_equal 2, applicant.owner.fees.length
+    assert applicant.user.fees.present?
+    assert_equal 2, applicant.user.fees.length
 
-    applicant_fee = applicant.owner.fees.find { |fee| fee.fee_type == 'Applicant' }
+    applicant_fee = applicant.user.fees.find { |fee| fee.fee_type == 'Applicant' }
     assert_equal applicant_fee.price, applicant.category.applicant_fee
 
-    prorated_fee = applicant.owner.fees.find { |fee| fee.fee_type == 'Prorated' }
+    prorated_fee = applicant.user.fees.find { |fee| fee.fee_type == 'Prorated' }
     assert_equal prorated_fee.price, applicant.category.send("prorated_#{Time.zone.now.strftime('%b').downcase}").to_i
   end
 
