@@ -11,7 +11,7 @@ module Effective
       subject = subject_for(__method__, 'Applicant Completed', resource, opts)
       headers = headers_for(resource, opts)
 
-      mail(to: resource.owner.email, subject: subject, **headers)
+      mail(to: resource.user.email, subject: subject, **headers)
     end
 
     def applicant_missing_info(resource, opts = {})
@@ -21,7 +21,7 @@ module Effective
       subject = subject_for(__method__, 'Applicant Missing Info', resource, opts)
       headers = headers_for(resource, opts)
 
-      mail(to: resource.owner.email, subject: subject, **headers)
+      mail(to: resource.user.email, subject: subject, **headers)
     end
 
     def applicant_approved(resource, opts = {})
@@ -31,7 +31,7 @@ module Effective
       subject = subject_for(__method__, 'Applicant Approved', resource, opts)
       headers = headers_for(resource, opts)
 
-      mail(to: resource.owner.email, subject: subject, **headers)
+      mail(to: resource.user.email, subject: subject, **headers)
     end
 
     def applicant_declined(resource, opts = {})
@@ -41,7 +41,7 @@ module Effective
       subject = subject_for(__method__, 'Applicant Declined', resource, opts)
       headers = headers_for(resource, opts)
 
-      mail(to: resource.owner.email, subject: subject, **headers)
+      mail(to: resource.user.email, subject: subject, **headers)
     end
 
     def applicant_reference_notification(resource, opts = {})
@@ -104,7 +104,7 @@ module Effective
 
       values = {
         name: owner.to_s,
-        email: owner.email
+        email: user.email
       }
 
       { user: values }

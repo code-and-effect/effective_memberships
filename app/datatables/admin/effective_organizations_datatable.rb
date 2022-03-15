@@ -20,11 +20,11 @@ module Admin
     end
 
     collection do
-      EffectiveOrganizations.Organization.deep.all
+      EffectiveMemberships.Organization.deep.all
     end
 
     def categories
-      EffectiveOrganizations.Organization.categories
+      EffectiveMemberships.Organization.categories
     end
 
   end
