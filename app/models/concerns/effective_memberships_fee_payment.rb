@@ -169,6 +169,10 @@ module EffectiveMembershipsFeePayment
     organization? ? :organization : :user
   end
 
+  def build_organization(params = {})
+    self.organization = EffectiveMemberships.Organization.new(params)
+  end
+
   def individual?
     !owner.kind_of?(EffectiveMemberships.Organization)
   end
