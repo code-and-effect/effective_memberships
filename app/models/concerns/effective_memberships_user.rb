@@ -51,7 +51,7 @@ module EffectiveMembershipsUser
   end
 
   def representative(organization:)
-    representatives.find { |rep| rep.organization_id == organization.id }
+    representatives.find { |rep| rep.organization_id == organization.id } if organization
   end
 
   # Find or build

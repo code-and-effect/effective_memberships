@@ -33,12 +33,16 @@ module Admin
 
       raise('expected an user_id but was given an owner_id') if attributes[:owner_id].present?
 
-      if fee_payments == :in_progress && attributes[:user_id].blank?
+      if fee_payments == :in_progress && attributes[:user_id].blank? && attributes[:organization_id].blank?
         fee_payments = fee_payments.where.not(status: :draft)
       end
 
       if attributes[:user_id].present?
         fee_payments = fee_payments.where(user_id: attributes[:user_id])
+      end
+
+      if attributes[:organization_id].present?
+        fee_payments = fee_payments.where(organization_id: attributes[:organization_id])
       end
 
       if attributes[:except_id].present?
