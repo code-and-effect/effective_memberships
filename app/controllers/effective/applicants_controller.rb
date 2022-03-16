@@ -6,7 +6,7 @@ module Effective
 
     resource_scope -> { EffectiveMemberships.Applicant.deep.where(user: current_user) }
 
-    submit :resubmit, 'Submit Application'
+    submit :resubmit, 'Resubmit Application'
 
   end
 end

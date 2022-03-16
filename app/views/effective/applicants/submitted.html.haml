@@ -7,6 +7,10 @@
   .alert.alert-success.mb-4
     This application was submitted on #{resource.submitted_at.strftime('%F')}
 
+  - if resource.missing_info?
+    = card do
+      = render 'effective/applicants/missing_info', applicant: resource
+
   - unless resource.approved?
     .card
       .card-body
@@ -18,10 +22,6 @@
 
   .card
     .card-body= render 'effective/applicants/summary', applicant: resource
-
-  - if resource.missing_info?
-    = card do
-      = render 'effective/applicants/missing_info', applicant: resource
 
   - if resource.min_applicant_references.to_i > 0 || resource.applicant_references.present?
     = card do

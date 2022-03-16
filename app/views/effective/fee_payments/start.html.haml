@@ -21,14 +21,14 @@
           = f.hidden_field :user_type
           = f.hidden_field :user_id
 
-          - if outstanding_owners.length == 0
+          - if outstanding_owners.length == 1
             - resource.organization = outstanding_owners.first if outstanding_owners.first.kind_of?(EffectiveMemberships.Organization)
 
             %p Continue with fee payment for #{resource.owner}.
 
             = f.hidden_field :organization_id
 
-          - if outstanding_owners.length > 0
+          - if outstanding_owners.length > 1
             %p You have multiple memberships that require a fee payment. They must be purchased separately.
             %p Please select an individual or organization to continue:
 

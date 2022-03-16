@@ -214,7 +214,8 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.datetime :created_at
     end
 
-    add_index :applicants, [:owner_id, :owner_type]
+    add_index :applicants, [:user_id, :user_type]
+    add_index :applicants, [:organization_id, :organization_type]
     add_index :applicants, :status
     add_index :applicants, :token
 
@@ -431,7 +432,8 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.datetime :created_at
     end
 
-    add_index :fee_payments, [:owner_id, :owner_type]
+    add_index :fee_payments, [:user_id, :user_type]
+    add_index :fee_payments, [:organization_id, :organization_type]
     add_index :fee_payments, :status
     add_index :fee_payments, :token
 

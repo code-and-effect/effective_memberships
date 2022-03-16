@@ -3,7 +3,7 @@
 
 %p
   Please revisit each wizard step and
-  = link_to 'complete all missing information', wizard_path(:demographics)
+  = link_to 'Complete all missing information', wizard_path(:demographics), class: 'btn btn-primary'
   for this application.
 
 %p
@@ -12,7 +12,9 @@
 %p
   = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
     = f.hidden_field :id
-    = f.save 'Submit Application', 'data-confirm': "Really submit application?"
+
+    - # If you change this label, update EffectiveMemberships ApplicantsController
+    = f.save 'Resubmit Application', 'data-confirm': "Really re-submit application?", class: 'btn-sm'
 
 %p
   %small * No additional payment required.

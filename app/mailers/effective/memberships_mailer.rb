@@ -58,11 +58,11 @@ module Effective
 
     def assigns_for(resource)
       if resource.class.respond_to?(:effective_memberships_applicant?)
-        return applicant_assigns(resource).merge(user_assigns(resource.owner))
+        return applicant_assigns(resource).merge(owner_assigns(resource.owner))
       end
 
       if resource.kind_of?(Effective::ApplicantReference)
-        return reference_assigns(resource).merge(user_assigns(resource.applicant.owner))
+        return reference_assigns(resource).merge(owner_assigns(resource.applicant.owner))
       end
 
       raise('unexpected resource')
@@ -99,12 +99,12 @@ module Effective
       { reference: values }
     end
 
-    def user_assigns(owner)
+    def owner_assigns(owner)
       raise('expected a owner') unless owner.class.respond_to?(:effective_memberships_owner?)
 
       values = {
         name: owner.to_s,
-        email: user.email
+        email: owner.email
       }
 
       { user: values }

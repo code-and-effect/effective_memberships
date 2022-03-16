@@ -30,10 +30,6 @@ module EffectiveMembershipsUser
   end
 
   # Instance Methods
-  def membership_organizations
-    organizations.select { |organization| organization.is?(:member) && !organization.archived? }
-  end
-
   def memberships
     Array(membership) + membership_organizations.map(&:membership)
   end
@@ -41,14 +37,6 @@ module EffectiveMembershipsUser
   def memberships_owners
     Array(is?(:member) ? self : nil) + membership_organizations
   end
-
-  # def memberships_outstanding_fee_payment_fees
-  #   (outstanding_fee_payment_fees + membership_organizations.map(&:outstanding_fee_payment_fees)).flatten
-  # end
-
-  # def effective_memberships_owners
-  #   [self] + organizations.reject(&:archived?)
-  # end
 
   def membership_present?
     individual_membership_present? || organization_membership_present?
@@ -73,6 +61,10 @@ module EffectiveMembershipsUser
 
   def organizations
     representatives.reject(&:marked_for_destruction?).map(&:organization)
+  end
+
+  def membership_organizations
+    organizations.select { |organization| organization.is?(:member) && !organization.archived? }
   end
 
 end

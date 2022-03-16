@@ -17,7 +17,10 @@
       %tr
         %th Organization
         %td
-          = link_to(applicant.organization, effective_memberships.edit_admin_organization_path(applicant.organization))
+          - if applicant.organization.present?
+            = link_to(applicant.organization, effective_memberships.edit_admin_organization_path(applicant.organization))
+          - else
+            None
 
     - if applicant.from_category.present?
       %tr
