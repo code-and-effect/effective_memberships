@@ -8,12 +8,19 @@ module Admin
       col :id, visible: false
 
       col :title
+      col :can_apply_new, label: 'Can Apply'
       col :applicant_fee, as: :price
+
       col :renewal_fee, as: :price
       col :late_fee, as: :price
       col :rich_text_body, label: 'Body'
       col :tax_exempt
       col :qb_item_name, visible: false
+
+      col :category_type, search: EffectiveMemberships.Category.category_types
+
+      col :optional_applicant_wizard_steps, label: 'Applicant Steps'
+      col :optional_fee_payment_wizard_steps, label: 'Fee Payment Steps'
 
       actions_col
     end

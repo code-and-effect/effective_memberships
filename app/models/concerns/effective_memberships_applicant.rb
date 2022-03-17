@@ -300,6 +300,13 @@ module EffectiveMembershipsApplicant
         applicant_steps.delete(:stamp) unless apply_to_join?
         applicant_steps.delete(:organization) unless category&.organization?
 
+        # change_wizard_steps is defined in effective_resources acts_as_wizard
+        applicant_steps = change_wizard_steps(applicant_steps)
+
+        unless applicant_steps.kind_of?(Array) && applicant_steps.all? { |step| step.kind_of?(Symbol) }
+          raise('expected change_wizard_steps to return an Array of steps with no nils')
+        end
+
         wizard_steps.select do |step|
           required_steps.include?(step) || category.blank? || applicant_steps.include?(step)
         end
@@ -423,9 +430,11 @@ module EffectiveMembershipsApplicant
     when 'draft'
       "Applicant has not yet completed the #{category} wizard steps or paid to submit this application. This application will transition to 'submitted' after payment has been collected."
     when 'submitted'
-      summary = "Application has been purchased and submitted. The following tasks must be done before this application will transition to 'completed':"
+      summary = "Application has been purchased and submitted."
+      tasks = "The following tasks remain before it can be completed:"
+      approval = "Waiting on approval."
       items = completed_requirements.map { |item, done| "<li>#{item}: #{done ? 'Complete' : 'Incomplete'}</li>" }.join
-      "<p>#{summary}</p><ul>#{items}</ul>"
+      completed_requirements.present? ? "<p>#{summary} #{tasks}</p><ul>#{items}</ul>" : "#{summary} #{approval}"
     when 'completed'
       if applicant_reviews_required?
         "All required materials have been provided. This application will transition to 'reviewed' after all reviewers have voted."
@@ -527,10 +536,6 @@ module EffectiveMembershipsApplicant
     )
   end
 
-  # The submit! method used to be here
-  # But it needs to be inside the included do block
-  # So see above. Sorry.
-
   def applicant_references_required?
     min_applicant_references > 0
   end
@@ -538,9 +543,13 @@ module EffectiveMembershipsApplicant
   # When an application is submitted, these must be done to go to completed.
   # An Admin can override this and just set them to completed.
   def completed_requirements
-    {
-      'Applicant References' => (!applicant_references_required? || applicant_references.count(&:completed?) >= min_applicant_references)
-    }
+    if category&.applicant_wizard_steps&.include?(:references) || applicant_references_required?
+      {
+        'Applicant References' => (!applicant_references_required? || applicant_references.count(&:completed?) >= min_applicant_references)
+      }
+    else
+      {}
+    end
   end
 
   def complete!

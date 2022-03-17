@@ -1,12 +1,31 @@
 - authorized = EffectiveResources.authorized?(self, :new, EffectiveMemberships.Applicant)
 - datatable = EffectiveResources.best('EffectiveApplicantsDatatable').new(self)
-- in_progress = current_user.applicants.in_progress
 
-- if in_progress.present?
+- # In progress
+- applicant = current_user.applicants.in_progress.first
+
+- if applicant.present? && applicant.draft?
+  %h2 In-Progress Application
+
+  %p
+    Your submission is incomplete.
+
+    %p
+      Please
+      = link_to("Continue application", effective_memberships.applicant_build_path(applicant, applicant.next_step), 'data-turbolinks' => false, class: 'btn btn-primary')
+      or you can
+      = link_to('Abandon application', effective_memberships.applicant_path(applicant), 'data-confirm': "Really delete #{applicant}?", 'data-method': :delete, class: 'btn btn-danger')
+      to apply again.
+
+    %hr
+
+- elsif applicant.present?
   %h2 Active Applications
 
-  - in_progress.each do |applicant|
-    = render 'effective/applicants/summary', applicant: applicant
+  = render 'effective/applicants/summary', applicant: applicant
+  = link_to("View application", effective_memberships.applicant_build_path(applicant, applicant.next_step), 'data-turbolinks' => false, class: 'btn btn-primary')
+
+  %hr
 
 %h2 Application History
 
@@ -15,5 +34,5 @@
 - else
   %p You have not yet created any applications. When you do, we'll show them here.
 
-- if authorized && in_progress.blank?
+- if authorized && applicant.blank?
   %p= link_to 'Apply to join, reclassify, or provide a change of status notification', effective_memberships.new_applicant_path, class: 'btn btn-primary'

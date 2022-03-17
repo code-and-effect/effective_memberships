@@ -10,7 +10,7 @@
         = f.hidden_field :id
 
         = f.has_many(:applicant_educations, cards: true) do |aef|
-          %h4 Post-Secondary Education
+          %h4.mb-4 Post-Secondary Education
 
           .row
             .col= aef.text_field :institution
@@ -20,7 +20,7 @@
             .col= aef.date_field :start_on, label: 'Start Date'
             .col= aef.date_field :end_on, label: 'End Date'
 
-          = aef.text_field :degree_obtained, label: 'Degree or diploma obtained'
+          = aef.text_field :degree_obtained, label: 'Degree, diploma or program'
 
         /= f.text_area :applicant_educations_details, label: 'Additional Education Details'
 

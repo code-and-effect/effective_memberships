@@ -119,10 +119,10 @@ module EffectiveMembershipsCategory
     validates :category_type, presence: true
     validates :position, presence: true
 
-    after_initialize(if: -> { new_record? }) do
-      self.applicant_wizard_steps = EffectiveMemberships.Applicant.all_wizard_steps
-      self.applicant_review_wizard_steps = EffectiveMemberships.ApplicantReview.all_wizard_steps
-      self.fee_payment_wizard_steps = EffectiveMemberships.FeePayment.all_wizard_steps
+    before_validation do
+      self.applicant_wizard_steps = EffectiveMemberships.Applicant.all_wizard_steps if applicant_wizard_steps.blank?
+      self.applicant_review_wizard_steps = EffectiveMemberships.ApplicantReview.all_wizard_steps if applicant_review_wizard_steps.blank?
+      self.fee_payment_wizard_steps = EffectiveMemberships.FeePayment.all_wizard_steps if fee_payment_wizard_steps.blank?
     end
 
     before_validation do
@@ -180,6 +180,18 @@ module EffectiveMembershipsCategory
 
   def can_apply_restricted_ids
     Array(self[:can_apply_restricted_ids]) - [nil, '']
+  end
+
+  def optional_applicant_wizard_steps
+    applicant_wizard_steps - EffectiveMemberships.Applicant.required_wizard_steps
+  end
+
+  def optional_fee_payment_wizard_steps
+    fee_payment_wizard_steps - EffectiveMemberships.FeePayment.required_wizard_steps
+  end
+
+  def optional_applicant_review_wizard_steps
+    applicant_review_wizard_steps - EffectiveMemberships.ApplicantReview.required_wizard_steps
   end
 
   def applicant_wizard_steps

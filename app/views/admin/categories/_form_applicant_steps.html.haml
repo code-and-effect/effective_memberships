@@ -14,29 +14,34 @@
 
   %table.table.table-sm
     %tbody
-      %tr
-        %td= applicant.wizard_step_title(:education)
-        %td= f.number_field :min_applicant_educations, label: false
-        %td minimum number of degrees
+      - if applicant.wizard_step_keys.include?(:education)
+        %tr
+          %td= applicant.wizard_step_title(:education)
+          %td= f.number_field :min_applicant_educations, label: false
+          %td minimum number of degrees
 
-      %tr
-        %td= applicant.wizard_step_title(:course_amounts)
-        %td= f.number_field :min_applicant_courses, label: false
-        %td minimum number of courses
+      - if applicant.wizard_step_keys.include?(:course_amounts)
+        %tr
+          %td= applicant.wizard_step_title(:course_amounts)
+          %td= f.number_field :min_applicant_courses, label: false
+          %td minimum number of courses
 
-      %tr
-        %td= applicant.wizard_step_title(:experience)
-        %td= f.number_field :min_applicant_experiences_months, label: false
-        %td minimimum months of work experience
+      - if applicant.wizard_step_keys.include?(:experience)
+        %tr
+          %td= applicant.wizard_step_title(:experience)
+          %td= f.number_field :min_applicant_experiences_months, label: false
+          %td minimimum months of work experience
 
-      %tr
-        %td= applicant.wizard_step_title(:references)
-        %td= f.number_field :min_applicant_references, label: false
-        %td minimimum number of references
+      - if applicant.wizard_step_keys.include?(:references)
+        %tr
+          %td= applicant.wizard_step_title(:references)
+          %td= f.number_field :min_applicant_references, label: false
+          %td minimimum number of references
 
-      %tr
-        %td= applicant.wizard_step_title(:files)
-        %td= f.number_field :min_applicant_files, label: false
-        %td minimimum number of attached files
+      - if applicant.wizard_step_keys.include?(:files)
+        %tr
+          %td= applicant.wizard_step_title(:files)
+          %td= f.number_field :min_applicant_files, label: false
+          %td minimimum number of attached files
 
   = f.submit
