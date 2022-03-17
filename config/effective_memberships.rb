@@ -3,6 +3,8 @@ EffectiveMemberships.setup do |config|
   config.applicants_table_name = :applicants
   config.applicant_reviews_table_name = :applicant_reviews
   config.fee_payments_table_name = :fee_payments
+  config.organizations_table_name = :organizations
+  config.representatives_table_name = :representatives
 
   # Layout Settings
   # Configure the Layout per controller, or all at once
@@ -16,6 +18,7 @@ EffectiveMemberships.setup do |config|
   # config.applicant_class_name = 'Effective::Applicant'
   # config.applicant_review_class_name = 'Effective::ApplicantReview'
   # config.registrar_class_name = 'Effective::Registrar'
+  # config.organization_class_name = 'Effective::Organization'
 
   # Fee Categories
   # The defaults include: Applicant, Prorated, Renewal, Late, Admin

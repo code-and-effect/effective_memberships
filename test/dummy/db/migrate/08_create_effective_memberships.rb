@@ -1,10 +1,11 @@
 class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
   def change
-
     # Categories
     create_table :categories do |t|
+      t.string :category_type       # Individual or Organization
+
       t.string :title
-      t.string :category
+      t.string :category            # Freeform
 
       t.integer :position
 
@@ -119,20 +120,63 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
     add_index :membership_histories, [:owner_id, :owner_type]
     add_index :membership_histories, :start_on
 
+    # Organizations
+    create_table :organizations do |t|
+      t.string    :email
+
+      t.string    :title
+
+      t.string    :phone
+      t.string    :fax
+      t.string    :website
+
+      t.string    :category
+      t.text      :notes
+
+      t.integer   :roles_mask
+      t.boolean   :archived, default: false
+
+      t.integer   :representatives_count, default: 0
+
+      t.datetime :updated_at
+      t.datetime :created_at
+    end
+
+    add_index :organizations, :title
+
+    # Representatives
+    create_table :representatives do |t|
+      t.integer :organization_id
+      t.string :organization_type
+
+      t.integer :user_id
+      t.string :user_type
+
+      t.integer :roles_mask
+
+      t.datetime :updated_at
+      t.datetime :created_at
+    end
+
+    add_index :representatives, [:organization_id, :organization_type]
+    add_index :representatives, [:user_id, :user_type]
+
     # Applicants
     create_table :applicants do |t|
+      t.string :applicant_type
       t.string :token
 
-      t.integer :owner_id
-      t.string :owner_type
+      t.integer :user_id
+      t.string :user_type
+
+      t.integer :organization_id
+      t.string :organization_type
 
       t.integer :category_id
       t.string :category_type
 
       t.integer :from_category_id
       t.string :from_category_type
-
-      t.string :applicant_type
 
       # Acts as Statused
       t.string :status
@@ -151,7 +195,7 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.datetime :declined_at
       t.text :declined_reason
 
-      # Missing Info
+      # Missing
       t.datetime :missing_info_at
       t.text :missing_info_reason
 
@@ -271,6 +315,7 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
     create_table :applicant_courses do |t|
       t.integer :applicant_course_area_id
       t.integer :applicant_course_name_id
+
       t.integer :applicant_id
       t.string :applicant_type
 
@@ -287,6 +332,7 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
     # Applicant Reviews
     create_table :applicant_reviews do |t|
       t.string :token
+
       t.integer :applicant_id
       t.string :applicant_type
 
@@ -359,11 +405,11 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
     create_table :fee_payments do |t|
       t.string :token
 
-      t.integer :owner_id
-      t.string :owner_type
-
       t.integer :user_id
       t.string :user_type
+
+      t.integer :organization_id
+      t.string :organization_type
 
       t.integer :category_id
       t.string :category_type

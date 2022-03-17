@@ -25,6 +25,8 @@ EffectiveMemberships::Engine.routes.draw do
       get :membership_card, on: :member, to: 'membership_cards#show'
     end
 
+    resources :organizations, except: [:show, :destroy]
+    resources :representatives, except: [:show]
   end
 
   namespace :admin do
@@ -43,6 +45,13 @@ EffectiveMemberships::Engine.routes.draw do
     resources :fee_payments, only: [:index, :show]
     resources :memberships, only: [:index]
     resources :registrar_actions, only: [:create]
+
+    resources :organizations, except: [:show] do
+      post :archive, on: :member
+      post :unarchive, on: :member
+    end
+
+    resources :representatives, except: [:show]
   end
 
 end

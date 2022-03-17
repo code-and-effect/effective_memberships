@@ -1,8 +1,9 @@
-- current_owner = current_user.effective_memberships_owner
-- membership = current_owner.membership
+- membership = current_user.membership
+- membership_organizations = current_user.membership_organizations
 
 %h2 Membership
 
+-# Individual membership
 - if membership.present?
   - if membership.categories.length == 0
     %p
@@ -29,8 +30,18 @@
   - if membership.bad_standing?
     %p Your membership is in bad standing with the following reason: #{membership.bad_standing_reason}.
 
-- elsif current_owner.membership_removed?
-  %p Your membership was removed on #{current_owner.membership_removed_on.strftime('%F')}.
+- if current_user.membership_removed?
+  %p Your membership was removed on #{current_user.membership_removed_on.strftime('%F')}.
 
-- else
+- if membership_organizations.present?
+  %p You are a representative for #{pluralize(membership_organizations.length, 'member organization')}.
+
+  %ul
+    - membership_organizations.each do |organization|
+      %li
+        = organization
+        = '-'
+        = organization.membership.categories.to_sentence
+
+- if current_user.is?(:member) == false
   %p You are not a member.

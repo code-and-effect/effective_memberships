@@ -4,7 +4,7 @@
   .card
     .card-body
       - if resource.min_applicant_references > 0
-        .alert.alert-danger You must include #{resource.min_applicant_references} or more references.
+        %p You must include #{resource.min_applicant_references} or more references.
 
       = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
         = f.hidden_field :id

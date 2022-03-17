@@ -1,1 +1,39 @@
--# Intentionally blank
+%table.table.table-sm
+  %tbody
+    %tr
+      %th.border-0 Fee Payment
+      %td.border-0
+        = fee_payment.owner.to_s
+        %br
+        = mail_to(fee_payment.owner.email)
+
+    %tr
+      %th Purchased By
+      %td= fee_payment.user.to_s
+
+    - if request.path.start_with?('/admin')
+      %tr
+        %th User
+        %td
+          - url = (polymorphic_admin_path(fee_payment.user) rescue "/admin/users/#{fee_payment.user.to_param}/edit")
+          = link_to(fee_payment.user, url)
+
+      - if fee_payment.organization.present?
+        %tr
+          %th Organization
+          %td
+            = link_to(fee_payment.organization, effective_memberships.edit_admin_organization_path(fee_payment.organization))
+
+    - if fee_payment.orders.present?
+      %tr
+        %th Order#{'s' if fee_payment.orders.length > 1}
+        %td
+          - fee_payment.orders.each do |order|
+            - if request.path.start_with?('/admin')
+              = link_to(order, effective_orders.edit_admin_order_path(order))
+            - else
+              = link_to(order, effective_orders.order_path(order))
+
+    %tr
+      %th Period
+      %td= fee_payment.period.strftime('%F')

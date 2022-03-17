@@ -9,6 +9,6 @@
     = f.submit(border: false, left: true) do
       -# Missing Info
       - if EffectiveResources.authorized?(self, :resubmit, resource)
-        = f.save 'Submit Application'
+        = f.save 'Resubmit Application'
       - else
         = f.save 'Save and Continue'

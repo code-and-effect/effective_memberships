@@ -1,0 +1,45 @@
+-# This is a placeholder file that should be overriden by the main application
+
+%table.table.table-sm
+  %tbody
+    %tr
+      %th Name
+      %td= organization.to_s
+
+    %tr
+      %th Email
+      %td= mail_to organization.email
+
+    - if organization.respond_to?(:website)
+      %tr
+        %th Website:
+        %td= organization.website.presence || '-'
+
+    - if organization.respond_to?(:phone)
+      %tr
+        %th Phone:
+        %td= organization.phone.presence || '-'
+
+    - if organization.respond_to?(:company_phone)
+      %tr
+        %th Company Phone:
+        %td= organization.company_phone.presence || '-'
+
+    - if organization.respond_to?(:cell_phone)
+      %tr
+        %th Cell Phone:
+        %td= organization.cell_phone.presence || '-'
+
+    - if organization.respond_to?(:fax)
+      %tr
+        %th Fax:
+        %td= organization.fax.presence || '-'
+
+    - if organization.respond_to?(:billing_address)
+      %tr
+        %th Billing Address:
+        %td
+          - if organization.billing_address.present?
+            = organization.billing_address.to_html
+          - else
+            = '-'

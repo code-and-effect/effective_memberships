@@ -1,6 +1,9 @@
 = effective_form_with(model: [:admin, category], engine: true) do |f|
   = f.text_field :title
 
+  = f.select :category_type, f.object.class.category_types,
+    hint: 'When Organization, the organization will be given membership. Otherwise the individual user'
+
   - if f.object.class.categories.present?
     = f.select :category, f.object.class.categories
 

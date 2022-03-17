@@ -23,10 +23,6 @@ module EffectiveMembershipsOwner
   included do
     acts_as_role_restricted unless respond_to?(:acts_as_role_restricted?)
 
-    # App scoped
-    has_many :applicants, -> { order(:id) }, inverse_of: :owner, as: :owner
-    has_many :fee_payments, -> { order(:id) }, inverse_of: :owner, as: :owner
-
     # Effective scoped
     has_many :fees, -> { order(:id) }, inverse_of: :owner, as: :owner, class_name: 'Effective::Fee', dependent: :nullify
     accepts_nested_attributes_for :fees, reject_if: :all_blank, allow_destroy: true
@@ -40,46 +36,7 @@ module EffectiveMembershipsOwner
     has_many :membership_histories, -> { Effective::MembershipHistory.sorted }, inverse_of: :owner, as: :owner, class_name: 'Effective::MembershipHistory'
     accepts_nested_attributes_for :membership_histories
 
-    effective_resource do
-      timestamps
-    end
-
     scope :members, -> { joins(:membership) }
-  end
-
-  def effective_memberships_owner
-    raise('expected singular usage but there are more than one owner') if effective_memberships_owners.length > 1
-    effective_memberships_owners.first
-  end
-
-  def effective_memberships_owners
-    owners = organizations if self.class.respond_to?(:effective_organizations_user?)
-    owners = users if self.class.respond_to?(:effective_organizations_organization?)
-
-    owners = Array(owners)
-      .select { |owner| owner.class.respond_to?(:effective_memberships_owner?) }
-      .reject { |owner| owner.try(:archived?) }
-
-    owners.presence || [self]
-  end
-
-  # This is the calculated way of determining if an owner is a member or not.
-  # The correct way to check for membership is: current_user.is?(:member)
-  def membership_present?
-    individual_membership_present? || organization_membership_present?
-  end
-
-  def individual_membership_present?
-    membership.present? && !membership.marked_for_destruction?
-  end
-
-  def organization_membership_present?(except: nil)
-    return false unless self.class.respond_to?(:effective_organizations_user?)
-
-    organizations
-      .select { |organization| organization.class.respond_to?(:effective_memberships_owner?) }
-      .reject { |organization| organization.try(:archived?) }
-      .any? { |organization| organization != except && organization.membership_present? }
   end
 
   def assign_member_role
@@ -90,18 +47,6 @@ module EffectiveMembershipsOwner
   def update_member_role!
     assign_member_role
     save!
-  end
-
-  def outstanding_fee_payment_owners
-    effective_memberships_owners.select { |owner| !owner.membership_fees_paid? }
-  end
-
-  def current_fee_payment_owner
-    outstanding_fee_payment_owners.first || self
-  end
-
-  def owner_label
-    self.class.name.split('::').last
   end
 
   def membership_fees_paid?

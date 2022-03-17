@@ -1,20 +1,32 @@
 %h2 Fees
-- current_owner = current_user.effective_memberships_owner
 
-- fees = current_owner.outstanding_fee_payment_fees
-- membership = current_owner.membership
+- memberships = current_user.memberships
+- outstanding_owners = current_user.memberships_owners.select { |owner| owner.outstanding_fee_payment_fees.present? }
 
-- if membership.present?
-  - if membership.category.create_renewal_fees?
+- if memberships.present?
+  - if memberships.any? { |membership| membership.category.create_renewal_fees? }
     - date = EffectiveMemberships.Registrar.renewal_fee_date(date: Time.zone.now)
     %p Annual fees become available for purchase on #{date.strftime('%B %e')} of each year.
 
-  - if membership.category.create_late_fees?
+  - if memberships.any? { |membership| membership.category.create_late_fees? }
     - date = EffectiveMemberships.Registrar.late_fee_date(date: Time.zone.now)
     %p Late fees will be applied on #{date.strftime('%B %e')}.
 
-- if fees.present?
-  .alert.alert-warning.mb-3 You have #{pluralize(fees.length , 'outstanding fee')}.
+  - if memberships.any? { |membership| membership.category.create_bad_standing? }
+    - date = EffectiveMemberships.Registrar.bad_standing_date(date: Time.zone.now)
+    %p Memberships with unpaid fees will be marked in bad standing on #{date.strftime('%B %e')}.
+
+- if outstanding_owners.present?
+  .alert.alert-warning.mb-3 You have outstanding fees ready to purchase.
+
+  %ul
+    - outstanding_owners.each do |owner|
+      %li
+        = owner
+
+        - if owner.outstanding_fee_payment_fees.present?
+          = '-'
+          = pluralize(owner.outstanding_fee_payment_fees.length, 'outstanding fee')
 
   %p= link_to 'Pay Fees', effective_memberships.new_fee_payment_path, class: 'btn btn-primary'
 

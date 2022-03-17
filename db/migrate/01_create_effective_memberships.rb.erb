@@ -3,8 +3,10 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
 
     # Categories
     create_table :categories do |t|
+      t.string :category_type       # Individual or Organization
+
       t.string :title
-      t.string :category
+      t.string :category            # Freeform
 
       t.integer :position
 
@@ -119,20 +121,63 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
     add_index :membership_histories, [:owner_id, :owner_type]
     add_index :membership_histories, :start_on
 
+    # Organizations
+    create_table :organizations do |t|
+      t.string    :email
+
+      t.string    :title
+
+      t.string    :phone
+      t.string    :fax
+      t.string    :website
+
+      t.string    :category
+      t.text      :notes
+
+      t.integer   :roles_mask
+      t.boolean   :archived, default: false
+
+      t.integer   :representatives_count, default: 0
+
+      t.datetime :updated_at
+      t.datetime :created_at
+    end
+
+    add_index :organizations, :title
+
+    # Representatives
+    create_table :representatives do |t|
+      t.integer :organization_id
+      t.string :organization_type
+
+      t.integer :user_id
+      t.string :user_type
+
+      t.integer :roles_mask
+
+      t.datetime :updated_at
+      t.datetime :created_at
+    end
+
+    add_index :representatives, [:organization_id, :organization_type]
+    add_index :representatives, [:user_id, :user_type]
+
     # Applicants
     create_table :applicants do |t|
+      t.string :applicant_type
       t.string :token
 
-      t.integer :owner_id
-      t.string :owner_type
+      t.integer :user_id
+      t.string :user_type
+
+      t.integer :organization_id
+      t.string :organization_type
 
       t.integer :category_id
       t.string :category_type
 
       t.integer :from_category_id
       t.string :from_category_type
-
-      t.string :applicant_type
 
       # Acts as Statused
       t.string :status
@@ -169,7 +214,8 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.datetime :created_at
     end
 
-    add_index :applicants, [:owner_id, :owner_type]
+    add_index :applicants, [:user_id, :user_type]
+    add_index :applicants, [:organization_id, :organization_type]
     add_index :applicants, :status
     add_index :applicants, :token
 
@@ -361,11 +407,11 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
     create_table :fee_payments do |t|
       t.string :token
 
-      t.integer :owner_id
-      t.string :owner_type
-
       t.integer :user_id
       t.string :user_type
+
+      t.integer :organization_id
+      t.string :organization_type
 
       t.integer :category_id
       t.string :category_type
@@ -386,7 +432,8 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.datetime :created_at
     end
 
-    add_index :fee_payments, [:owner_id, :owner_type]
+    add_index :fee_payments, [:user_id, :user_type]
+    add_index :fee_payments, [:organization_id, :organization_type]
     add_index :fee_payments, :status
     add_index :fee_payments, :token
 

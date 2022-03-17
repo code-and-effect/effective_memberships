@@ -9,10 +9,18 @@
 
     - if request.path.start_with?('/admin')
       %tr
-        %th= applicant.owner_label
+        %th User
         %td
-          - url = (polymorphic_admin_path(applicant.owner) rescue "/admin/users/#{applicant.owner.to_param}/edit")
-          = link_to(applicant.owner, url)
+          - url = (polymorphic_admin_path(applicant.user) rescue "/admin/users/#{applicant.user.to_param}/edit")
+          = link_to(applicant.user, url)
+
+      %tr
+        %th Organization
+        %td
+          - if applicant.organization.present?
+            = link_to(applicant.organization, effective_memberships.edit_admin_organization_path(applicant.organization))
+          - else
+            None
 
     - if applicant.from_category.present?
       %tr
@@ -21,17 +29,17 @@
 
     %tr
       %th Category
-      %td
-        = applicant.applicant_type
-        %br
-        = applicant.category
+      %td= [applicant.applicant_type, applicant.category].join(' - ')
 
     - if applicant.orders.present?
       %tr
-        %th Orders
+        %th Order#{'s' if applicant.orders.length > 1}
         %td
           - applicant.orders.each do |order|
-            = link_to(order, effective_orders.order_path(order))
+            - if request.path.start_with?('/admin')
+              = link_to(order, effective_orders.edit_admin_order_path(order))
+            - else
+              = link_to(order, effective_orders.order_path(order))
 
     %tr
       %th Status

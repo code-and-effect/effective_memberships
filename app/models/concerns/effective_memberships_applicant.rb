@@ -44,7 +44,8 @@ module EffectiveMembershipsApplicant
     acts_as_wizard(
       start: 'Start',
       select: 'Select Application Type',
-      demographics: 'Demographics',
+      demographics: 'Demographics',         # Individual only. Users fields.
+      organization: 'Organization',         # Organization only. Organization fields.
       education: 'Education',
       course_amounts: 'Courses',
       experience: 'Work Experience',
@@ -73,8 +74,11 @@ module EffectiveMembershipsApplicant
     attr_accessor :approved_membership_date
 
     # Application Namespace
-    belongs_to :owner, polymorphic: true
-    accepts_nested_attributes_for :owner
+    belongs_to :user, polymorphic: true
+    accepts_nested_attributes_for :user
+
+    belongs_to :organization, polymorphic: true, optional: true
+    accepts_nested_attributes_for :organization
 
     belongs_to :category, polymorphic: true, optional: true
     belongs_to :from_category, polymorphic: true, optional: true
@@ -142,7 +146,7 @@ module EffectiveMembershipsApplicant
       timestamps
     end
 
-    scope :deep, -> { includes(:owner, :category, :from_category, :orders) }
+    scope :deep, -> { includes(:user, :organization, :category, :from_category, :orders) }
     scope :sorted, -> { order(:id) }
 
     scope :in_progress, -> { where.not(status: [:approved, :declined]) }
@@ -150,14 +154,15 @@ module EffectiveMembershipsApplicant
 
     scope :not_draft, -> { where.not(status: :draft) }
 
-    # Set Apply to Join or Reclassification
-    before_validation(if: -> { new_record? && owner.present? }) do
-      self.applicant_type ||= (owner.membership.blank? ? 'Apply to Join' : 'Apply to Reclassify')
-      self.from_category ||= owner.membership&.category
-    end
+    scope :for, -> (user) {
+      raise('expected a effective memberships user') unless user.class.try(:effective_memberships_user?)
+      where(user: user).or(where(organization: user.organizations))
+    }
 
-    before_validation(if: -> { current_step == :select && category_id.present? }) do
-      self.category_type ||= EffectiveMemberships.Category.name
+    # Set Apply to Join or Reclassification
+    before_validation(if: -> { (new_record? || current_step == :select) && owner.present? }) do
+      self.applicant_type = (owner.membership.blank? ? 'Apply to Join' : 'Apply to Reclassify')
+      self.from_category = owner.membership&.category
     end
 
     before_validation(if: -> { current_step == :experience }) do
@@ -165,24 +170,26 @@ module EffectiveMembershipsApplicant
     end
 
     # All Steps validations
-    validates :owner, presence: true
+    validates :user, presence: true
     validates :from_category, presence: true, if: -> { reclassification? }
 
     validate(if: -> { reclassification? }) do
       errors.add(:category_id, "can't reclassify to existing category") if category_id == from_category_id
     end
 
-    # Start Step
-    with_options(if: -> { current_step == :start && owner.present? }) do
-      validate do
-        errors.add(:base, 'may not have outstanding fees') if owner.outstanding_fee_payment_fees.present?
-      end
+    validate(if: -> { category.present? }) do
+      self.errors.add(:organization_id, "can't be blank when organization category") if category.organization? && organization.blank?
+      self.errors.add(:organization_id, "must be blank when individual category") if category.individual? && organization.present?
     end
 
     # Select Step
     with_options(if: -> { current_step == :select || has_completed_step?(:select) }) do
       validates :applicant_type, presence: true
       validates :category, presence: true
+    end
+
+    validate(if: -> { current_step == :select && owner.present? }) do
+      self.errors.add(:base, 'may not have outstanding fees') if owner.outstanding_fee_payment_fees.present?
     end
 
     # Applicant Educations Step
@@ -291,6 +298,14 @@ module EffectiveMembershipsApplicant
 
         # Special logic for stamp step
         applicant_steps.delete(:stamp) unless apply_to_join?
+        applicant_steps.delete(:organization) unless category&.organization?
+
+        # change_wizard_steps is defined in effective_resources acts_as_wizard
+        applicant_steps = change_wizard_steps(applicant_steps)
+
+        unless applicant_steps.kind_of?(Array) && applicant_steps.all? { |step| step.kind_of?(Symbol) }
+          raise('expected change_wizard_steps to return an Array of steps with no nils')
+        end
 
         wizard_steps.select do |step|
           required_steps.include?(step) || category.blank? || applicant_steps.include?(step)
@@ -370,6 +385,18 @@ module EffectiveMembershipsApplicant
     end
   end
 
+  def owner
+    organization || user
+  end
+
+  def owner_symbol
+    organization? ? :organization : :user
+  end
+
+  def build_organization(params = {})
+    self.organization = EffectiveMemberships.Organization.new(params)
+  end
+
   def apply_to_join?
     applicant_type == 'Apply to Join'
   end
@@ -378,8 +405,12 @@ module EffectiveMembershipsApplicant
     applicant_type == 'Apply to Reclassify'
   end
 
-  def owner_label
-    owner_type.to_s.split('::').last
+  def individual?
+    !(owner.kind_of?(EffectiveMemberships.Organization) && category&.organization?)
+  end
+
+  def organization?
+    owner.kind_of?(EffectiveMemberships.Organization) && category&.organization?
   end
 
   def in_progress?
@@ -399,9 +430,11 @@ module EffectiveMembershipsApplicant
     when 'draft'
       "Applicant has not yet completed the #{category} wizard steps or paid to submit this application. This application will transition to 'submitted' after payment has been collected."
     when 'submitted'
-      summary = "Application has been purchased and submitted. The following tasks must be done before this application will transition to 'completed':"
+      summary = "Application has been purchased and submitted."
+      tasks = "The following tasks remain before it can be completed:"
+      approval = "Waiting on approval."
       items = completed_requirements.map { |item, done| "<li>#{item}: #{done ? 'Complete' : 'Incomplete'}</li>" }.join
-      "<p>#{summary}</p><ul>#{items}</ul>"
+      completed_requirements.present? ? "<p>#{summary} #{tasks}</p><ul>#{items}</ul>" : "#{summary} #{approval}"
     when 'completed'
       if applicant_reviews_required?
         "All required materials have been provided. This application will transition to 'reviewed' after all reviewers have voted."
@@ -425,11 +458,11 @@ module EffectiveMembershipsApplicant
   def can_apply_categories_collection
     categories = EffectiveMemberships.Category.sorted.can_apply
 
-    if owner.blank? || owner.membership.blank?
+    if user.blank? || !user.is?(:member)
       return categories.where(can_apply_new: true)
     end
 
-    category_ids = owner.membership.category_ids
+    category_ids = user.memberships.map(&:category_ids).flatten
 
     categories.select do |cat|
       cat.can_apply_existing? ||
@@ -503,10 +536,6 @@ module EffectiveMembershipsApplicant
     )
   end
 
-  # The submit! method used to be here
-  # But it needs to be inside the included do block
-  # So see above. Sorry.
-
   def applicant_references_required?
     min_applicant_references > 0
   end
@@ -514,9 +543,13 @@ module EffectiveMembershipsApplicant
   # When an application is submitted, these must be done to go to completed.
   # An Admin can override this and just set them to completed.
   def completed_requirements
-    {
-      'Applicant References' => (!applicant_references_required? || applicant_references.count(&:completed?) >= min_applicant_references)
-    }
+    if category&.applicant_wizard_steps&.include?(:references) || applicant_references_required?
+      {
+        'Applicant References' => (!applicant_references_required? || applicant_references.count(&:completed?) >= min_applicant_references)
+      }
+    else
+      {}
+    end
   end
 
   def complete!

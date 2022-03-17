@@ -16,6 +16,10 @@ module EffectiveMembershipsCategory
   module ClassMethods
     def effective_memberships_category?; true; end
 
+    def category_types
+      ['Individual', 'Organization']
+    end
+
     def categories
       []
     end
@@ -35,6 +39,8 @@ module EffectiveMembershipsCategory
     has_many :membership_categories, class_name: 'Effective::MembershipCategory', as: :category
 
     effective_resource do
+      category_type         :string
+
       title                 :string
       category              :string
       position              :integer
@@ -110,17 +116,18 @@ module EffectiveMembershipsCategory
     scope :create_bad_standing, -> { where(create_bad_standing: true) }
 
     validates :title, presence: true, uniqueness: true
-
+    validates :category_type, presence: true
     validates :position, presence: true
 
-    after_initialize(if: -> { new_record? }) do
-      self.applicant_wizard_steps = EffectiveMemberships.Applicant.all_wizard_steps
-      self.applicant_review_wizard_steps = EffectiveMemberships.ApplicantReview.all_wizard_steps
-      self.fee_payment_wizard_steps = EffectiveMemberships.FeePayment.all_wizard_steps
+    before_validation do
+      self.applicant_wizard_steps = EffectiveMemberships.Applicant.all_wizard_steps if applicant_wizard_steps.blank?
+      self.applicant_review_wizard_steps = EffectiveMemberships.ApplicantReview.all_wizard_steps if applicant_review_wizard_steps.blank?
+      self.fee_payment_wizard_steps = EffectiveMemberships.FeePayment.all_wizard_steps if fee_payment_wizard_steps.blank?
     end
 
     before_validation do
       self.position ||= (self.class.pluck(:position).compact.max || -1) + 1
+      self.category_type ||= self.class.category_types.first
     end
 
     with_options(if: -> { can_apply? }) do
@@ -155,6 +162,14 @@ module EffectiveMembershipsCategory
     can_apply_new? || can_apply_existing? || can_apply_restricted?
   end
 
+  def individual?
+    category_type == 'Individual'
+  end
+
+  def organization?
+    category_type == 'Organization'
+  end
+
   def prorated_fee(date:)
     send("prorated_#{date.strftime('%b').downcase}").to_i
   end
@@ -165,6 +180,18 @@ module EffectiveMembershipsCategory
 
   def can_apply_restricted_ids
     Array(self[:can_apply_restricted_ids]) - [nil, '']
+  end
+
+  def optional_applicant_wizard_steps
+    applicant_wizard_steps - EffectiveMemberships.Applicant.required_wizard_steps
+  end
+
+  def optional_fee_payment_wizard_steps
+    fee_payment_wizard_steps - EffectiveMemberships.FeePayment.required_wizard_steps
+  end
+
+  def optional_applicant_review_wizard_steps
+    applicant_review_wizard_steps - EffectiveMemberships.ApplicantReview.required_wizard_steps
   end
 
   def applicant_wizard_steps

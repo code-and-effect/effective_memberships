@@ -1,0 +1,10 @@
+%h2 Organizations
+
+- if current_user.organizations.present?
+  %p You are a representative for #{pluralize(current_user.organizations.length, 'organization')}.
+
+  - datatable = EffectiveResources.best('EffectiveOrganizationsDatatable').new(self, namespace: :effective)
+  = render_datatable(datatable, simple: true)
+
+- else
+  %p You are not a representative. When you create an organization, or if someone else adds you to their organization, we'll show them here.
