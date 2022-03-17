@@ -158,7 +158,7 @@ GEM
       effective_roles
       rails (>= 6.0.0)
       wicked
-    effective_resources (1.15.0)
+    effective_resources (1.17.0)
       rails (>= 4.0.0)
     effective_roles (2.3.0)
       effective_resources
