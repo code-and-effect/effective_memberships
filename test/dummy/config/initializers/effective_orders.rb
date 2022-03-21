@@ -58,7 +58,7 @@ EffectiveOrders.setup do |config|
   # Mark as Paid
   # Mark an order as paid without going through a processor
   # This is accessed via the admin screens only. Must have can?(:admin, :effective_orders)
-  config.mark_as_paid_enabled = false
+  config.mark_as_paid_enabled = true
 
   # Pretend Purchase
   # Display a 'Purchase order' button on the Checkout screen allowing the user
