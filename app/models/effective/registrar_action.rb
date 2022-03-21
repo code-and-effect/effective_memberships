@@ -20,6 +20,12 @@ module Effective
     # Assign
     attr_accessor :category_ids
 
+    # Mark Fees Paid - Order Attributes
+    attr_accessor :payment_provider
+    attr_accessor :payment_card
+    attr_accessor :note_to_buyer
+    attr_accessor :note_internal
+
     # All Action Validations
     validates :current_action, presence: true
     validates :current_user, presence: true
@@ -65,7 +71,7 @@ module Effective
 
     def fees_paid!
       update!(current_action: :fees_paid)
-      EffectiveMemberships.Registrar.fees_paid!(owner)
+      EffectiveMemberships.Registrar.fees_paid!(owner, order_attributes: order_attributes)
     end
 
     def remove!
@@ -101,6 +107,15 @@ module Effective
 
     def categories
       EffectiveMemberships.Category.where(id: @category_ids) if @category_ids
+    end
+
+    def order_attributes
+      {
+        payment_provider: @payment_provider.presence,
+        payment_card: @payment_card.presence,
+        note_to_buyer: @note_to_buyer.presence,
+        note_internal: @note_internal.presence
+      }.compact
     end
 
     def skip_fees?

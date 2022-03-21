@@ -25,6 +25,22 @@
       = f.check_box :current_action, label: 'Yes, mark this members fees paid in full'
 
       = f.show_if :current_action, true do
+        - if fees.blank?
+          %p There are no outstanding fee payment fees, so no order will be created.
+        - else
+          %p An order will be created and marked as paid with the following information:
+
+          = f.select :payment_provider, EffectiveOrders.admin_payment_providers, required: true
+
+          = f.text_field :payment_card,
+            label: 'Payment card type, cheque or transaction number',
+            hint: 'Do not enter credit card numbers here, or anywhere.'
+
+          .row
+            .col
+              = f.text_area :note_to_buyer, hint: 'This message will be displayed to the buyer on the receipt.'
+            .col
+              = f.text_area :note_internal, hint: 'For or internal admin use only. This note will never be displayed to the buyer.'
 
         = f.submit 'Mark Fees Paid', border: false, center: true,
           'data-confirm': "Really mark #{f.object.owner} fees paid?"

@@ -207,9 +207,10 @@ module EffectiveMembershipsRegistrar
     save!(owner, date: date)
   end
 
-  def fees_paid!(owner, date: nil)
+  def fees_paid!(owner, date: nil, order_attributes: nil)
     raise('expecting a memberships owner') unless owner.class.respond_to?(:effective_memberships_owner?)
     raise('expected a member') unless owner.membership.present?
+    raise('expected a Hash of attributes') if order_attributes.present? && !order_attributes.kind_of?(Hash)
 
     # Date
     date ||= Time.zone.now
@@ -219,6 +220,7 @@ module EffectiveMembershipsRegistrar
 
     if owner.outstanding_fee_payment_fees.present?
       order = Effective::Order.new(items: owner.outstanding_fee_payment_fees, user: owner)
+      order.assign_attributes(order_attributes) if order_attributes.present?
       order.mark_as_purchased!
     end
 

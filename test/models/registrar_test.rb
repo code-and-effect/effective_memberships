@@ -93,11 +93,30 @@ class RegistrarTest < ActiveSupport::TestCase
     assert owner.membership.fees_paid_period.blank?
     assert owner.membership.fees_paid_through_period.blank?
 
-    assert EffectiveMemberships.Registrar.fees_paid!(owner)
+    def order_attributes
+      {
+        payment_provider: @payment_provider.presence,
+        payment_card: @payment_card.presence,
+        note_to_buyer: @note_to_buyer.presence,
+        note_internal: @note_internal.presence
+      }.compact
+    end
+
+    order_attributes = { payment_provider: 'cheque', payment_card: '12345', note_to_buyer: 'note to buyer', note_internal: 'note internal'}
+
+    assert EffectiveMemberships.Registrar.fees_paid!(owner, order_attributes: order_attributes)
 
     assert_equal 0, owner.outstanding_fee_payment_fees.length
     assert_equal period, owner.membership.fees_paid_period
     assert_equal period.end_of_year, owner.membership.fees_paid_through_period
+
+    order = owner.orders.last
+
+    assert order.purchased?
+    assert_equal 'cheque', order.payment_provider
+    assert_equal '12345', order.payment_card
+    assert_equal 'note to buyer', order.note_to_buyer
+    assert_equal 'note internal', order.note_internal
   end
 
   test 'remove' do
