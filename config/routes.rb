@@ -43,7 +43,8 @@ EffectiveMemberships::Engine.routes.draw do
     resources :applicant_course_names, except: [:show]
 
     resources :fee_payments, only: [:index, :show]
-    resources :memberships, only: [:index]
+    resources :memberships, only: [:index, :update]
+    resources :membership_histories, except: [:show]
     resources :registrar_actions, only: [:create]
 
     resources :organizations, except: [:show] do

@@ -36,5 +36,20 @@ module Effective
       'membership history'
     end
 
+    # These two accessors are for the memberships history form.
+    # But we just assign categories and category_ids directly in registrar.
+    def membership_categories
+      category_ids.present? ? EffectiveMemberships.Category.where(id: category_ids) : []
+    end
+
+    def membership_category_ids
+      membership_categories.map(&:id)
+    end
+
+    def membership_category_ids=(ids)
+      categories = EffectiveMemberships.Category.where(id: ids)
+      assign_attributes(categories: categories.map(&:to_s), category_ids: categories.map(&:id))
+    end
+
   end
 end

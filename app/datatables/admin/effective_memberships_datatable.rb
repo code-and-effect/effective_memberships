@@ -69,8 +69,8 @@ module Admin
 
       raise('expected an owner_id, not user_id') if attributes[:user_id].present?
 
-      if attributes[:owner_id].present?
-        memberships = memberships.where(owner_id: attributes[:owner_id])
+      if attributes[:owner_id].present? && attributes[:owner_type].present?
+        memberships = memberships.where(owner_id: attributes[:owner_id], owner_type: attributes[:owner_type])
       end
 
       memberships

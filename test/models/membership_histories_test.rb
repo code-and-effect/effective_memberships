@@ -33,4 +33,26 @@ class MembershipHistoriesTest < ActiveSupport::TestCase
     assert_equal [first_category.to_s], first.categories
     assert_equal [first_category.id], first.category_ids
   end
+
+  test 'membership categories form assigns categories and category_ids' do
+    owner = build_member()
+
+    history = owner.membership_histories.first
+    assert history.present?
+
+    assert history.category_ids.present?
+    assert history.categories.present?
+    assert history.membership_category_ids.present?
+
+    assert_equal history.category_ids, history.membership_category_ids
+    assert_equal history.categories.map(&:to_s), history.membership_categories.map(&:to_s)
+
+    categories = EffectiveMemberships.Category.all
+
+    history.update!(membership_category_ids: categories.map(&:id))
+
+    assert_equal history.category_ids, categories.map(&:id)
+    assert_equal history.categories, categories.map(&:to_s)
+  end
+
 end
