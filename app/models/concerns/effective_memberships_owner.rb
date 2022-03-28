@@ -265,4 +265,52 @@ module EffectiveMembershipsOwner
     membership_histories.find { |history| (history.start_on..history.end_on).cover?(date) } # Ruby 2.6 supports endless ranges
   end
 
+  # Point out busted data
+  def membership_history_errors
+    return unless membership.present?
+    return unless membership_histories.present?
+
+    errors = []
+    history = membership_histories.first
+    last_history = membership_histories.last
+
+    # Check membership joined on date matches first history start date
+    if membership.joined_on != history.start_on
+      errors << "The joined date #{membership.joined_on.strftime('%F')} does not match the first history start date of #{history.start_on.strftime('%F')}. Please change the first history start date to #{membership.joined_on.strftime('%F')} or update the joined date above."
+    end
+
+    # Check that there is a membership history row if the registered date is unique
+    if membership.joined_on != membership.registration_on && membership_histories.none? { |mh| mh.start_on == membership.registration_on }
+      errors << "The registered date #{membership.registration_on.strftime('%F')} is missing a history with this date. Please create a history with a start date of #{membership.registration_on.strftime('%F')} or update the registered date above."
+    end
+
+    # Check numbers
+    if membership.number.present? && membership_histories.none? { |history| history.number == membership.number }
+      errors << "The membership number ##{membership.number} is missing a history with this number. Please create a history with the #{membership.number} number or update the membership number above."
+    end
+
+    # Check that the last history does not have an end_on date
+
+    if last_history.end_on.present? && !last_history.removed?
+      errors << "The most recent history must have a blank end date. Please remove the end date of the most recent history entry or create another history."
+    end
+
+    if membership_histories.any? { |history| history.end_on.blank? && history != last_history }
+      errors << "The end date must be present for all past histories. Please add the end date to all histories, except the most recent history."
+    end
+
+    unless membership_history_continuous?
+      errors << "The start and end dates are overlapping or non-continuous. Please make sure each history start date has a matching history end date"
+    end
+
+    errors
+  end
+
+  def membership_history_continuous?
+    membership_histories.all? do |history|
+      history.end_on.blank? || (history.end_on.present? && history.removed?) || membership_histories.find { |h| h.start_on == history.end_on }.present?
+    end
+  end
+
+
 end

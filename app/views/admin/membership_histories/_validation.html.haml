@@ -1,0 +1,7 @@
+- raise('expected a memberships owner with a membership') unless owner.present? && owner.try(:membership).present?
+
+- errors = owner.membership_history_errors
+
+- if errors.present?
+  - errors.each do |error|
+    .mb-2.alert.alert-warning= error

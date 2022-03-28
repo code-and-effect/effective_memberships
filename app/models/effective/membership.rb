@@ -2,6 +2,8 @@ module Effective
   class Membership < ActiveRecord::Base
     belongs_to :owner, polymorphic: true
 
+    attr_accessor :current_action
+
     has_many :membership_categories, -> { order(:id) }, inverse_of: :membership, dependent: :delete_all
     accepts_nested_attributes_for :membership_categories
 
@@ -54,7 +56,10 @@ module Effective
 
     before_validation do
       self.registration_on ||= joined_on
-      self.number_as_integer ||= (Integer(number) rescue nil)
+    end
+
+    before_validation(if: -> { number_changed? }) do
+      self.number_as_integer = (Integer(number) rescue nil)
     end
 
     validates :number, presence: true, uniqueness: true
@@ -66,12 +71,29 @@ module Effective
       self.errors.add(:owner_id, 'must be a memberships owner') unless owner.class.effective_memberships_owner?
     end
 
+    validate(if: -> { registration_on.present? && joined_on.present? }) do
+      self.errors.add(:registration_on, 'must match or be greater than the joined date') if registration_on < joined_on
+    end
+
     def self.max_number
       maximum('number_as_integer') || 0
     end
 
     def to_s
-      'membership'
+      return 'membership' if owner.blank?
+
+      summary = [
+        owner.to_s,
+        'is',
+        (categories.to_sentence),
+        'member',
+        "##{number_was}",
+        "who joined #{joined_on&.strftime('%F') || '-'}",
+        ("and last registered #{registration_on.strftime('%F')}" if registration_on > joined_on),
+        (". Membership is Not In Good Standing because #{bad_standing_reason}" if bad_standing?)
+      ].compact.join(' ')
+
+      (summary + '.').html_safe
     end
 
     # We can't use the polymorphic has_many. So this is a helper.

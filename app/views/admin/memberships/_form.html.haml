@@ -1,0 +1,17 @@
+- membership ||= owner.membership
+- owner ||= membership.owner
+
+- if membership.present?
+  = card('Member Information') do
+    = render 'admin/memberships/form_membership', membership: membership
+
+  = card('History') do
+    = render 'admin/membership_histories/validation', owner: owner
+    = render_datatable(Admin::EffectiveMembershipHistoriesDatatable.new(owner: owner), inline: true, simple: true)
+
+- # Always render this one
+= render 'admin/registrar_actions/form', owner: owner
+
+- if membership.blank? && owner.membership_histories.present?
+  = card('History') do
+    = render_datatable(Admin::EffectiveMembershipHistoriesDatatable.new(owner: owner), inline: true, simple: true)

@@ -12,8 +12,6 @@ module Admin
 
       col :owner
 
-      col :number
-
       col :categories, label: 'Category' do |history|
         history.categories.map.with_index do |category, index|
           category_id = history.category_ids[index]
@@ -22,6 +20,8 @@ module Admin
           content_tag(:div, link, class: 'col-resource_item')
         end.join.html_safe
       end
+
+      col :number
 
       col :category_ids, visible: false
 
@@ -35,7 +35,11 @@ module Admin
       raise('expected an owner_id, not user_id') if attributes[:user_id].present?
 
       scope = Effective::MembershipHistory.deep.all
-      scope = scope.where(owner_id: attributes[:owner_id]) if attributes[:owner_id]
+
+      if attributes[:owner_id] && attributes[:owner_type]
+        scope = scope.where(owner_id: attributes[:owner_id], owner_type: attributes[:owner_type])
+      end
+
       scope
     end
 

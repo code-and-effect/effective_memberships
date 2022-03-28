@@ -1,0 +1,19 @@
+= effective_form_with(model: [:admin, membership_history], engine: true) do |f|
+  - if inline_datatable?
+    = f.hidden_field :owner_id
+    = f.hidden_field :owner_type
+  - else
+    - raise('todo')
+    - collection = EffectiveMembershipsOwner.descendants.map { |d| [d.name.to_s, d.members.sorted] }.to_h
+    = f.select :owner_id, collection, polymorphic: true
+
+  = f.date_field :start_on, hint: 'The start date of this period in history. Must be present.'
+
+  = f.date_field :end_on, hint: 'The end date of this period in history. Must be present for all past histories. Must be blank in the most recent history, unless membership removed.'
+  = f.text_field :number, hint: 'The membership number'
+  = f.select :membership_category_ids, EffectiveMemberships.Category.all.sorted, label: 'Membership Categories', hint: 'The membership category or categories held during this period in history.'
+
+  = f.check_box :bad_standing, hint: 'Membership in bad standing'
+  = f.check_box :removed, hint: 'Membership removed'
+
+  = f.submit 'Update History', border: false, center: true, 'data-confirm': "Really update #{f.object.owner}?"

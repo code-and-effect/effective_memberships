@@ -1,18 +1,18 @@
 module Admin
-  class MembershipsController < ApplicationController
+  class MembershipHistoriesController < ApplicationController
     before_action(:authenticate_user!) if defined?(Devise)
     before_action { EffectiveResources.authorize!(self, :admin, :effective_memberships) }
 
     include Effective::CrudController
 
-    submit :save, 'Update Membership',
-      success: -> { "#{resource.owner} has been successfully updated. Please double check the membership history is correct" },
+    submit :save, 'Update History',
+      success: -> { "Membership history successfully updated. Please double check the history is correct." },
       redirect: -> { admin_owners_path(resource) }
 
     private
 
     def permitted_params
-      model = (params.key?(:effective_membership) ? :effective_membership : :membership)
+      model = (params.key?(:effective_membership_history) ? :effective_membership_history : :membership_history)
       params.require(model).permit!
     end
 
