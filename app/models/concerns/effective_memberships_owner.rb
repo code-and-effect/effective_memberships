@@ -293,13 +293,9 @@ module EffectiveMembershipsOwner
 
     if last_history.end_on.present? && !last_history.removed?
       errors << "The most recent history must have a blank end date. Please remove the end date of the most recent history entry or create another history."
-    end
-
-    if membership_histories.any? { |history| history.end_on.blank? && history != last_history }
+    elsif membership_histories.any? { |history| history.end_on.blank? && history != last_history }
       errors << "The end date must be present for all past histories. Please add the end date to all histories, except the most recent history."
-    end
-
-    unless membership_history_continuous?
+    elsif !membership_history_continuous?
       errors << "The start and end dates are overlapping or non-continuous. Please make sure each history start date has a matching history end date"
     end
 

@@ -17,6 +17,6 @@
     = f.date_field :registration_on, label: 'Registered', hint: 'When the membership category last changed'
     = f.text_field :number, hint: 'The membership number. Must be unique.'
 
-    %p.text-muted To update membership categories, use the 'Assign' or 'Reclassify' actions below
+    %p.text-muted To update the current membership categories, use the 'Assign' or 'Reclassify' actions below
 
     = f.submit 'Update Membership', border: false, center: true, 'data-confirm': "Really update #{f.object.owner}?"
