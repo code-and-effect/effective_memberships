@@ -160,8 +160,20 @@ module EffectiveMembershipsOwner
     fee
   end
 
+  # These should be singular fees anyway.
+  def membership_period_fee(category:, period:, except: nil)
+    raise('expected except to be a string like Renewal') if except.present? && !except.kind_of?(String)
+    fees.find { |fee| fee.membership_period_fee? && fee.period == period && fee.category_id == category.id && fee.category_type == category.class.name && (except.blank? || fee.fee_type != except) }
+  end
+
   def build_renewal_fee(category:, period:, late_on: nil, bad_standing_on: nil)
     raise('must have an existing membership') unless membership.present?
+
+    # Sanity check.
+    # If there's already a purchased or unpurchased Prorated (or other membership period advancing fee) in this period
+    # We shouldn't be building renewal fees for the same period a prorated fee is purcahsed in
+    prorated = membership_period_fee(category: category, period: period, except: 'Renewal')
+    raise('must not have an existing membership_period (prorated) fee in this period') if prorated.present?
 
     fee = fees.find { |fee| fee.fee_type == 'Renewal' && fee.period == period && fee.category_id == category.id && fee.category_type == category.class.name }
     return fee if fee&.purchased?

@@ -42,18 +42,6 @@ module Effective
       .or(where(fees_paid_period: nil))
     }
 
-    scope :create_renewal_fees, -> (period = nil) {
-      deep.with_unpaid_fees_through(period).where.not(fees_paid_period: nil) # Must have purchased a Prorated or Renewal Fee before
-    }
-
-    scope :create_late_fees, -> (period = nil) {
-      deep.with_unpaid_fees_through(period).where.not(fees_paid_period: nil) # Must have purchased a Prorated or Renewal Fee before
-    }
-
-    scope :create_bad_standing, -> (period = nil) {
-      deep.with_unpaid_fees_through(period).where.not(fees_paid_period: nil) # Must have purchased a Prorated or Renewal Fee before
-    }
-
     before_validation do
       self.registration_on ||= joined_on
     end
@@ -132,6 +120,19 @@ module Effective
 
     def fees_paid?
       fees_paid_period == EffectiveMemberships.Registrar.current_period
+    end
+
+    def change_fees_paid_period
+      fees_paid_period
+    end
+
+    def change_fees_paid_period=(date)
+      date = (date.respond_to?(:strftime) ? date : Date.parse(date))
+
+      period = EffectiveMemberships.Registrar.period(date: date)
+      period_end_on = EffectiveMemberships.Registrar.period_end_on(date: date)
+
+      assign_attributes(fees_paid_period: period, fees_paid_through_period: period_end_on)
     end
 
   end

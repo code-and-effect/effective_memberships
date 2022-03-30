@@ -10,8 +10,8 @@ class RegistrarCreateFeesTest < ActiveSupport::TestCase
     assert_equal 3, Effective::Membership.count
     assert_equal 3, Effective::Membership.where(fees_paid_period: period).count
 
-    assert_equal 0, Effective::Membership.create_renewal_fees.count
-    assert_equal 0, Effective::Membership.create_renewal_fees(period).count
+    assert_equal 0, Effective::Membership.with_unpaid_fees_through.count
+    assert_equal 0, Effective::Membership.with_unpaid_fees_through(period).count
 
     EffectiveMemberships.Registrar.create_fees!
     assert_equal 0, Effective::Fee.where(category: 'Renewal').count
@@ -30,8 +30,8 @@ class RegistrarCreateFeesTest < ActiveSupport::TestCase
     Effective::Fee.update_all(period: last_period)
 
     # Create Fees for this period scopes
-    assert_equal 3, Effective::Membership.create_renewal_fees.count
-    assert_equal 3, Effective::Membership.create_renewal_fees(period).count
+    assert_equal 3, Effective::Membership.with_unpaid_fees_through.count
+    assert_equal 3, Effective::Membership.with_unpaid_fees_through(period).count
 
     # There are no Renewal fees so far
     assert_equal 0, Effective::Fee.where(fee_type: 'Renewal').count

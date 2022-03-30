@@ -110,11 +110,6 @@ module EffectiveMembershipsCategory
       .or(where(can_apply_restricted: true))
     }
 
-    # For the create_fees rake task
-    scope :create_renewal_fees, -> { where(create_renewal_fees: true) }
-    scope :create_late_fees, -> { where(create_late_fees: true) }
-    scope :create_bad_standing, -> { where(create_bad_standing: true) }
-
     validates :title, presence: true, uniqueness: true
     validates :category_type, presence: true
     validates :position, presence: true

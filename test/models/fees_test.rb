@@ -37,7 +37,7 @@ class FeesTest < ActiveSupport::TestCase
   end
 
   test 'build renewal fee' do
-    owner = build_member()
+    owner = build_member(date: EffectiveMemberships.Registrar.last_period)
     category = owner.membership.category
 
     now = Time.zone.now
@@ -66,8 +66,32 @@ class FeesTest < ActiveSupport::TestCase
     assert_equal fee, fee3
   end
 
-  test 'build late fee' do
+  test 'building a renewal year in the same year as a prorated raises an error' do
     owner = build_member()
+    category = owner.membership.category
+
+    now = Time.zone.now
+    period = EffectiveMemberships.Registrar.current_period
+    late_on = EffectiveMemberships.Registrar.late_fee_date(period: period)
+    bad_standing_on = EffectiveMemberships.Registrar.bad_standing_date(period: period)
+
+    # Assert a prorated fee exists for this category
+    existing = owner.membership_period_fee(category: category, period: period)
+    assert existing.present?
+    assert_equal 'Prorated', existing.fee_type
+
+    # Build the fee
+    retval = begin
+      owner.build_renewal_fee(category: category, period: period, late_on: late_on, bad_standing_on: bad_standing_on)
+    rescue => e
+      e.message
+    end
+
+    assert_equal 'must not have an existing membership_period (prorated) fee in this period', retval
+  end
+
+  test 'build late fee' do
+    owner = build_member(date: EffectiveMemberships.Registrar.last_period)
     category = owner.membership.category
 
     now = Time.zone.now

@@ -1,13 +1,13 @@
 module EffectiveMembershipsTestBuilder
 
-  def build_member(category: nil, type: :user)
+  def build_member(category: nil, type: :user, date: nil)
     category ||= Effective::Category.where(title: (type == :user ? 'Full Member' : 'Corporate')).first!
 
     user = build_user_with_address()
     organization = build_organization_with_address() if type == :organization
     owner = (organization || user)
 
-    EffectiveMemberships.Registrar.register!(owner, to: category)
+    EffectiveMemberships.Registrar.register!(owner, to: category, date: date)
 
     fp = EffectiveMemberships.FeePayment.new(user: user, organization: organization)
     fp.ready!

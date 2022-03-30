@@ -33,6 +33,15 @@ module EffectiveMembershipsRegistrar
     raise('to be implemented by app registrar')
   end
 
+  # Should two could be overridden if we do non 1-year periods
+  def advance_period(period:, number:)
+    period.advance(years: number).beginning_of_year
+  end
+
+  def period_end_on(date:)
+    period(date: date).end_of_year
+  end
+
   def assign!(owner, categories:, date: nil, number: nil)
     categories = Array(categories)
 
@@ -243,18 +252,41 @@ module EffectiveMembershipsRegistrar
     period(date: Time.zone.now)
   end
 
+  def last_period
+    advance_period(period: current_period, number: -1)
+  end
+
   # Returns a date of Jan 1, Year
   def period(date:)
     cutoff = renewal_fee_date(date: date) # period_end_on
-    period = (date < cutoff) ? date.beginning_of_year : date.advance(years: 1).beginning_of_year
+    period = (date < cutoff) ? advance_period(period: date, number: 0) : advance_period(period: date, number: 1)
     period.to_date
   end
 
-  def period_end_on(date:)
-    period(date: date).end_of_year
+  # This is only used for a form collection on admin memberships
+  def periods(from:, to: nil)
+    to ||= Time.zone.now
+
+    raise('expected to date') unless to.respond_to?(:strftime)
+    raise('expected from date') unless from.respond_to?(:strftime)
+
+    from = period(date: from)
+    to = period(date: to)
+
+    retval = []
+
+    loop do
+      retval << from
+      from = advance_period(period: from, number: 1)
+      break if from > to
+    end
+
+    retval
   end
 
+
   # This is intended to be run once per day in a rake task
+  # rake effective_memberships:create_fees
   # Create Renewal and Late fees
   def create_fees!(period: nil, late_on: nil, bad_standing_on: nil)
     # The current period, based on Time.zone.now
@@ -263,12 +295,16 @@ module EffectiveMembershipsRegistrar
     bad_standing_on ||= bad_standing_date(period: period)
 
     # Create Renewal Fees
-    Effective::Membership.create_renewal_fees(period).find_each do |membership|
-
+    Effective::Membership.deep.with_unpaid_fees_through(period).find_each do |membership|
       membership.categories.select(&:create_renewal_fees?).map do |category|
+        existing = membership.owner.membership_period_fee(category: category, period: period, except: 'Renewal')
+        next if existing.present? # This might be an existing Prorated fee
+
         fee = membership.owner.build_renewal_fee(category: category, period: period, late_on: late_on, bad_standing_on: bad_standing_on)
         raise("expected build_renewal_fee to return a fee for period #{period}") unless fee.kind_of?(Effective::Fee)
         next if fee.purchased?
+
+        puts("Created renewal fee for #{membership.owner}") if fee.new_record? && !Rails.env.test?
 
         fee.save!
       end
@@ -277,7 +313,7 @@ module EffectiveMembershipsRegistrar
     GC.start
 
     # Create Late Fees
-    Effective::Membership.create_late_fees(period).find_each do |membership|
+    Effective::Membership.deep.with_unpaid_fees_through(period).find_each do |membership|
       membership.categories.select(&:create_late_fees?).map do |category|
         fee = membership.owner.build_late_fee(category: category, period: period)
         next if fee.blank? || fee.purchased?
