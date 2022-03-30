@@ -48,7 +48,7 @@ module Admin
       end
 
       if attributes[:user_id].present?
-        applicants = applicants.where(user_id: attributes[:owner_id])
+        applicants = applicants.where(user_id: attributes[:user_id])
       end
 
       if attributes[:organization_id].present?
