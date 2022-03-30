@@ -25,7 +25,7 @@ module Effective
     def permitted_params
       permitted = params.require(:effective_applicant_reference).permit!.except(:token, :last_notified_at, :status, :status_steps)
 
-      if current_user && current_user.effective_memberships_owners.include?(resource.applicant&.owner)
+      if current_user && current_user.memberships_owners.include?(resource.applicant&.owner)
         permitted.except(:reservations, :reservations_reason, :work_history, :accept_declaration)
       else
         permitted
