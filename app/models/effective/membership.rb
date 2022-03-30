@@ -122,5 +122,18 @@ module Effective
       fees_paid_period == EffectiveMemberships.Registrar.current_period
     end
 
+    def change_fees_paid_period
+      fees_paid_period
+    end
+
+    def change_fees_paid_period=(date)
+      date = (date.respond_to?(:strftime) ? date : Date.parse(date))
+
+      period = EffectiveMemberships.Registrar.period(date: date)
+      period_end_on = EffectiveMemberships.Registrar.period_end_on(date: date)
+
+      assign_attributes(fees_paid_period: period, fees_paid_through_period: period_end_on)
+    end
+
   end
 end

@@ -173,7 +173,7 @@ module EffectiveMembershipsOwner
     # If there's already a purchased or unpurchased Prorated (or other membership period advancing fee) in this period
     # We shouldn't be building renewal fees for the same period a prorated fee is purcahsed in
     prorated = membership_period_fee(category: category, period: period, except: 'Renewal')
-    raise('should not have an existing prorated/membership_period fee in this period') if prorated.present?
+    raise('must not have an existing membership_period (prorated) fee in this period') if prorated.present?
 
     fee = fees.find { |fee| fee.fee_type == 'Renewal' && fee.period == period && fee.category_id == category.id && fee.category_type == category.class.name }
     return fee if fee&.purchased?
