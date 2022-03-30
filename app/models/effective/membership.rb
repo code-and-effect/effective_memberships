@@ -42,18 +42,6 @@ module Effective
       .or(where(fees_paid_period: nil))
     }
 
-    scope :create_renewal_fees, -> (period = nil) {
-      deep.with_unpaid_fees_through(period).where.not(fees_paid_period: nil) # Must have purchased a Prorated or Renewal Fee before
-    }
-
-    scope :create_late_fees, -> (period = nil) {
-      deep.with_unpaid_fees_through(period).where.not(fees_paid_period: nil) # Must have purchased a Prorated or Renewal Fee before
-    }
-
-    scope :create_bad_standing, -> (period = nil) {
-      deep.with_unpaid_fees_through(period).where.not(fees_paid_period: nil) # Must have purchased a Prorated or Renewal Fee before
-    }
-
     before_validation do
       self.registration_on ||= joined_on
     end

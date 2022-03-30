@@ -263,9 +263,11 @@ module EffectiveMembershipsRegistrar
     bad_standing_on ||= bad_standing_date(period: period)
 
     # Create Renewal Fees
-    Effective::Membership.create_renewal_fees(period).find_each do |membership|
-
+    Effective::Membership.deep.with_unpaid_fees_through(period).find_each do |membership|
       membership.categories.select(&:create_renewal_fees?).map do |category|
+        existing = membership.owner.membership_period_fee(category: category, period: period, except: 'Renewal')
+        next if existing.present? # This will be a Prorated fee
+
         fee = membership.owner.build_renewal_fee(category: category, period: period, late_on: late_on, bad_standing_on: bad_standing_on)
         raise("expected build_renewal_fee to return a fee for period #{period}") unless fee.kind_of?(Effective::Fee)
         next if fee.purchased?
@@ -277,7 +279,7 @@ module EffectiveMembershipsRegistrar
     GC.start
 
     # Create Late Fees
-    Effective::Membership.create_late_fees(period).find_each do |membership|
+    Effective::Membership.deep.with_unpaid_fees_through(period).find_each do |membership|
       membership.categories.select(&:create_late_fees?).map do |category|
         fee = membership.owner.build_late_fee(category: category, period: period)
         next if fee.blank? || fee.purchased?

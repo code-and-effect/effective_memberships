@@ -17,6 +17,10 @@ module Admin
       col :tax_exempt
       col :qb_item_name, visible: false
 
+      col :create_renewal_fees, visible: false
+      col :create_late_fees, visible: false
+      col :create_bad_standing, visible: false
+
       col :category_type, search: EffectiveMemberships.Category.category_types
 
       col :optional_applicant_wizard_steps, label: 'Applicant Steps'
