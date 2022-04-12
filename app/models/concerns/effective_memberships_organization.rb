@@ -23,6 +23,7 @@ module EffectiveMembershipsOrganization
     effective_memberships_owner
 
     acts_as_addressable :billing # effective_addresses
+    acts_as_archived unless respond_to?(:acts_as_archived?)
     log_changes(except: [:representatives, :users]) if respond_to?(:log_changes)
 
     # rich_text_body

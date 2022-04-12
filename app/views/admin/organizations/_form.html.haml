@@ -5,7 +5,7 @@
   - if organization.persisted?
     - if can?(:index, Effective::Membership)
       = tab 'Membership' do
-        = render 'admin/registrar_actions/form', owner: organization
+        = render 'admin/memberships/form', owner: organization
 
     = tab 'Representatives' do
       = render_datatable(Admin::EffectiveRepresentativesDatatable.new(organization: organization), inline: true, namespace: :admin)
@@ -17,10 +17,6 @@
     - if can?(:index, EffectiveMemberships.FeePayment)
       = tab 'Fee Payments' do
         = render_inline_datatable(Admin::EffectiveFeePaymentsDatatable.new(organization: organization))
-
-    - if can?(:index, Effective::MembershipHistory)
-      = tab 'History' do
-        = render_datatable(Admin::EffectiveMembershipHistoriesDatatable.new(owner: organization))
 
     - if can?(:index, Effective::Order)
       = tab 'Orders' do

@@ -1,7 +1,12 @@
 module Admin
   class EffectiveOrganizationsDatatable < Effective::Datatable
-    datatable do
+    filters do
+      scope :unarchived, label: 'All'
+      scope :members
+      scope :archived
+    end
 
+    datatable do
       col :updated_at, visible: false
       col :created_at, visible: false
 
@@ -11,16 +16,36 @@ module Admin
         col :category, search: categories
       end
 
-      col :title
+      col(:to_s, label: 'Organization', sql_column: true, action: :edit)
+      .search do |collection, term|
+        collection.where(id: effective_resource.search_any(term))
+      end.sort do |collection, direction|
+        collection.order(title: direction)
+      end
+
+      col :title, visible: false
+
+      col 'membership.joined_on'
+      col 'membership.fees_paid_through_period', label: 'Fees Paid Through'
+      col 'membership.categories'
 
       col :representatives_count
       col :representatives
+
+      col :title, visible: false
+      col :email, visible: false
+
+      col :phone, visible: false
+      col :fax, visible: false
+      col :website, visible: false
+      col :category, visible: false
+      col :notes, visible: false
 
       actions_col
     end
 
     collection do
-      EffectiveMemberships.Organization.deep.all
+      EffectiveMemberships.Organization.deep.left_joins(:membership).includes(membership: :membership_categories)
     end
 
     def categories
