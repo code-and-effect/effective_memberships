@@ -63,7 +63,7 @@ module Admin
     end
 
     collection do
-      EffectiveMemberships.Organization.deep.left_joins(:membership).includes(membership: :membership_categories)
+      EffectiveMemberships.Organization.deep.left_joins(:membership).includes(:addresses, membership: :membership_categories)
     end
 
     def categories
