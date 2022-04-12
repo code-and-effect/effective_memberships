@@ -32,8 +32,26 @@ module Admin
       col :representatives_count
       col :representatives
 
-      col :title, visible: false
       col :email, visible: false
+
+      col :address1, visible: false do |organization|
+        organization.billing_address&.address1
+      end
+      col :address2, visible: false do |organization|
+        organization.billing_address&.address2
+      end
+      col :city, visible: false do |organization|
+        organization.billing_address&.city
+      end
+      col :state_code, label: 'Prov', visible: false do |organization|
+        organization.billing_address&.state_code
+      end
+      col :postal_code, label: 'Postal', visible: false do |organization|
+        organization.billing_address&.postal_code
+      end
+      col :country_code, label: 'Country', visible: false do |organization|
+        organization.billing_address&.country_code
+      end
 
       col :phone, visible: false
       col :fax, visible: false

@@ -3,9 +3,7 @@
     .col-sm-6
       %h2 Demographics
       = render 'admin/organizations/fields', f: f
-
-      %h2 Billing Address
-      = effective_address_fields(f, :billing)
+      = render 'organizations/fields_demographics', f: f
 
     .col-sm-6
       %h2 Membership
