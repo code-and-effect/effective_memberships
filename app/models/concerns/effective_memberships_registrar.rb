@@ -284,52 +284,53 @@ module EffectiveMembershipsRegistrar
     retval
   end
 
-
   # This is intended to be run once per day in a rake task
   # rake effective_memberships:create_fees
   # Create Renewal and Late fees
-  def create_fees!(period: nil, late_on: nil, bad_standing_on: nil)
-    # The current period, based on Time.zone.now
+  def create_fees!(period: nil)
     period ||= current_period
-    late_on ||= late_fee_date(period: period)
-    bad_standing_on ||= bad_standing_date(period: period)
+    memberships = Effective::Membership.deep.with_unpaid_fees_through(period)
 
     # Create Renewal Fees
-    Effective::Membership.deep.with_unpaid_fees_through(period).find_each do |membership|
-      membership.categories.select(&:create_renewal_fees?).map do |category|
-        existing = membership.owner.membership_period_fee(category: category, period: period, except: 'Renewal')
-        next if existing.present? # This might be an existing Prorated fee
-
-        fee = membership.owner.build_renewal_fee(category: category, period: period, late_on: late_on, bad_standing_on: bad_standing_on)
-        raise("expected build_renewal_fee to return a fee for period #{period}") unless fee.kind_of?(Effective::Fee)
-        next if fee.purchased?
-
-        puts("Created renewal fee for #{membership.owner}") if fee.new_record? && !Rails.env.test?
-
-        fee.save!
-      end
-    end
-
+    memberships.find_each { |membership| create_renewal_fees!(membership, period: period) }
     GC.start
 
     # Create Late Fees
-    Effective::Membership.deep.with_unpaid_fees_through(period).find_each do |membership|
-      membership.categories.select(&:create_late_fees?).map do |category|
-        fee = membership.owner.build_late_fee(category: category, period: period)
-        next if fee.blank? || fee.purchased?
-
-        fee.save!
-      end
-    end
-
+    memberships.find_each { |membership| create_late_fees!(membership, period: period) }
     GC.start
 
     # Update Membership Status - Assign In Bad Standing
-    Effective::Membership.deep.with_unpaid_fees_through(period).find_each do |membership|
-      membership.owner.update_membership_status!
-    end
+    memberships.find_each { |membership| update_membership_status!(membership, period: period) }
+    GC.start
 
     true
+  end
+
+  def create_renewal_fees!(membership, period:)
+    membership.categories.select(&:create_renewal_fees?).map do |category|
+      existing = membership.owner.membership_period_fee(category: category, period: period, except: 'Renewal')
+      next if existing.present? # This might be an existing Prorated fee
+
+      fee = membership.owner.build_renewal_fee(category: category, period: period)
+      raise("expected build_renewal_fee to return a fee for period #{period}") unless fee.kind_of?(Effective::Fee)
+      next if fee.purchased?
+
+      puts("Created renewal fee for #{membership.owner}") if fee.new_record? && !Rails.env.test?
+
+      fee.save!
+    end
+  end
+
+  def create_late_fees!(membership, period:)
+    membership.categories.select(&:create_late_fees?).map do |category|
+      fee = membership.owner.build_late_fee(category: category, period: period)
+      next if fee.blank? || fee.purchased?
+      fee.save!
+    end
+  end
+
+  def update_membership_status!(membership, period: nil)
+    membership.owner.update_membership_status!
   end
 
   # Called in the after_purchase of fee payment

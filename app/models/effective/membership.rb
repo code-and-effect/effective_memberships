@@ -38,8 +38,9 @@ module Effective
     }
 
     scope :with_unpaid_fees_through, -> (period = nil) {
-      where(arel_table[:fees_paid_period].lt(period || EffectiveMemberships.Registrar.current_period))
-      .or(where(fees_paid_period: nil))
+      joined = where(arel_table[:joined_on].lt(period || EffectiveMemberships.Registrar.current_period))
+      unpaid = where(arel_table[:fees_paid_period].lt(period || EffectiveMemberships.Registrar.current_period)).or(where(fees_paid_period: nil))
+      joined.merge(unpaid)
     }
 
     before_validation do
@@ -119,7 +120,24 @@ module Effective
     end
 
     def fees_paid?
-      fees_paid_period == EffectiveMemberships.Registrar.current_period
+      paid_fees_through?(EffectiveMemberships.Registrar.current_period)
+    end
+
+    def paid_fees_through?(period = nil)
+      period ||= EffectiveMemberships.Registrar.current_period
+
+      return false if fees_paid_period.blank?
+      fees_paid_period >= period
+    end
+
+    def unpaid_fees_through?(period = nil)
+      period ||= EffectiveMemberships.Registrar.current_period
+
+      return false if joined_on.blank?
+      return false unless joined_on < period
+
+      return true if fees_paid_period.blank?
+      fees_paid_period < period
     end
 
     def change_fees_paid_period
@@ -127,12 +145,31 @@ module Effective
     end
 
     def change_fees_paid_period=(date)
+      if date.blank?
+        return assign_attributes(fees_paid_period: nil, fees_paid_through_period: nil)
+      end
+
       date = (date.respond_to?(:strftime) ? date : Date.parse(date))
 
       period = EffectiveMemberships.Registrar.period(date: date)
       period_end_on = EffectiveMemberships.Registrar.period_end_on(date: date)
 
       assign_attributes(fees_paid_period: period, fees_paid_through_period: period_end_on)
+    end
+
+    # Admin updating membership info
+    def revise!
+      save!
+
+      period = EffectiveMemberships.Registrar.current_period
+      return true if paid_fees_through?(period)
+
+      # Otherwise build fees right now
+      EffectiveMemberships.Registrar.create_renewal_fees!(self, period: period)
+      EffectiveMemberships.Registrar.create_late_fees!(self, period: period)
+      EffectiveMemberships.Registrar.update_membership_status!(self, period: period)
+
+      true
     end
 
   end

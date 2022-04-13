@@ -5,7 +5,7 @@ module Admin
 
     include Effective::CrudController
 
-    submit :save, 'Update Membership',
+    submit :revise, 'Update Membership',
       success: -> { "#{resource.owner} has been successfully updated. Please double check the membership history is correct" },
       redirect: -> { admin_owners_path(resource) }
 

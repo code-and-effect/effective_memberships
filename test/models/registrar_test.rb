@@ -113,8 +113,6 @@ class RegistrarTest < ActiveSupport::TestCase
     order = owner.orders.last
 
     assert order.purchased?
-    assert_equal 'cheque', order.payment_provider
-    assert_equal '12345', order.payment_card
     assert_equal 'note to buyer', order.note_to_buyer
     assert_equal 'note internal', order.note_internal
   end

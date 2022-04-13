@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'timecop'
 
 class RegistrarCreateFeesTest < ActiveSupport::TestCase
   test 'create fees for current members' do
@@ -26,7 +27,7 @@ class RegistrarCreateFeesTest < ActiveSupport::TestCase
     refute_equal period, last_period
 
     # Now everyone is a outstanding member.
-    Effective::Membership.update_all(fees_paid_period: last_period)
+    Effective::Membership.update_all(fees_paid_period: last_period, joined_on: last_period - 1.day)
     Effective::Fee.update_all(period: last_period)
 
     # Create Fees for this period scopes
@@ -48,64 +49,83 @@ class RegistrarCreateFeesTest < ActiveSupport::TestCase
 
   test 'create fees for late members' do
     3.times { build_member() }
-    last_period = EffectiveMemberships.Registrar.period(date: Time.zone.now - 1.year)
 
-    # Now everyone is a outstanding member.
-    Effective::Membership.update_all(fees_paid_period: last_period)
+    current_period = EffectiveMemberships.Registrar.current_period
+    last_period = EffectiveMemberships.Registrar.last_period
+    late_fee_date = EffectiveMemberships.Registrar.late_fee_date(period: current_period)
+
+    # Now everyone is a member that paid previously
+    Effective::Membership.update_all(fees_paid_period: last_period, joined_on: last_period - 1.day)
     Effective::Fee.update_all(period: last_period)
 
     # Create Renewal Fees
-    EffectiveMemberships.Registrar.create_fees!(late_on: Time.zone.now + 1.day)
-    EffectiveMemberships.Registrar.create_fees!(late_on: Time.zone.now + 1.day)
-    assert_equal 3, Effective::Fee.where(fee_type: 'Renewal').count
+    with_time_travel(current_period + 1.day) do
+      EffectiveMemberships.Registrar.create_fees!
+      EffectiveMemberships.Registrar.create_fees!
 
-    fee = Effective::Fee.where(fee_type: 'Renewal').first
-    refute fee.late?
+      assert_equal 3, Effective::Fee.where(fee_type: 'Renewal').count
 
-    assert_equal 0, Effective::Fee.where(fee_type: 'Late').count
+      fee = Effective::Fee.where(fee_type: 'Renewal').first
+      refute fee.late?
 
-    # Update The Renewal Fees so they're all late
-    Effective::Fee.where(fee_type: 'Renewal').update_all(late_on: Time.zone.now - 1.day)
+      assert_equal 0, Effective::Fee.where(fee_type: 'Late').count
+    end
 
-    # Create Late Fees
-    EffectiveMemberships.Registrar.create_fees!(late_on: Time.zone.now - 1.day)
-    assert_equal 3, Effective::Fee.where(fee_type: 'Renewal').count
-    assert_equal 3, Effective::Fee.where(fee_type: 'Late').count
+    # Go to a time where we are late
+    with_time_travel(late_fee_date) do
+      # Create Late Fees
+      EffectiveMemberships.Registrar.create_fees!
+      assert_equal 3, Effective::Fee.where(fee_type: 'Renewal').count
+      assert_equal 3, Effective::Fee.where(fee_type: 'Late').count
 
-    # Running it a second time makes no changes
-    EffectiveMemberships.Registrar.create_fees!(late_on: Time.zone.now - 1.day)
-    assert_equal 3, Effective::Fee.where(fee_type: 'Renewal').count
-    assert_equal 3, Effective::Fee.where(fee_type: 'Late').count
+      # Running it a second time makes no changes
+      EffectiveMemberships.Registrar.create_fees!
+      assert_equal 3, Effective::Fee.where(fee_type: 'Renewal').count
+      assert_equal 3, Effective::Fee.where(fee_type: 'Late').count
+    end
+
   end
 
   test 'create fees assigns bad standing' do
     3.times { build_member() }
-    last_period = EffectiveMemberships.Registrar.period(date: Time.zone.now - 1.year)
 
-    # Now everyone is a outstanding member.
+    current_period = EffectiveMemberships.Registrar.current_period
+    last_period = EffectiveMemberships.Registrar.last_period
+    bad_standing_date = EffectiveMemberships.Registrar.bad_standing_date(period: current_period)
+
+    Effective::Category.update_all(create_bad_standing: true)
+
+    # Now everyone is a member that paid previously
     # No one is in bad standing
-    Effective::Membership.update_all(fees_paid_period: last_period)
+    Effective::Membership.update_all(fees_paid_period: last_period, joined_on: last_period - 1.day)
     Effective::Fee.update_all(period: last_period)
     assert_equal 0, Effective::Membership.where(bad_standing: true).count
 
     # Create Renewal Fees
-    EffectiveMemberships.Registrar.create_fees!(bad_standing_on: Time.zone.now + 1.day)
-    assert_equal 3, Effective::Fee.where(fee_type: 'Renewal').count
+    with_time_travel(current_period + 1.day) do
+      EffectiveMemberships.Registrar.create_fees!
+      assert_equal 3, Effective::Fee.where(fee_type: 'Renewal').count
 
-    fee = Effective::Fee.where(fee_type: 'Renewal').first
-    refute fee.bad_standing?
+      fee = Effective::Fee.where(fee_type: 'Renewal').first
+      refute fee.bad_standing?
+    end
 
-    # Update The Renewal Fees so they're all in bad standing
-    Effective::Fee.where(fee_type: 'Renewal').update_all(bad_standing_on: Time.zone.now - 1.minute)
-    assert_equal 0, Effective::Membership.where(bad_standing: true).count
+    # Go to a time where we are bad standing
+    with_time_travel(bad_standing_date) do
+      # Create Fees Should mark them in bad standing
+      EffectiveMemberships.Registrar.create_fees!
+      assert_equal 3, Effective::Membership.where(bad_standing: true).count
 
-    # Create Fees Should mark them in bad standing
-    EffectiveMemberships.Registrar.create_fees!(bad_standing_on: Time.zone.now - 1.minute)
-    assert_equal 3, Effective::Membership.where(bad_standing: true).count
+      # Running it a second time makes no changes
+      EffectiveMemberships.Registrar.create_fees!
+      assert_equal 3, Effective::Fee.where(fee_type: 'Renewal').count
 
-    # Running it a second time makes no changes
-    EffectiveMemberships.Registrar.create_fees!
-    assert_equal 3, Effective::Fee.where(fee_type: 'Renewal').count
+      # Members are all in bad standing
+      Effective::Membership.where(bad_standing: true).each do |membership|
+        assert membership.bad_standing?
+      end
+    end
+
   end
 
 end
