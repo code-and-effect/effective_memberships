@@ -27,6 +27,11 @@ module EffectiveMembershipsUser
       class_name: 'Effective::Representative', inverse_of: :user, dependent: :delete_all
 
     accepts_nested_attributes_for :representatives, allow_destroy: true
+
+    scope :membership_applying, -> {
+      applicants = EffectiveMemberships.Applicant.all
+      without_role(:member).where(id: applicants.select(:user_id))
+    }
   end
 
   # Instance Methods

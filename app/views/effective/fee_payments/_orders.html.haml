@@ -1,4 +1,4 @@
 - if fee_payment.submit_order&.purchased?
   .card.mb-4
     .card-body
-      = render(fee_payment.submit_order)
+      = render('effective/orders/order', order: fee_payment.submit_order)

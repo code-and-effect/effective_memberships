@@ -62,6 +62,11 @@ module EffectiveMembershipsOrganization
     scope :deep, -> { includes(:representatives) }
     scope :sorted, -> { order(:title) }
 
+    scope :membership_applying, -> {
+      applicants = EffectiveMemberships.Applicant.all
+      without_role(:member).where(id: applicants.select(:organization_id))
+    }
+
     validates :title, presence: true, uniqueness: true
     validates :email, presence: true
   end
