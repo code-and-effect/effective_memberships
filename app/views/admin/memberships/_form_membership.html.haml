@@ -21,7 +21,7 @@
     - periods = registrar.periods(from: f.object.joined_on)
     - collection = periods.reverse.map { |period| [registrar.period_end_on(date: period), period] }
 
-    = f.select :change_fees_paid_period, collection, label: 'Fees Paid Through', hint: 'Which period this user has fees paid through. Can change how renewal fees are created.'
+    = f.select :change_fees_paid_period, collection, label: 'Fees Paid Through', hint: 'Which period this user has fees paid through. Determines which renewal fees should be created. Setting this to a past or blank period may create a renewal fee in the current period.'
 
     %p.text-muted To update the current membership categories, use the 'Assign' or 'Reclassify' actions below
 

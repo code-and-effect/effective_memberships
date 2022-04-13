@@ -181,8 +181,8 @@ module EffectiveMembershipsOwner
     # Build the renewal fee
     fee ||= fees.build()
 
-    late_on ||= EffectiveMemberships.Registrar.late_fee_date(period: period)
-    bad_standing_on ||= EffectiveMemberships.Registrar.bad_standing_date(period: period)
+    late_on ||= EffectiveMemberships.Registrar.late_fee_date(period: period) if category.create_late_fees?
+    bad_standing_on ||= EffectiveMemberships.Registrar.bad_standing_date(period: period) if category.create_bad_standing?
 
     fee.assign_attributes(
       fee_type: 'Renewal',

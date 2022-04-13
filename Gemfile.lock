@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    effective_memberships (0.4.4)
+    effective_memberships (0.4.7)
       effective_bootstrap
       effective_datatables (>= 4.0.0)
       effective_orders
@@ -113,7 +113,7 @@ GEM
       railties (>= 4.1.0)
       responders
       warden (~> 1.2.3)
-    effective_addresses (1.9.8)
+    effective_addresses (1.9.9)
       carmen
       coffee-rails
       effective_resources
@@ -142,7 +142,7 @@ GEM
       effective_resources
       liquid
       rails (>= 3.2.0)
-    effective_orders (5.4.3)
+    effective_orders (5.5.1)
       coffee-rails
       effective_addresses
       effective_bootstrap
@@ -330,6 +330,7 @@ DEPENDENCIES
   haml-rails
   pry-byebug
   sqlite3
+  timecop
 
 BUNDLED WITH
    2.1.4
