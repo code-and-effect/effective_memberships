@@ -37,6 +37,22 @@ module EffectiveMembershipsOwner
     accepts_nested_attributes_for :membership_histories
 
     scope :members, -> { joins(:membership) }
+
+    scope :membership_removed, -> {
+      removed = Effective::MembershipHistory.removed.where(owner_type: name)
+      without_role(:member).where(id: removed.select(:owner_id))
+    }
+
+    scope :membership_bad_standing, -> {
+      bad_standing = Effective::Membership.where(bad_standing: true).where(owner_type: name)
+      where(id: bad_standing.select(:owner_id))
+    }
+
+    scope :membership_renewed_this_period, -> {
+      with_paid_fees_through = Effective::Membership.with_paid_fees_through.where(owner_type: name)
+      where(id: with_paid_fees_through.select(:owner_id))
+    }
+
   end
 
   def assign_member_role

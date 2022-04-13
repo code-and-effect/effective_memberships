@@ -25,6 +25,8 @@ module Effective
     scope :deep, -> { includes(:owner) }
     scope :sorted, -> { order(:start_on) }
 
+    scope :removed, -> { where(removed: true) }
+
     validates :owner, presence: true
 
     # validates :categories, presence: true, unless: -> { removed? }

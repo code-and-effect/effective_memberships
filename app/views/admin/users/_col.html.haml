@@ -1,0 +1,12 @@
+- user = (resource.respond_to?(:email) ? resource : resource.user)
+
+= user.to_s
+
+- if user.email.present?
+  %br
+  = mail_to user.email
+
+- if user.membership.present?
+  %br
+  = '#' + user.membership.number
+  #{user.membership.categories.to_sentence}
