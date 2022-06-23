@@ -109,6 +109,27 @@ ActiveRecord::Schema.define(version: 8) do
     t.index ["start_on"], name: "index_applicant_educations_on_start_on"
   end
 
+  create_table "applicant_endorsements", force: :cascade do |t|
+    t.integer "applicant_id"
+    t.string "applicant_type"
+    t.integer "endorser_id"
+    t.string "endorser_type"
+    t.boolean "unknown_member", default: false
+    t.string "endorser_email"
+    t.string "name"
+    t.string "phone"
+    t.string "status"
+    t.text "status_steps"
+    t.text "notes"
+    t.boolean "accept_declaration"
+    t.string "token"
+    t.datetime "last_notified_at"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.index ["applicant_id"], name: "index_applicant_endorsements_on_applicant_id"
+    t.index ["token"], name: "index_applicant_endorsements_on_token"
+  end
+
   create_table "applicant_experiences", force: :cascade do |t|
     t.integer "applicant_id"
     t.string "applicant_type"
@@ -242,6 +263,7 @@ ActiveRecord::Schema.define(version: 8) do
     t.integer "min_applicant_educations"
     t.integer "min_applicant_experiences_months"
     t.integer "min_applicant_references"
+    t.integer "min_applicant_endorsements"
     t.integer "min_applicant_courses"
     t.integer "min_applicant_files"
     t.integer "min_applicant_reviews"

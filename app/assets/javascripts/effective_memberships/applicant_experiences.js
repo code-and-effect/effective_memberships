@@ -31,8 +31,3 @@ $(document).on('change dp.change keyup', "[data-applicant-experiences-month]", f
   const $form = $(event.currentTarget).closest('form');
   sumApplicantExperiences($form);
 });
-
-
-// $(document).on 'cocoon:after-remove', (event) ->
-//   $form = $(event.target).closest('form')
-//   sumMonths($form) if $form.find('[data-experience-month]').length > 0

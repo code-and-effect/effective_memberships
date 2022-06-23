@@ -1,0 +1,4 @@
+= dropdown(variation: :dropleft) do
+  - unless applicant_endorsement.completed?
+    = dropdown_link_to 'Notify', effective_memberships.notify_applicant_endorsement_path(applicant_endorsement),
+      data: { method: :post, confirm: "Really notify #{applicant_endorsement.email}?" }

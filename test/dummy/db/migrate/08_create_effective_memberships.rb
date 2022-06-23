@@ -23,6 +23,7 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.integer :min_applicant_educations
       t.integer :min_applicant_experiences_months
       t.integer :min_applicant_references
+      t.integer :min_applicant_endorsements
       t.integer :min_applicant_courses
       t.integer :min_applicant_files
 
@@ -262,6 +263,36 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
 
     add_index :applicant_experiences, :applicant_id
     add_index :applicant_experiences, :start_on
+
+    # Applicant Endorsements
+    create_table :applicant_endorsements do |t|
+      t.integer :applicant_id
+      t.string :applicant_type
+
+      t.integer :endorser_id
+      t.string :endorser_type
+
+      t.boolean :unknown_member, default: false
+      t.string :endorser_email
+      t.string :name
+      t.string :phone
+
+      t.string :status
+      t.text :status_steps
+
+      t.text :notes
+      t.boolean :accept_declaration
+
+      t.string :token
+      t.datetime :last_notified_at
+
+      t.datetime :created_at
+      t.datetime :updated_at
+    end
+
+    add_index :applicant_endorsements, :applicant_id
+    add_index :applicant_endorsements, :token
+
 
     # Applicant References
     create_table :applicant_references do |t|

@@ -27,8 +27,13 @@
             = f.show_if(:category_id, mc.id) do
               .mb-4
                 %h3= mc.to_s
-                %small.text-muted #{mc.category} #{mc.category_type} Membership
+
+                - if organization_categories.present?
+                  %small.text-muted #{mc.category} #{mc.category_type} Membership
+
                 = mc.rich_text_body
+
+                = render_if_exists("effective/applicants/select/#{mc.to_s.parameterize.underscore}", f: f, category: mc)
 
           - if organization_categories.present?
             = f.show_if_any(:category_id, organization_categories.map(&:id)) do

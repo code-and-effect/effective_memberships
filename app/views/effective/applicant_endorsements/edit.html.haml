@@ -1,0 +1,8 @@
+.card
+  .card-body
+    %p
+      Please provide a endorsement for the applicant
+      = succeed('.') do
+        %strong= @applicant_endorsement.applicant.owner
+
+    = render('form_declaration', applicant_endorsement: @applicant_endorsement)

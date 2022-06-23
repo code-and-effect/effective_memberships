@@ -129,7 +129,6 @@ module EffectiveMembershipsFeePayment
 
         fee_payment_steps.delete(:organization) unless organization?
 
-
         wizard_steps.select do |step|
           required_steps.include?(step) || category.blank? || fee_payment_steps.include?(step)
         end

@@ -1,0 +1,46 @@
+- endorsement = applicant_endorsement
+
+%table.table.table-sm
+  %tbody
+    %tr
+      %th Endorser
+      %td
+        - if endorsement.endorser.present?
+          - endorser = endorsement.endorser
+          = link_to("#{endorser.to_s} <#{endorser.email}>", "mailto:#{endorser.email}")
+        - else
+          = link_to("#{endorsement.name} <#{endorsement.email}>", "mailto:#{endorsement.email}")
+      %td
+
+    - if endorsement.phone.present?
+      %tr
+        %th Phone
+        %td= endorsement.phone
+
+    - if endorsement.applicant.was_submitted?
+      %tr
+        %th Status
+        %td
+          - if endorsement.submitted?
+            Waiting on response
+          - elsif endorsement.completed?
+            Response completed
+
+    - unless endorsement.applicant.was_approved?
+      %tr
+        %th Last Notified at
+        %td= endorsement.last_notified_at&.strftime('%F') || 'Never'
+
+      - if can?(:notify, endorsement) && !local_assigns[:skip_actions]
+        %tr
+          %th Notification
+          %td= link_to('Resend email notification', effective_memberships.notify_applicant_endorsement_path(endorsement), 'data-method': :post, 'data-confirm': "Really resend email notification to #{endorsement.email}?")
+
+    - if endorsement.completed? && can?(:review, endorsement)
+      %tr
+        %th Notes
+        %td= endorsement.notes
+
+      %tr
+        %th Endorsed On
+        %td= endorsement.completed_at.strftime('%F')

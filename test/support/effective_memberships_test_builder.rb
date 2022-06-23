@@ -92,6 +92,21 @@ module EffectiveMembershipsTestBuilder
     applicant
   end
 
+  def create_applicant_endorsement!
+    build_applicant_endorsement.tap(&:save!)
+  end
+
+  def build_applicant_endorsement(applicant: nil)
+    applicant ||= build_applicant()
+
+    applicant.applicant_endorsements.build(
+      unknown_member: true,
+      name: 'Endorser Name',
+      endorser_email: 'reference@somewhere.com',
+      phone: '(444) 444-4444'
+    )
+  end
+
   def create_applicant_reference!
     build_applicant_reference.tap(&:save!)
   end

@@ -93,6 +93,9 @@ module EffectiveMembershipsApplicant
     has_many :applicant_educations, -> { order(:id) }, class_name: 'Effective::ApplicantEducation', as: :applicant, inverse_of: :applicant, dependent: :destroy
     accepts_nested_attributes_for :applicant_educations, reject_if: :all_blank, allow_destroy: true
 
+    has_many :applicant_endorsements, -> { order(:id) }, class_name: 'Effective::ApplicantEndorsement', as: :applicant, inverse_of: :applicant, dependent: :destroy
+    accepts_nested_attributes_for :applicant_endorsements, reject_if: :all_blank, allow_destroy: true
+
     has_many :applicant_experiences, -> { order(:id) }, class_name: 'Effective::ApplicantExperience', as: :applicant, inverse_of: :applicant, dependent: :destroy
     accepts_nested_attributes_for :applicant_experiences, reject_if: :all_blank, allow_destroy: true
 
@@ -238,6 +241,16 @@ module EffectiveMembershipsApplicant
       end
     end
 
+    # Applicant Endorsements Step
+    with_options(if: -> { current_step == :endorsements }) do
+      validate do
+        required = min_applicant_endorsements()
+        existing = applicant_endorsements().reject(&:marked_for_destruction?).length
+
+        self.errors.add(:applicant_endorsements, "please include #{required} or more endorsements") if existing < required
+      end
+    end
+
     # Applicant References Step
     with_options(if: -> { current_step == :references }) do
       validate do
@@ -361,6 +374,7 @@ module EffectiveMembershipsApplicant
       stamps.each { |stamp| stamp.submit! }
 
       after_commit do
+        applicant_endorsements.each { |endorsement| endorsement.notify! if endorsement.submitted? }
         applicant_references.each { |reference| reference.notify! if reference.submitted? }
       end
 
@@ -521,6 +535,11 @@ module EffectiveMembershipsApplicant
     category&.min_applicant_references.to_i
   end
 
+  # Endorsements Step
+  def min_applicant_endorsements
+    category&.min_applicant_endorsements.to_i
+  end
+
   # Files Step
   def min_applicant_files
     category&.min_applicant_files.to_i
@@ -536,6 +555,10 @@ module EffectiveMembershipsApplicant
     )
   end
 
+  def applicant_endorsements_required?
+    min_applicant_endorsements > 0
+  end
+
   def applicant_references_required?
     min_applicant_references > 0
   end
@@ -543,13 +566,18 @@ module EffectiveMembershipsApplicant
   # When an application is submitted, these must be done to go to completed.
   # An Admin can override this and just set them to completed.
   def completed_requirements
-    if category&.applicant_wizard_steps&.include?(:references) || applicant_references_required?
-      {
-        'Applicant References' => (!applicant_references_required? || applicant_references.count(&:completed?) >= min_applicant_references)
-      }
-    else
-      {}
+    requirements = {}
+    return requirements unless category.present?
+
+    if category.applicant_wizard_steps.include?(:references) || applicant_references_required?
+      requirements['Applicant References'] = (!applicant_references_required? || applicant_references.count(&:completed?) >= min_applicant_references)
     end
+
+    if category.applicant_wizard_steps.include?(:endorsements) || applicant_endorsements_required?
+      requirements['Applicant Endorsements'] = (!applicant_endorsements_required? || applicant_endorsements.count(&:completed?) >= min_applicant_endorsements)
+    end
+
+    requirements
   end
 
   def complete!

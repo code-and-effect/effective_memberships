@@ -1,4 +1,4 @@
-# For the applicant complete step to add additional applicants
+# For the applicant complete step to add additional references
 class EffectiveApplicantReferencesDatatable < Effective::Datatable
 
   datatable do

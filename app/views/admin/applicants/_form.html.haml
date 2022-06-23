@@ -25,6 +25,10 @@
     = tab 'References' do
       .mb-4= render_inline_datatable(Admin::EffectiveApplicantReferencesDatatable.new(applicant: applicant))
 
+  - if applicant.applicant_endorsements.present?
+    = tab 'Endorsements' do
+      .mb-4= render_inline_datatable(Admin::EffectiveApplicantEndorsementsDatatable.new(applicant: applicant))
+
   - if applicant.fees.present? || applicant.orders.present?
     = tab 'Fees' do
       .mb-4

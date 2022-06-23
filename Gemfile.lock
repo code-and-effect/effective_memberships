@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    effective_memberships (0.4.7)
+    effective_memberships (0.4.9)
       effective_bootstrap
       effective_datatables (>= 4.0.0)
       effective_orders
@@ -113,7 +113,7 @@ GEM
       railties (>= 4.1.0)
       responders
       warden (~> 1.2.3)
-    effective_addresses (1.9.9)
+    effective_addresses (1.10.1)
       carmen
       coffee-rails
       effective_resources
@@ -142,7 +142,7 @@ GEM
       effective_resources
       liquid
       rails (>= 3.2.0)
-    effective_orders (5.5.1)
+    effective_orders (5.7.0)
       coffee-rails
       effective_addresses
       effective_bootstrap
@@ -160,7 +160,7 @@ GEM
       wicked
     effective_resources (1.17.0)
       rails (>= 4.0.0)
-    effective_roles (2.3.0)
+    effective_roles (2.3.1)
       effective_resources
       rails (>= 3.2.0)
     effective_test_bot (1.2.9)

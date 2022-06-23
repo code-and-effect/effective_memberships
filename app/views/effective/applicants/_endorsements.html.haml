@@ -1,0 +1,15 @@
+.card
+  .card-body
+    .row
+      .col-sm
+        %h5.card-title= applicant.wizard_step_title(:endorsements)
+      .col-sm-auto.text-right
+        = link_to('Edit', wizard_path(:endorsements)) if edit_effective_wizard?
+
+    - applicant.applicant_endorsements.each_with_index do |applicant_endorsement, index|
+      - if index > 0
+        .mb-4
+
+      %h6 Endorsement ##{index + 1}
+
+      = render('effective/applicant_endorsements/applicant_endorsement', applicant_endorsement: applicant_endorsement)

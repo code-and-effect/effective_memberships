@@ -1,0 +1,9 @@
+= effective_form_with(model: applicant_endorsement, engine: true) do |f|
+  = f.hidden_field :applicant_id
+  = f.hidden_field :applicant_type
+
+  - if f.object.new_record?
+    %p An email will be sent asking them to complete a endorsement declaration form.
+    = f.submit('Create and Notify endorser')
+  - else
+    = f.submit

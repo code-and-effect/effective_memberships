@@ -44,6 +44,16 @@ module Effective
       mail(to: resource.user.email, subject: subject, **headers)
     end
 
+    def applicant_endorsement_notification(resource, opts = {})
+      @assigns = assigns_for(resource)
+      @applicant_endorsement = resource
+
+      subject = subject_for(__method__, 'Endorsement Requested', resource, opts)
+      headers = headers_for(resource, opts)
+
+      mail(to: resource.email, subject: subject, **headers)
+    end
+
     def applicant_reference_notification(resource, opts = {})
       @assigns = assigns_for(resource)
       @applicant_reference = resource
@@ -59,6 +69,10 @@ module Effective
     def assigns_for(resource)
       if resource.class.respond_to?(:effective_memberships_applicant?)
         return applicant_assigns(resource).merge(owner_assigns(resource.owner))
+      end
+
+      if resource.kind_of?(Effective::ApplicantEndorsement)
+        return endorsement_assigns(resource).merge(owner_assigns(resource.applicant.owner))
       end
 
       if resource.kind_of?(Effective::ApplicantReference)
@@ -86,6 +100,17 @@ module Effective
       }.compact
 
       { applicant: values }
+    end
+
+    def endorsement_assigns(applicant_endorsement)
+      raise('expected a endorsement') unless applicant_endorsement.kind_of?(Effective::ApplicantEndorsement)
+
+      values = {
+        name: (applicant_endorsement.endorser&.to_s || applicant_endorsement.name),
+        url: effective_memberships.applicant_endorsement_url(applicant_endorsement)
+      }
+
+      { endorsement: values }
     end
 
     def reference_assigns(applicant_reference)

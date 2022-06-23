@@ -12,7 +12,7 @@
         = f.error :applicant_experiences_months
 
         = f.has_many(:applicant_experiences, cards: true) do |aef|
-          %h4 Work Experience
+          %h4.mb-4 Work Experience
 
           .row
             .col= aef.text_field :employer

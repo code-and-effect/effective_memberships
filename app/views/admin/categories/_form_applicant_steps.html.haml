@@ -32,6 +32,12 @@
           %td= f.number_field :min_applicant_experiences_months, label: false
           %td minimimum months of work experience
 
+      - if applicant.wizard_step_keys.include?(:endorsements)
+        %tr
+          %td= applicant.wizard_step_title(:endorsements)
+          %td= f.number_field :min_applicant_endorsements, label: false
+          %td minimimum number of endorsements
+
       - if applicant.wizard_step_keys.include?(:references)
         %tr
           %td= applicant.wizard_step_title(:references)

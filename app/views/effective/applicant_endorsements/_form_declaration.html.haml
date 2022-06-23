@@ -1,0 +1,22 @@
+= effective_form_with(model: applicant_endorsement, engine: true) do |f|
+  %h2 Applicant endorsement
+
+  %p
+    I endorse and sponser
+    = applicant_endorsement.applicant.owner
+    as a candidate for
+    = applicant_endorsement.applicant.category
+    membership and certify that I have personal knowledge of the professional ability
+    and character, methods of practice, and experience of the applicant.
+
+  %p
+    The candidate has satisfied the requirements for membership in this category,
+    and to the best of my personal knowledge,
+    the applicant observes and upholds the Code of Ethics and Professional Practice.
+
+  .mt-4
+
+  = f.text_area :notes, label: "Additional comments"
+  = f.check_box :accept_declaration, label: 'Yes, I declare that the above information is true and accurate'
+
+  = f.submit 'Complete Endorsement'
