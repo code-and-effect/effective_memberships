@@ -9,6 +9,11 @@ EffectiveMemberships::Engine.routes.draw do
       resources :build, controller: :applicants, only: [:show, :update]
     end
 
+    resources :applicant_endorsements, only: [:new, :create, :show, :update] do
+      get :select2_ajax_endorser, on: :member
+      post :notify, on: :member
+    end
+
     resources :applicant_references, only: [:new, :create, :show, :update] do
       post :notify, on: :member
     end

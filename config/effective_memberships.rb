@@ -24,6 +24,9 @@ EffectiveMemberships.setup do |config|
   # The defaults include: Applicant, Prorated, Renewal, Late, Admin
   # config.additional_fee_types = []
 
+  # Applicant Endorsements
+  # config.applicant_endorsements_endorser_collection = Proc.new { |applicant| applicant.user.class.members }
+
   # Applicant Reviews
   # When true, display the reviewed state and require Category.min_applicant_reviews
   # When false, hide the reviewed state entirely

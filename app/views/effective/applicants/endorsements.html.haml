@@ -1,0 +1,25 @@
+= render 'layout' do
+  = render 'effective/applicants/content', resource: resource
+
+  .card
+    .card-body
+      - if resource.min_applicant_endorsements > 0
+        %p You must include #{resource.min_applicant_endorsements} or more endorsements.
+
+      = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+        = f.hidden_field :id
+
+        = f.has_many(:applicant_endorsements, cards: true) do |aef|
+          %h4 Endorsement
+
+          = aef.select :endorser, Effective::ApplicantEndorsement.endorser_collection(resource), required: false,
+            ajax_url: effective_memberships.select2_ajax_endorser_applicant_endorsement_path(applicant_id: resource)
+
+          = aef.check_box :unknown_member, label: 'I cant find my endorser in the above list'
+
+          = aef.show_if(:unknown_member, true) do
+            = aef.email_field :endorser_email, required: true
+            = aef.text_field :name, required: true
+            = aef.phone_field :phone, required: true
+
+        = f.save 'Save and Continue'

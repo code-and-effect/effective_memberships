@@ -63,7 +63,7 @@ module Effective
       collection_method = EffectiveMemberships.applicant_endorsements_endorser_collection()
 
       if collection_method.blank?
-        return (applicant.owner.class.members)
+        return (applicant.user.class.members)
       end
 
       collection = instance_exec(applicant, &collection_method)

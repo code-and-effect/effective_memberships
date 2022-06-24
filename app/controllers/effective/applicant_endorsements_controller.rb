@@ -1,6 +1,7 @@
 module Effective
   class ApplicantEndorsementsController < ApplicationController
     include Effective::CrudController
+    include Effective::Select2AjaxController
 
     page_title 'Confidential Endorsement Form'
 
@@ -23,41 +24,12 @@ module Effective
     # Must be signed in
     def select2_ajax_endorser
       authenticate_user! if defined?(Devise)
-      authorize! :index, User
 
-      collection = Effective::ApplicantEndorsement.endorser_collection(resource)
+      applicant = EffectiveMemberships.Applicant.find(params[:applicant_id])
+      collection = Effective::ApplicantEndorsement.endorser_collection(applicant)
 
-      # Collection
-      collection = User.shallow.sorted.all
-
-      # Search
-      if (term = params[:term]).present?
-        collection = collection
-          .where('first_name ILIKE ?', "%#{term}%")
-          .or(collection.where('last_name ILIKE ?', "%#{term}%"))
-          .or(collection.where('email ILIKE ?', "%#{term}%"))
-      end
-
-      # Paginate
-      per_page = 20
-      page = (params[:page] || 1).to_i
-      last = (collection.reselect(:id).count.to_f / per_page).ceil
-      more = page < last
-
-      offset = [(page - 1), 0].max * per_page
-      collection = collection.limit(per_page).offset(offset)
-
-      # Results
-      results = collection.map { |user| { id: user.to_param, text: user.to_s_verbose } }
-
-      respond_to do |format|
-        format.js do
-          render json: { results: results, pagination: { more: more } }
-        end
-      end
+      respond_with_select2_ajax(collection)
     end
-
-
 
     protected
 
