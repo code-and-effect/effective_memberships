@@ -55,6 +55,8 @@ module EffectiveMembershipsCategory
       applicant_wizard_steps     :text
 
       min_applicant_educations          :integer
+      min_applicant_endorsements        :integer
+      min_applicant_equivalences        :integer
       min_applicant_experiences_months  :integer
       min_applicant_references          :integer
       min_applicant_courses             :integer

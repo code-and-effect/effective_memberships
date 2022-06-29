@@ -16,4 +16,6 @@
         = f.check_box :declare_truth,
           label: 'Yes, I hereby certify that the statements and information contained herein are correct'
 
+        = render_if_exists("effective/applicants/declarations_fields", f: f)
+
         = f.save 'Save and Continue'

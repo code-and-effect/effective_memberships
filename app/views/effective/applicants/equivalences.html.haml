@@ -1,0 +1,25 @@
+= render 'layout' do
+  = render 'effective/applicants/content', resource: resource
+
+  .card
+    .card-body
+      - if resource.min_applicant_equivalences > 0
+        .alert.alert-danger You must include #{resource.min_applicant_equivalences} or more equivalent memberships.
+
+      = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+        = f.hidden_field :id
+
+        = f.has_many(:applicant_equivalences, cards: true) do |aef|
+          %h4.mb-4 Equivalent Membership
+
+          = aef.text_field :name
+
+          .row
+            .col= aef.date_field :start_on, label: 'Start Date'
+            .col= aef.date_field :end_on, label: 'End Date'
+
+          = aef.text_area :notes
+
+        = render_if_exists("effective/applicants/equivalences_fields", f: f)
+
+        = f.save 'Save and Continue'

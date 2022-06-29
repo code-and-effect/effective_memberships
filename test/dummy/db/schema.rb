@@ -130,6 +130,18 @@ ActiveRecord::Schema.define(version: 8) do
     t.index ["token"], name: "index_applicant_endorsements_on_token"
   end
 
+  create_table "applicant_equivalences", force: :cascade do |t|
+    t.integer "applicant_id"
+    t.string "applicant_type"
+    t.string "name"
+    t.date "start_on"
+    t.date "end_on"
+    t.text "notes"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.index ["applicant_id"], name: "index_applicant_equivalences_on_applicant_id"
+  end
+
   create_table "applicant_experiences", force: :cascade do |t|
     t.integer "applicant_id"
     t.string "applicant_type"
@@ -221,9 +233,10 @@ ActiveRecord::Schema.define(version: 8) do
     t.text "additional_information"
     t.datetime "updated_at"
     t.datetime "created_at"
-    t.index "\"owner_id\", \"owner_type\"", name: "index_applicants_on_owner_id_and_owner_type"
+    t.index ["organization_id", "organization_type"], name: "index_applicants_on_organization_id_and_organization_type"
     t.index ["status"], name: "index_applicants_on_status"
     t.index ["token"], name: "index_applicants_on_token"
+    t.index ["user_id", "user_type"], name: "index_applicants_on_user_id_and_user_type"
   end
 
   create_table "cart_items", force: :cascade do |t|
@@ -264,6 +277,7 @@ ActiveRecord::Schema.define(version: 8) do
     t.integer "min_applicant_experiences_months"
     t.integer "min_applicant_references"
     t.integer "min_applicant_endorsements"
+    t.integer "min_applicant_equivalences"
     t.integer "min_applicant_courses"
     t.integer "min_applicant_files"
     t.integer "min_applicant_reviews"
@@ -333,9 +347,10 @@ ActiveRecord::Schema.define(version: 8) do
     t.datetime "submitted_at"
     t.datetime "updated_at"
     t.datetime "created_at"
-    t.index "\"owner_id\", \"owner_type\"", name: "index_fee_payments_on_owner_id_and_owner_type"
+    t.index ["organization_id", "organization_type"], name: "index_fee_payments_on_organization_id_and_organization_type"
     t.index ["status"], name: "index_fee_payments_on_status"
     t.index ["token"], name: "index_fee_payments_on_token"
+    t.index ["user_id", "user_type"], name: "index_fee_payments_on_user_id_and_user_type"
   end
 
   create_table "fees", force: :cascade do |t|

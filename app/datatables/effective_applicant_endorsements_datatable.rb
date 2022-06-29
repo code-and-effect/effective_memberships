@@ -2,6 +2,7 @@
 class EffectiveApplicantEndorsementsDatatable < Effective::Datatable
 
   datatable do
+    length :all
     order :name
 
     col :name do |endorsement|

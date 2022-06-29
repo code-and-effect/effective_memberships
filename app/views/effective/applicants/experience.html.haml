@@ -21,7 +21,7 @@
           .row
             .col= aef.date_field :start_on, label: 'Start Date', 'data-applicant-experiences-month': true
             .col
-              = aef.date_field :end_on, label: 'End Date', 'data-applicant-experiences-month': true
+              = aef.date_field :end_on, label: 'End Date', required: false, 'data-applicant-experiences-month': true
               = aef.check_box :still_work_here, label: 'I still work here'
 
           .row
@@ -46,6 +46,6 @@
 
         = f.error :applicant_experiences_months
 
-        /= f.text_area :applicant_experiences_details, label: 'Additional Experiences Details'
+        = render_if_exists("effective/applicants/experience_fields", f: f)
 
         = f.save 'Save and Continue'

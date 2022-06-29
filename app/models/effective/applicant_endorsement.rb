@@ -42,7 +42,7 @@ module Effective
 
     # All step validations
     validates :applicant, presence: true
-    validates :endorser, presence: true, unless: -> { unknown_member? }
+    validates :endorser_id, presence: true, unless: -> { unknown_member? }
 
     with_options(if: -> { unknown_member? }) do
       validates :endorser_email, presence: true, email: true

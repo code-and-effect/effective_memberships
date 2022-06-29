@@ -22,6 +22,6 @@
 
           = aef.text_field :degree_obtained, label: 'Degree, diploma or program'
 
-        /= f.text_area :applicant_educations_details, label: 'Additional Education Details'
+        = render_if_exists("effective/applicants/education_fields", f: f)
 
         = f.save 'Save and Continue'

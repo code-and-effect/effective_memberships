@@ -38,6 +38,12 @@
           %td= f.number_field :min_applicant_endorsements, label: false
           %td minimimum number of endorsements
 
+      - if applicant.wizard_step_keys.include?(:equivalences)
+        %tr
+          %td= applicant.wizard_step_title(:equivalences)
+          %td= f.number_field :min_applicant_equivalences, label: false
+          %td minimimum number of equivalent memberships
+
       - if applicant.wizard_step_keys.include?(:references)
         %tr
           %td= applicant.wizard_step_title(:references)

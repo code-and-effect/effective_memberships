@@ -1,0 +1,10 @@
+.card
+  .card-body
+    .row
+      .col-sm
+        %h5.card-title= applicant.wizard_step_title(:equivalences)
+      .col-sm-auto.text-right
+        = link_to('Edit', wizard_path(:equivalences)) if edit_effective_wizard?
+
+    - datatable = EffectiveApplicantEquivalencesDatatable.new(applicant: applicant)
+    .mb-4= render_simple_datatable(datatable)

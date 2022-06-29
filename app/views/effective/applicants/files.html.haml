@@ -11,4 +11,6 @@
 
         = f.file_field :applicant_files, attachment_style: :table
 
+        = render_if_exists("effective/applicants/files_fields", f: f)
+
         = f.save 'Save and Continue'

@@ -47,4 +47,6 @@
             .col
               = f.static_field :min_applicant_courses, label: 'Required Courses'
 
+        = render_if_exists("effective/applicants/course_amounts_fields", f: f)
+
         = f.save 'Save and Continue'

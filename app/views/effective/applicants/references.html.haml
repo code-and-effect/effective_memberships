@@ -21,4 +21,6 @@
             .col= arf.select :relationship, Effective::ApplicantReference::RELATIONSHIPS
             .col= arf.select :known, Effective::ApplicantReference::KNOWNS, label: 'Known for'
 
+        = render_if_exists("effective/applicants/references_fields", f: f)
+
         = f.save 'Save and Continue'

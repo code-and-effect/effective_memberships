@@ -25,6 +25,7 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.integer :min_applicant_experiences_months
       t.integer :min_applicant_references
       t.integer :min_applicant_endorsements
+      t.integer :min_applicant_equivalences
       t.integer :min_applicant_courses
       t.integer :min_applicant_files
 
@@ -324,6 +325,24 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
 
     add_index :applicant_endorsements, :applicant_id
     add_index :applicant_endorsements, :token
+
+    # Applicant Equivalences
+    create_table :applicant_equivalences do |t|
+      t.integer :applicant_id
+      t.string :applicant_type
+
+      t.string :name
+
+      t.date :start_on
+      t.date :end_on
+
+      t.text :notes
+
+      t.datetime :created_at
+      t.datetime :updated_at
+    end
+
+    add_index :applicant_equivalences, :applicant_id
 
     # Applicant Courses
     create_table :applicant_course_areas do |t|

@@ -96,6 +96,9 @@ module EffectiveMembershipsApplicant
     has_many :applicant_endorsements, -> { order(:id) }, class_name: 'Effective::ApplicantEndorsement', as: :applicant, inverse_of: :applicant, dependent: :destroy
     accepts_nested_attributes_for :applicant_endorsements, reject_if: :all_blank, allow_destroy: true
 
+    has_many :applicant_equivalences, -> { order(:id) }, class_name: 'Effective::ApplicantEquivalence', as: :applicant, inverse_of: :applicant, dependent: :destroy
+    accepts_nested_attributes_for :applicant_equivalences, reject_if: :all_blank, allow_destroy: true
+
     has_many :applicant_experiences, -> { order(:id) }, class_name: 'Effective::ApplicantExperience', as: :applicant, inverse_of: :applicant, dependent: :destroy
     accepts_nested_attributes_for :applicant_experiences, reject_if: :all_blank, allow_destroy: true
 
@@ -248,6 +251,16 @@ module EffectiveMembershipsApplicant
         existing = applicant_endorsements().reject(&:marked_for_destruction?).length
 
         self.errors.add(:applicant_endorsements, "please include #{required} or more endorsements") if existing < required
+      end
+    end
+
+    # Applicant Equivalences Step
+    with_options(if: -> { current_step == :equivalences }) do
+      validate do
+        required = min_applicant_equivalences()
+        existing = applicant_equivalences().reject(&:marked_for_destruction?).length
+
+        self.errors.add(:applicant_equivalences, "please include #{required} or more equivalences") if existing < required
       end
     end
 
@@ -538,6 +551,11 @@ module EffectiveMembershipsApplicant
   # Endorsements Step
   def min_applicant_endorsements
     category&.min_applicant_endorsements.to_i
+  end
+
+  # Equivalences Step
+  def min_applicant_equivalences
+    category&.min_applicant_equivalences.to_i
   end
 
   # Files Step
