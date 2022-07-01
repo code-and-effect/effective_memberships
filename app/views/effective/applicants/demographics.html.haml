@@ -1,12 +1,11 @@
 = render 'layout' do
   = render 'effective/applicants/content', resource: resource
 
-  .card
-    .card-body
-      = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
-        = f.hidden_field :id
+  = card do
+    = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+      = f.hidden_field :id
 
-        = f.fields_for(:user, f.object.user) do |fu|
-          = render 'users/fields_demographics', f: fu, user: f.object.user, parent: resource
+      = f.fields_for(:user, f.object.user) do |fu|
+        = render 'users/fields_demographics', f: fu, user: f.object.user, parent: resource
 
-        = f.save 'Save and Continue'
+      = f.save 'Save and Continue'

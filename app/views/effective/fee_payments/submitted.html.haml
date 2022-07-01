@@ -9,8 +9,8 @@
 
   = link_to "Return to Dashboard", root_path, class: 'btn btn-lg btn-primary mb-4'
 
-  .card
-    .card-body= render 'effective/fee_payments/summary', fee_payment: resource
+  = card do
+    = render 'effective/fee_payments/summary', fee_payment: resource
 
   .mb-4
     = collapse('Show fee payment...', card_class: 'my-2') do

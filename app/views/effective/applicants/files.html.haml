@@ -1,16 +1,15 @@
 = render 'layout' do
   = render 'effective/applicants/content', resource: resource
 
-  .card
-    .card-body
-      - if resource.min_applicant_files > 0
-        %p You must include #{resource.min_applicant_files} or more files.
+  = card do
+    - if resource.min_applicant_files > 0
+      %p You must include #{resource.min_applicant_files} or more files.
 
-      = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
-        = f.hidden_field :id
+    = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+      = f.hidden_field :id
 
-        = f.file_field :applicant_files, attachment_style: :table
+      = f.file_field :applicant_files, attachment_style: :table
 
-        = render_if_exists("effective/applicants/files_fields", f: f)
+      = render_if_exists("effective/applicants/files_fields", f: f)
 
-        = f.save 'Save and Continue'
+      = f.save 'Save and Continue'

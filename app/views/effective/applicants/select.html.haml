@@ -4,39 +4,38 @@
   - categories = resource.can_apply_categories_collection()
   - organization_categories = categories.select(&:organization?)
 
-  .card
-    .card-body
-      - if categories.blank?
-        %p
-          There are no categories available for you to apply for.
-          Please contact us if you believe this is in error.
+  = card do
+    - if categories.blank?
+      %p
+        There are no categories available for you to apply for.
+        Please contact us if you believe this is in error.
 
-      - if categories.present?
-        %p Please select a category to continue.
+    - if categories.present?
+      %p Please select a category to continue.
 
-        = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
-          = f.hidden_field :id
+      = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+        = f.hidden_field :id
 
-          = f.hidden_field :organization_id, value: nil
-          = f.hidden_field :organization_type, value: nil
-          = f.hidden_field :category_type, value: EffectiveMemberships.Category.name
+        = f.hidden_field :organization_id, value: nil
+        = f.hidden_field :organization_type, value: nil
+        = f.hidden_field :category_type, value: EffectiveMemberships.Category.name
 
-          = f.select :category_id, categories, required: true
+        = f.select :category_id, categories, required: true
 
-          - categories.each do |mc|
-            = f.show_if(:category_id, mc.id) do
-              .mb-4
-                %h3= mc.to_s
+        - categories.each do |mc|
+          = f.show_if(:category_id, mc.id) do
+            .mb-4
+              %h3= mc.to_s
 
-                - if organization_categories.present?
-                  %small.text-muted #{mc.category} #{mc.category_type} Membership
+              - if organization_categories.present?
+                %small.text-muted #{mc.category} #{mc.category_type} Membership
 
-                = mc.rich_text_body
+              = mc.rich_text_body
 
-                = render_if_exists("effective/applicants/select/#{mc.to_s.parameterize.underscore}", f: f, category: mc)
+              = render_if_exists("effective/applicants/select/#{mc.to_s.parameterize.underscore}", f: f, category: mc)
 
-          - if organization_categories.present?
-            = f.show_if_any(:category_id, organization_categories.map(&:id)) do
-              = render('effective/applicants/select_organization', f: f)
+        - if organization_categories.present?
+          = f.show_if_any(:category_id, organization_categories.map(&:id)) do
+            = render('effective/applicants/select_organization', f: f)
 
-          = f.save 'Save and Continue'
+        = f.save 'Save and Continue'

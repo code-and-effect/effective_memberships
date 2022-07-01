@@ -1,6 +1,5 @@
 = render 'layout' do
   = render 'effective/fee_payments/content', resource: resource
 
-  .card
-    .card-body
-      = render_checkout_step2(resource.submit_order, purchased_url: wizard_path(:submitted), deferred_url: wizard_path(:checkout), declined_url: wizard_path(:checkout))
+  = card do
+    = render_checkout_step2(resource.submit_order, purchased_url: wizard_path(:submitted), deferred_url: wizard_path(:checkout), declined_url: wizard_path(:checkout))

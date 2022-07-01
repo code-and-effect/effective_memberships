@@ -1,9 +1,2 @@
-.card
-  .card-body
-    .row
-      .col-sm
-        %h5.card-title= applicant.wizard_step_title(:organization)
-      .col-sm-auto.text-right
-        = link_to('Edit', wizard_path(:organization)) if edit_effective_wizard?
-
-    = render 'organizations/demographics', parent: applicant, organization: applicant.organization
+= wizard_card(applicant) do
+  = render 'organizations/demographics', parent: applicant, organization: applicant.organization

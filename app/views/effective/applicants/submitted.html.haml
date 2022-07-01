@@ -12,16 +12,15 @@
       = render 'effective/applicants/missing_info', applicant: resource
 
   - unless resource.approved?
-    .card
-      .card-body
-        %p
-          Your application must still be approved.
-          We will send
-          %strong= resource.user.email
-          an email notifying you of the application's approval status.
+    = card do
+      %p
+        Your application must still be approved.
+        We will send
+        %strong= resource.user.email
+        an email notifying you of the application's approval status.
 
-  .card
-    .card-body= render 'effective/applicants/summary', applicant: resource
+  = card do
+    = render 'effective/applicants/summary', applicant: resource
 
   - if resource.min_applicant_references.to_i > 0 || resource.applicant_references.present?
     = card do

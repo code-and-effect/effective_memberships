@@ -31,6 +31,11 @@
       %th Category
       %td= [applicant.applicant_type, applicant.category].join(' - ')
 
+    - if applicant.try(:stream).present?
+      %tr
+        %th Stream
+        %td= applicant.stream
+
     - if applicant.orders.present?
       %tr
         %th Order#{'s' if applicant.orders.length > 1}

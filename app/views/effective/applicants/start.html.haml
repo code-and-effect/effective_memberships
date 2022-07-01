@@ -1,11 +1,10 @@
 = render 'layout' do
   = render 'effective/applicants/content', resource: resource
 
-  .card
-    .card-body
-      = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
-        = f.hidden_field :id
-        = f.save 'Save and Continue'
+  = card do
+    = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+      = f.hidden_field :id
+      = f.save 'Save and Continue'
 
   -# .card
   -#   .card-body

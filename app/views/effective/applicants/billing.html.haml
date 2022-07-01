@@ -3,12 +3,11 @@
 
   - raise('expected owner to respond to billing_address') unless resource.owner.respond_to?(:billing_address)
 
-  .card
-    .card-body
-      = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
-        = f.hidden_field :id
+  = card do
+    = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+      = f.hidden_field :id
 
-        = f.fields_for(f.object.owner_symbol, f.object.owner) do |fo|
-          = effective_address_fields(fo, :billing)
+      = f.fields_for(f.object.owner_symbol, f.object.owner) do |fo|
+        = effective_address_fields(fo, :billing)
 
-        = f.save 'Save and Continue'
+      = f.save 'Save and Continue'

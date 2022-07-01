@@ -1,14 +1,7 @@
-.card
-  .card-body
-    .row
-      .col-sm
-        %h5.card-title= applicant.wizard_step_title(:education)
-      .col-sm-auto.text-right
-        = link_to('Edit', wizard_path(:education)) if edit_effective_wizard?
+= wizard_card(applicant) do
+  - datatable = EffectiveApplicantEducationsDatatable.new(applicant: applicant)
+  .mb-4= render_simple_datatable(datatable)
 
-    - datatable = EffectiveApplicantEducationsDatatable.new(applicant: applicant)
-    .mb-4= render_simple_datatable(datatable)
-
-    - if applicant.applicant_educations_details.present?
-      %h6 Additional Education Details
-      = simple_format(applicant.applicant_educations_details)
+  - if applicant.applicant_educations_details.present?
+    %h6 Additional Education Details
+    = simple_format(applicant.applicant_educations_details)

@@ -1,27 +1,20 @@
-.card
-  .card-body
-    .row
-      .col-sm
-        %h5.card-title= applicant.wizard_step_title(:files)
-      .col-sm-auto.text-right
-        = link_to('Edit', wizard_path(:files)) if edit_effective_wizard?
+= wizard_card(applicant) do
+  %table.table.table-sm
+    %tbody
+      - applicant.applicant_files.each do |file|
 
-    %table.table.table-sm
-      %tbody
-        - applicant.applicant_files.each do |file|
+        - url = url_for(file)
+        - title = file.filename.to_s
 
-          - url = url_for(file)
-          - title = file.filename.to_s
+        - image_tag = content_tag(:img, '', class: '', src: url, alt: title) if file.image?
+        - link_tag = link_to('Download', url, target: '_blank')
+        - size_tag = (file.content_type + '<br>' + number_to_human_size(file.byte_size)).html_safe
 
-          - image_tag = content_tag(:img, '', class: '', src: url, alt: title) if file.image?
-          - link_tag = link_to('Download', url, target: '_blank')
-          - size_tag = (file.content_type + '<br>' + number_to_human_size(file.byte_size)).html_safe
+        %tr
+          %td= image_tag
+          %td= title
+          %td= size_tag
+          %td= link_tag
 
-          %tr
-            %td= image_tag
-            %td= title
-            %td= size_tag
-            %td= link_tag
-
-    - if applicant.applicant_files.blank?
-      %p No files attached
+  - if applicant.applicant_files.blank?
+    %p No files attached

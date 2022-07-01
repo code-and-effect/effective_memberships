@@ -1,27 +1,26 @@
 = render 'layout' do
   = render 'effective/applicants/content', resource: resource
 
-  .card
-    .card-body
-      - if resource.min_applicant_educations > 0
-        .alert.alert-danger You must include #{resource.min_applicant_educations} or more post-secondary educations.
+  = card do
+    - if resource.min_applicant_educations > 0
+      .alert.alert-danger You must include #{resource.min_applicant_educations} or more post-secondary educations.
 
-      = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
-        = f.hidden_field :id
+    = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+      = f.hidden_field :id
 
-        = f.has_many(:applicant_educations, cards: true) do |aef|
-          %h4.mb-4 Post-Secondary Education
+      = f.has_many(:applicant_educations, cards: true) do |aef|
+        %h4.mb-4 Post-Secondary Education
 
-          = aef.text_field :degree_obtained, label: 'Degree, diploma or program'
+        = aef.text_field :degree_obtained, label: 'Degree, diploma or program'
 
-          .row
-            .col= aef.text_field :institution
-            .col= aef.text_field :location
+        .row
+          .col= aef.text_field :institution
+          .col= aef.text_field :location
 
-          .row
-            .col= aef.date_field :start_on, label: 'Start Date'
-            .col= aef.date_field :end_on, label: 'End Date'
+        .row
+          .col= aef.date_field :start_on, label: 'Start Date'
+          .col= aef.date_field :end_on, label: 'End Date'
 
-        = render_if_exists("effective/applicants/education_fields", f: f)
+      = render_if_exists("effective/applicants/education_fields", f: f)
 
-        = f.save 'Save and Continue'
+      = f.save 'Save and Continue'

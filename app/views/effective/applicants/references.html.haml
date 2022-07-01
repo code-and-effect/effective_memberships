@@ -1,26 +1,25 @@
 = render 'layout' do
   = render 'effective/applicants/content', resource: resource
 
-  .card
-    .card-body
-      - if resource.min_applicant_references > 0
-        %p You must include #{resource.min_applicant_references} or more references.
+  = card do
+    - if resource.min_applicant_references > 0
+      %p You must include #{resource.min_applicant_references} or more references.
 
-      = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
-        = f.hidden_field :id
+    = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+      = f.hidden_field :id
 
-        = f.has_many(:applicant_references, cards: true) do |arf|
-          %h4 Reference
+      = f.has_many(:applicant_references, cards: true) do |arf|
+        %h4 Reference
 
-          = arf.text_field :name, label: 'Full Name'
-          .row
-            .col= arf.email_field :email
-            .col= arf.tel_field :phone
+        = arf.text_field :name, label: 'Full Name'
+        .row
+          .col= arf.email_field :email
+          .col= arf.tel_field :phone
 
-          .row
-            .col= arf.select :relationship, Effective::ApplicantReference::RELATIONSHIPS
-            .col= arf.select :known, Effective::ApplicantReference::KNOWNS, label: 'Known for'
+        .row
+          .col= arf.select :relationship, Effective::ApplicantReference::RELATIONSHIPS
+          .col= arf.select :known, Effective::ApplicantReference::KNOWNS, label: 'Known for'
 
-        = render_if_exists("effective/applicants/references_fields", f: f)
+      = render_if_exists("effective/applicants/references_fields", f: f)
 
-        = f.save 'Save and Continue'
+      = f.save 'Save and Continue'

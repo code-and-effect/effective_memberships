@@ -1,34 +1,33 @@
 = render 'layout' do
   = render 'effective/applicants/content', resource: resource
 
-  .card
-    .card-body
-      - if resource.min_applicant_endorsements > 0
-        %p You must include #{resource.min_applicant_endorsements} or more endorsements.
+  = card do
+    - if resource.min_applicant_endorsements > 0
+      %p You must include #{resource.min_applicant_endorsements} or more endorsements.
 
-      = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
-        = f.hidden_field :id
+    = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+      = f.hidden_field :id
 
-        - endorders_collection = Effective::ApplicantEndorsement.endorser_collection(resource)
+      - endorders_collection = Effective::ApplicantEndorsement.endorser_collection(resource)
 
-        = f.has_many(:applicant_endorsements, cards: true) do |aef|
-          - aef.object.endorser_type ||= endorders_collection.klass.name
+      = f.has_many(:applicant_endorsements, cards: true) do |aef|
+        - aef.object.endorser_type ||= endorders_collection.klass.name
 
-          %h4 Endorsement
+        %h4 Endorsement
 
-          = aef.hidden_field :endorser_id
-          = aef.hidden_field :endorser_type
+        = aef.hidden_field :endorser_id
+        = aef.hidden_field :endorser_type
 
-          = aef.select :endorser_id, endorders_collection, required: false,
-            ajax_url: effective_memberships.select2_ajax_endorser_applicant_endorsement_path(applicant_id: resource)
+        = aef.select :endorser_id, endorders_collection, required: false,
+          ajax_url: effective_memberships.select2_ajax_endorser_applicant_endorsement_path(applicant_id: resource)
 
-          = aef.check_box :unknown_member, label: 'I cant find my endorser in the above list'
+        = aef.check_box :unknown_member, label: 'I cant find my endorser in the above list'
 
-          = aef.show_if(:unknown_member, true) do
-            = aef.text_field :name, label: 'Endorser name', required: true
-            = aef.email_field :endorser_email, label: 'Email', required: true
-            = aef.phone_field :phone, required: true
+        = aef.show_if(:unknown_member, true) do
+          = aef.text_field :name, label: 'Endorser name', required: true
+          = aef.email_field :endorser_email, label: 'Email', required: true
+          = aef.phone_field :phone, required: true
 
-        = render_if_exists("effective/applicants/endorsements_fields", f: f)
+      = render_if_exists("effective/applicants/endorsements_fields", f: f)
 
-        = f.save 'Save and Continue'
+      = f.save 'Save and Continue'

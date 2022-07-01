@@ -1,16 +1,9 @@
-.card
-  .card-body
-    .row
-      .col-sm
-        %h5.card-title= fee_payment.wizard_step_title(:declarations)
-      .col-sm-auto.text-right
-        = link_to('Edit', wizard_path(:declarations)) if edit_effective_wizard?
-
-    %table.table.table-sm
-      %tbody
-        %tr
-          %td= icon('check')
-          %td Yes, I hereby certify that I have read and will adhere to the Code of Ethics
-        %tr
-          %td= icon('check')
-          %td Yes, I hereby certify that the statements and information contained herein are correct
+= wizard_card(fee_payment) do
+  %table.table.table-sm
+    %tbody
+      %tr
+        %td= icon('check')
+        %td Yes, I hereby certify that I have read and will adhere to the Code of Ethics
+      %tr
+        %td= icon('check')
+        %td Yes, I hereby certify that the statements and information contained herein are correct

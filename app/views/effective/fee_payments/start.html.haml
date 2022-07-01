@@ -1,37 +1,36 @@
 = render 'layout' do
   = render 'effective/fee_payments/content', resource: resource
 
-  .card
-    .card-body
-      - outstanding_owners = current_user.memberships_owners.select { |owner| owner.outstanding_fee_payment_fees.present? }
+  = card do
+    - outstanding_owners = current_user.memberships_owners.select { |owner| owner.outstanding_fee_payment_fees.present? }
 
-      - if outstanding_owners.blank?
-        %p You have no fees due at this time.
-        = link_to 'Home', root_path, class: 'btn btn-primary'
+    - if outstanding_owners.blank?
+      %p You have no fees due at this time.
+      = link_to 'Home', root_path, class: 'btn btn-primary'
 
-      - else
-        %p You have the following fees due at this time:
+    - else
+      %p You have the following fees due at this time:
 
-        - outstanding_owners.each do |owner|
-          %h3= owner
-          = render_purchasables(owner.outstanding_fee_payment_fees)
+      - outstanding_owners.each do |owner|
+        %h3= owner
+        = render_purchasables(owner.outstanding_fee_payment_fees)
 
-        = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
-          = f.hidden_field :id
-          = f.hidden_field :user_type
-          = f.hidden_field :user_id
+      = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+        = f.hidden_field :id
+        = f.hidden_field :user_type
+        = f.hidden_field :user_id
 
-          - if outstanding_owners.length == 1
-            - resource.organization = outstanding_owners.first if outstanding_owners.first.kind_of?(EffectiveMemberships.Organization)
+        - if outstanding_owners.length == 1
+          - resource.organization = outstanding_owners.first if outstanding_owners.first.kind_of?(EffectiveMemberships.Organization)
 
-            %p Continue with fee payment for #{resource.owner}.
+          %p Continue with fee payment for #{resource.owner}.
 
-            = f.hidden_field :organization_id
+          = f.hidden_field :organization_id
 
-          - if outstanding_owners.length > 1
-            %p You have multiple memberships that require a fee payment. They must be purchased separately.
-            %p Please select an individual or organization to continue:
+        - if outstanding_owners.length > 1
+          %p You have multiple memberships that require a fee payment. They must be purchased separately.
+          %p Please select an individual or organization to continue:
 
-            = f.select :organization_id, effective_memberships_select_fee_payment_organization(resource)
+          = f.select :organization_id, effective_memberships_select_fee_payment_organization(resource)
 
-          = f.save 'Save and Continue'
+        = f.save 'Save and Continue'

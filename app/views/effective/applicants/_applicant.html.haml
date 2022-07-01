@@ -1,3 +1,4 @@
 .effective-applicant
   - applicant.render_steps.each do |partial|
-    = render "effective/applicants/#{partial}", applicant: applicant, step: partial
+    - applicant.render_step = partial
+    = render "effective/applicants/#{partial}", applicant: applicant

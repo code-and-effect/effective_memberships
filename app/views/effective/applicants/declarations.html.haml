@@ -5,17 +5,16 @@
   - resource.declare_code_of_ethics = completed
   - resource.declare_truth = completed
 
-  .card
-    .card-body
-      = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
-        = f.hidden_field :id
+  = card do
+    = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+      = f.hidden_field :id
 
-        = f.check_box :declare_code_of_ethics,
-          label: 'Yes, I hereby certify that I have read and will adhere to the Code of Ethics'
+      = f.check_box :declare_code_of_ethics,
+        label: 'Yes, I hereby certify that I have read and will adhere to the Code of Ethics'
 
-        = f.check_box :declare_truth,
-          label: 'Yes, I hereby certify that the statements and information contained herein are correct'
+      = f.check_box :declare_truth,
+        label: 'Yes, I hereby certify that the statements and information contained herein are correct'
 
-        = render_if_exists("effective/applicants/declarations_fields", f: f)
+      = render_if_exists("effective/applicants/declarations_fields", f: f)
 
-        = f.save 'Save and Continue'
+      = f.save 'Save and Continue'
