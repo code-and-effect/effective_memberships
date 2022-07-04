@@ -24,6 +24,11 @@ module EffectiveMembershipsApplicant
     def categories
       ['Apply to Join', 'Apply to Reclassify']
     end
+
+    def transcripts_statuses
+      []
+    end
+
   end
 
   included do
@@ -48,6 +53,7 @@ module EffectiveMembershipsApplicant
       organization: 'Organization',         # Organization only. Organization fields.
       education: 'Education',
       course_amounts: 'Courses',
+      transcripts: 'Transcripts',
       experience: 'Work Experience',
       references: 'References',
       files: 'Attach Files',
@@ -64,6 +70,10 @@ module EffectiveMembershipsApplicant
     log_changes(except: :wizard_steps) if respond_to?(:log_changes)
 
     has_many_attached :applicant_files
+    has_many_attached :transcripts
+
+    # Transcripts Step
+    attr_accessor :declare_will_send_transcripts
 
     # Declarations Step
     attr_accessor :declare_code_of_ethics
@@ -142,6 +152,11 @@ module EffectiveMembershipsApplicant
       # Applicant Experiences
       applicant_experiences_months    :integer
       applicant_experiences_details   :text
+
+      # Transcripts
+      transcripts_received_on       :date
+      transcripts_status            :string
+      transcripts_details           :text
 
       # Additional Information
       additional_information          :text
@@ -282,6 +297,11 @@ module EffectiveMembershipsApplicant
 
         self.errors.add(:applicant_files, "please include #{required} or more files") if existing < required
       end
+    end
+
+    # Transcripts step
+    with_options(if: -> { current_step == :transcripts }) do
+      validates :declare_will_send_transcripts, acceptance: true
     end
 
     # Declarations Step
@@ -548,14 +568,31 @@ module EffectiveMembershipsApplicant
     category&.min_applicant_references.to_i
   end
 
+  def applicant_references_required?
+    min_applicant_references > 0
+  end
+
   # Endorsements Step
   def min_applicant_endorsements
     category&.min_applicant_endorsements.to_i
   end
 
+  def applicant_endorsements_required?
+    min_applicant_endorsements > 0
+  end
+
   # Equivalences Step
   def min_applicant_equivalences
     category&.min_applicant_equivalences.to_i
+  end
+
+  # Transcripts Step
+  def transcripts_received?
+    transcripts_received_on_was.present?
+  end
+
+  def transcripts_required?
+    category.applicant_wizard_steps.include?(:transcripts)
   end
 
   # Files Step
@@ -573,26 +610,22 @@ module EffectiveMembershipsApplicant
     )
   end
 
-  def applicant_endorsements_required?
-    min_applicant_endorsements > 0
-  end
-
-  def applicant_references_required?
-    min_applicant_references > 0
-  end
-
   # When an application is submitted, these must be done to go to completed.
   # An Admin can override this and just set them to completed.
   def completed_requirements
     requirements = {}
     return requirements unless category.present?
 
+    if category.applicant_wizard_steps.include?(:endorsements) || applicant_endorsements_required?
+      requirements['Applicant Endorsements'] = (!applicant_endorsements_required? || applicant_endorsements.count(&:completed?) >= min_applicant_endorsements)
+    end
+
     if category.applicant_wizard_steps.include?(:references) || applicant_references_required?
       requirements['Applicant References'] = (!applicant_references_required? || applicant_references.count(&:completed?) >= min_applicant_references)
     end
 
-    if category.applicant_wizard_steps.include?(:endorsements) || applicant_endorsements_required?
-      requirements['Applicant Endorsements'] = (!applicant_endorsements_required? || applicant_endorsements.count(&:completed?) >= min_applicant_endorsements)
+    if category.applicant_wizard_steps.include?(:transcripts) || transcripts_required?
+      requirements['Applicant Transcripts'] = (!transcripts_required? || transcripts_received?)
     end
 
     requirements

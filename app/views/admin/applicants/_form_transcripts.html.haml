@@ -1,0 +1,12 @@
+= effective_form_with(model: [:admin, applicant], engine: true) do |f|
+  = f.date_field :transcripts_received_on
+
+  - statuses = f.object.class.transcripts_statuses
+
+  - if statuses.present?
+    = f.select_field :transcripts_status, statuses
+
+  = f.file_field :transcripts
+  = f.text_area :transcripts_details, hint: 'These details will be displayed to the applicant'
+
+  = f.submit 'Save Transcripts', border: false, center: true

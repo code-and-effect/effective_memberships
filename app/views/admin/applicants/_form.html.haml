@@ -29,6 +29,10 @@
     = tab 'Endorsements' do
       .mb-4= render_inline_datatable(Admin::EffectiveApplicantEndorsementsDatatable.new(applicant: applicant))
 
+  - if applicant.transcripts_required?
+    = tab 'Transcripts' do
+      = render 'admin/applicants/form_transcripts', applicant: applicant
+
   - if applicant.fees.present? || applicant.orders.present?
     = tab 'Fees' do
       .mb-4

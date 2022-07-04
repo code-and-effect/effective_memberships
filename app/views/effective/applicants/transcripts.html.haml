@@ -1,0 +1,13 @@
+= render 'layout' do
+  = render 'effective/applicants/content', resource: resource
+
+  = card do
+    .mb-2= render('transcripts_requirements', applicant: resource)
+
+    = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
+      = f.hidden_field :id
+
+      = f.check_box :declare_will_send_transcripts,
+        label: "Yes, I will request my transcripts be sent directly from the insitiution to the registrar.", required: true
+
+      = f.save 'Save and Continue'

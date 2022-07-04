@@ -209,6 +209,11 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
       t.integer :applicant_experiences_months
       t.text :applicant_experiences_details
 
+      # Transcripts
+      t.date :transcripts_received_on
+      t.string :transcripts_status
+      t.text :transcripts_details
+
       # Additional Information
       t.text :additional_information
 
