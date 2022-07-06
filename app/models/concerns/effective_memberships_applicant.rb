@@ -127,6 +127,7 @@ module EffectiveMembershipsApplicant
 
     effective_resource do
       applicant_type         :string
+      stream                 :string
 
       # Acts as Statused
       status                 :string, permitted: false
@@ -357,6 +358,11 @@ module EffectiveMembershipsApplicant
           required_steps.include?(step) || category.blank? || applicant_steps.include?(step)
         end
       end
+    end
+
+    def sidebar_steps
+      return self.class.required_wizard_steps unless category.present?
+      required_steps
     end
 
     def can_visit_step?(step)

@@ -167,6 +167,7 @@ class CreateEffectiveMemberships < ActiveRecord::Migration[6.0]
     # Applicants
     create_table :applicants do |t|
       t.string :applicant_type
+      t.string :stream
       t.string :token
 
       t.integer :user_id

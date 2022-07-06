@@ -207,6 +207,7 @@ ActiveRecord::Schema.define(version: 8) do
 
   create_table "applicants", force: :cascade do |t|
     t.string "applicant_type"
+    t.string "stream"
     t.string "token"
     t.integer "user_id"
     t.string "user_type"
