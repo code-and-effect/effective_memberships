@@ -19,7 +19,7 @@
         = aef.hidden_field :endorser_type
 
         = aef.select :endorser_id, endorders_collection, required: false,
-          ajax_url: effective_memberships.select2_ajax_endorser_applicant_endorsement_path(applicant_id: resource)
+          ajax_url: (effective_memberships.select2_ajax_endorser_applicant_endorsement_path(applicant_id: resource) unless Rails.env.test?)
 
         = aef.check_box :unknown_member, label: 'I cant find my endorser in the above list'
 

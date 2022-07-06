@@ -53,6 +53,7 @@ module EffectiveMembershipsApplicant
       organization: 'Organization',         # Organization only. Organization fields.
       education: 'Education',
       course_amounts: 'Courses',
+      equivalences: 'Equivalent Memberships',
       transcripts: 'Transcripts',
       experience: 'Work Experience',
       references: 'References',
@@ -373,6 +374,14 @@ module EffectiveMembershipsApplicant
       can_revisit_completed_steps(step)
     end
 
+    def applicant_fee_category
+      category
+    end
+
+    def applicant_fee_price
+      category.applicant_fee
+    end
+
     # All Fees and Orders
     def submit_fees
       # Find or build submit fee
@@ -380,10 +389,10 @@ module EffectiveMembershipsApplicant
 
       unless fee.purchased?
         fee.assign_attributes(
-          category: category,
-          price: category.applicant_fee,
-          tax_exempt: category.applicant_fee_tax_exempt,
-          qb_item_name: category.applicant_fee_qb_item_name
+          category: applicant_fee_category(),
+          price: applicant_fee_price(),
+          tax_exempt: applicant_fee_category().applicant_fee_tax_exempt,
+          qb_item_name: applicant_fee_category().applicant_fee_qb_item_name
         )
       end
 

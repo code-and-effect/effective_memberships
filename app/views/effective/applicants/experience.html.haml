@@ -3,6 +3,9 @@
 
   = card do
     - if resource.min_applicant_educations > 0
+      %p You must include #{resource.min_applicant_educations} or more work experiences.
+
+    - if resource.min_applicant_experiences_months > 0
       %p You must include #{resource.min_applicant_experiences_months} or more months of experience.
 
     = effective_form_with(model: resource, url: wizard_path(step), method: :put) do |f|
