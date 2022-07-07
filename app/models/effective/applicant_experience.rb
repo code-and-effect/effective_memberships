@@ -34,7 +34,7 @@ module Effective
     validates :position, presence: true
     validates :employer, presence: true
     validates :start_on, presence: true
-    validates :end_on, presence: true
+    validates :end_on, presence: true, unless: -> { still_work_here? }
     validates :level, presence: true, inclusion: { in: LEVELS }
     validates :months, presence: true
 
