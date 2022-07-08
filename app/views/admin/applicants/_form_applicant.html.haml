@@ -1,0 +1,56 @@
+= tabs do
+  - # Done applicants have the Applicant tab first. In progress ones the Status tab
+  - if applicant.done?
+    = tab 'Applicant' do
+      .mb-4= render 'effective/applicants/summary', applicant: applicant, namespace: :admin
+      = render 'effective/applicants/applicant', applicant: applicant, namespace: :admin
+
+    = tab 'Status' do
+      = render 'admin/applicants/status', applicant: applicant, namespace: :admin
+
+  - if applicant.in_progress?
+    = tab 'Status' do
+      = render 'admin/applicants/status', applicant: applicant, namespace: :admin
+
+    = tab 'Applicant' do
+      .mb-4= render 'effective/applicants/summary', applicant: applicant, namespace: :admin
+      = render 'effective/applicants/applicant', applicant: applicant, namespace: :admin
+
+  - # Just normal tabs now
+  - if applicant.was_submitted? && !applicant.was_approved?
+    = tab 'Process' do
+      = render 'admin/applicants/form_process', applicant: applicant
+
+  - if applicant.applicant_references.present?
+    = tab 'References' do
+      .mb-4= render_inline_datatable(Admin::EffectiveApplicantReferencesDatatable.new(applicant: applicant))
+
+  - if applicant.applicant_endorsements.present?
+    = tab 'Endorsements' do
+      .mb-4= render_inline_datatable(Admin::EffectiveApplicantEndorsementsDatatable.new(applicant: applicant))
+
+  - if applicant.transcripts_required?
+    = tab 'Transcripts' do
+      = render 'admin/applicants/form_transcripts', applicant: applicant
+
+  = yield
+
+  - if applicant.fees.present? || applicant.orders.present?
+    = tab 'Fees' do
+      .mb-4
+        %h2 Fees
+        - datatable = Admin::EffectiveFeesDatatable.new(applicant: applicant, total: false)
+        = render_datatable(datatable, simple: true, inline: true)
+
+      .mb-4
+        %h2 Orders
+        - datatable = Admin::EffectiveOrdersDatatable.new(parent: applicant, owner: applicant.owner, user: applicant.owner, total: false)
+        = render_datatable(datatable, simple: true)
+
+  - if applicant.owner.applicants.any? { |other| other.was_submitted? && other.id != applicant.id }
+    = tab 'Other Applications' do
+      = render_datatable(Admin::EffectiveApplicantsDatatable.new(owner: applicant.owner, except_id: applicant.id))
+
+  - if applicant.persisted? && applicant.respond_to?(:log_changes_datatable)
+    = tab 'Logs' do
+      = render_inline_datatable(applicant.log_changes_datatable)

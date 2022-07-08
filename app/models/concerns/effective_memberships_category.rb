@@ -101,6 +101,7 @@ module EffectiveMembershipsCategory
 
     serialize :can_apply_restricted_ids, Array
     serialize :applicant_wizard_steps, Array
+    serialize :applicant_review_wizard_steps, Array
     serialize :fee_payment_wizard_steps, Array
 
     scope :deep, -> { includes(:rich_texts) }
