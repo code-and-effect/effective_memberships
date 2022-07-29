@@ -53,6 +53,15 @@ module EffectiveMembershipsOwner
       where(id: with_paid_fees_through.select(:owner_id))
     }
 
+    scope :members_with_category, -> (categories) {
+      raise('expected an EffectiveMemberships.Category') unless Array(categories).all? { |cat| cat.kind_of?(EffectiveMemberships.Category) }
+
+      membership_categories = Effective::MembershipCategory.where(category: categories)
+      memberships = Effective::Membership.where(id: membership_categories.select(:membership_id))
+
+      where(id: memberships.where(owner_type: name).select(:owner_id))
+    }
+
   end
 
   def assign_member_role
